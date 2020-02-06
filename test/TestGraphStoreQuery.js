@@ -7,19 +7,19 @@ var username = "labbcat";
 var password = "labbcat";
 
 describe("#GraphStoreQuery", function() {
-    beforeEach(function(done) {
+    beforeEach((done)=>{
         // verbosity only applies in tests that enable it
         labbcat.verbose = false;
         done();
     });
     
-    it("exports GraphStoreQuery", function() {
+    it("exports GraphStoreQuery", ()=>{
         expect(labbcat.GraphStoreQuery).to.exist;
     });
     
-    it("support getId", function(done) {
+    it("support getId", (done)=>{
         const store = new labbcat.GraphStoreQuery(baseUrl, username, password);
-        store.getId(function(result, errors, messages, call) {
+        store.getId((result, errors, messages, call)=>{
             console.log("in result " + result);
             expect(result).to.equal(baseUrl);
             done();

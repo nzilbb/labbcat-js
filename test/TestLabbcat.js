@@ -6,20 +6,20 @@ var baseUrl = "http://localhost:8080/labbcat/";
 var username = "labbcat";
 var password = "labbcat";
 
-describe("#Labbcat", function() {
+describe("#Labbcat", ()=>{
     beforeEach(function(done) {
         // verbosity only applies in tests that enable it
         labbcat.verbose = false;
         done();
     });
     
-    it("exports Labbcat", function() {
+    it("exports Labbcat", ()=>{
         expect(labbcat.Labbcat).to.exist;
     });
 
-    it("support getId", function(done) {
+    it("support getId", (done)=>{
         const lc = new labbcat.Labbcat(baseUrl, username, password);
-        lc.getId(function(result, errors, messages, call) {
+        lc.getId((result, errors, messages, call)=>{
             expect(result).to.equal(baseUrl);
             done();
         });
