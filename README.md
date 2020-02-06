@@ -6,13 +6,17 @@ This is both a node module and a browser-importable script (nzilbb.labbcat.js) t
 provides functionality for querying and extracting data from LaBB-CAT corpora, directly
 from JavaScript.
 
-## running unit tests
+## Documentation
+
+Detailed documentation is available [here](https://nzilbb.github.io/labbcat-js/)
+
+## Running unit tests
 
 ```
 npm test
 ```
 
-## generating documentation
+## Generating documentation
 
 Documentation is generated using *jsdoc*, which you must install first:
 
@@ -26,4 +30,3 @@ Once *jsdoc* has been installed, you can generate the documentation, which is sa
 ```
 npm run docs
 ```
-
