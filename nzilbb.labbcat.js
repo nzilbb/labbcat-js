@@ -108,10 +108,18 @@
      * // create annotation store client
      * const store = new GraphStoreQuery("https://labbcat.canterbury.ac.nz", "demo", "demo");
      * // get some basic information
-     * const id = store.getId();
-     * const layers = store.getLayerIds();
-     * const corpora = store.getCorpusIds();
-     * const documents = store.getGraphIdsInCorpus(corpora[0]);
+     * store.getId((result, errors, messages, call)=>{ 
+     *     console.log("id: " + result); 
+     *   });
+     * store.getLayerIds((layers, errors, messages, call)=>{ 
+     *     for (l in result) console.log("layer: " + layers[l]); 
+     *   });
+     * store.getCorpusIds((corpora, errors, messages, call)=>{ 
+     *     store.getGraphIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
+     *         console.log("transcripts in: " + id); 
+     *         for (i in ids) console.log(ids[i]);
+     *       });
+     *   });
      * @author Robert Fromont robert@fromont.net.nz
      */
     class GraphStoreQuery {
@@ -131,21 +139,21 @@
         }
         
         /**
-         * The base URL
+         * The base URL - e.g. https://labbcat.canterbury.ac.nz/demo/store/
          */
         get baseUrl() {
             return this._baseUrl;
         }
         
         /**
-         * The graph store URL
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/store/
          */
         get storeUrl() {
             return this._storeUrl;
         }
         
         /**
-         * The graph store URL
+         * The LaBB-CAT user name.
          */
         get username() {
             return this._username;
@@ -200,8 +208,8 @@
         
         /**
          * Gets the store's ID.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {string} The annotation store's ID.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {string} The annotation store's ID.
          */
         getId(onResult) {
 	    this.createRequest("getId", null, onResult).send();
@@ -209,8 +217,8 @@
         
         /**
          * Gets a list of layer IDs (annotation 'types').
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {string[]} A list of layer IDs.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {string[]} A list of layer IDs.
          */
         getLayerIds(onResult) {
 	    this.createRequest("getLayerIds", null, onResult).send();
@@ -218,8 +226,8 @@
         
         /**
          * Gets a list of layer definitions.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return A list of layer definitions.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  A list of layer definitions.
          */
         getLayers(onResult) {
 	    this.createRequest("getLayers", null, onResult).send();
@@ -227,8 +235,9 @@
         
         /**
          * Gets the layer schema.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return A schema defining the layers and how they relate to each other.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  A schema defining the layers and how they
+         * relate to each other. 
          */
         getSchema(onResult) {
 	    this.createRequest("getSchema", null, onResult).send();
@@ -236,9 +245,9 @@
         
         /**
          * Gets a layer definition.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @param {string} id ID of the layer to get the definition for.
-         * @return The definition of the given layer.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: The definition of the given layer.
          */
         getLayer(id, onResult) {
 	    var xhr = this.createRequest("getLayer", { id : id }, onResult).send();
@@ -246,8 +255,8 @@
         
         /**
          * Gets a list of corpus IDs.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {string[]} A list of corpus IDs.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {string[]} A list of corpus IDs.
          */
         getCorpusIds(onResult) {
 	    this.createRequest("getCorpusIds", null, onResult).send();
@@ -255,8 +264,8 @@
         
         /**
          * Gets a list of participant IDs.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {string[]} A list of participant IDs.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {string[]} A list of participant IDs.
          */
         getParticipantIds(onResult) {
 	    this.createRequest("getParticipantIds", null, onResult).send();
@@ -264,8 +273,8 @@
         
         /**
          * Gets a list of graph IDs.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {string[]} A list of graph IDs.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {string[]} A list of graph IDs.
          */
         getGraphIds(onResult) {
 	    this.createRequest("getGraphIds", null, onResult).send();
@@ -274,8 +283,8 @@
         /**
          * Gets a list of graph IDs in the given corpus.
          * @param {string} id A corpus ID.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {string[]} A list of graph IDs.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {string[]} A list of graph IDs.
          */
         getGraphIdsInCorpus(id, onResult) {
 	    this.createRequest("getGraphIdsInCorpus", { id : id }, onResult).send();
@@ -284,8 +293,8 @@
         /**
          * Gets a list of IDs of graphs that include the given participant.
          * @param {string} id A participant ID.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {string[]} A list of graph IDs.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {string[]} A list of graph IDs.
          */
         getGraphIdsWithParticipant(id, onResult) {
 	    this.createRequest("getGraphIdsWithParticipant", { id : id }, onResult).send();
@@ -296,8 +305,8 @@
          * @param {string} id The given graph ID.
          * @param {string[]} layerId The IDs of the layers to load, or null for all
          * layers. If only graph data is required, set this to ["graph"]. 
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return The identified graph.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  The identified graph.
          */
         getGraph (id, layerId, onResult) {
 	    this.createRequest("getGraph", { id : id, layerId : layerId }, onResult).send();
@@ -307,8 +316,8 @@
          * Gets the number of annotations on the given layer of the given graph.
          * @param {string} id The given graph ID.
          * @param {string} layerId The ID of the layer to load.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return The identified graph.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  The identified graph.
          */
         countAnnotations (id, layerId, onResult) {
 	    this.createRequest("countAnnotations", { id : id, layerId : layerId }, onResult).send();
@@ -320,8 +329,8 @@
          * @param {string} layerId The ID of the layer to load.
          * @param {int} pageLength The number of annotations per page (or null for one big page with all annotations on it).
          * @param {int} pageNumber The page number to return (or null for the first page).
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return The identified graph.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  The identified graph.
          */
         getAnnotations (id, layerId, pageLength, pageNumber, onResult) {
 	    this.createRequest("getAnnotations", { id : id, layerId : layerId, pageLength : pageLength, pageNumber : pageNumber }, onResult).send();
@@ -331,8 +340,8 @@
          * Gets the given anchors in the given graph.
          * @param {string} id The given graph ID.
          * @param {string[]} anchorId The IDs of the anchors to load.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return The identified graph.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  The identified graph.
          */
         getAnchors (id, anchorId, onResult) {
 	    this.createRequest("getAnchors", { id : id, anchorId : anchorId }, onResult).send();
@@ -340,8 +349,8 @@
         
         /**
          * List the predefined media tracks available for transcripts.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return An ordered list of media track definitions.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  An ordered list of media track definitions.
          */
         getMediaTracks(onResult) {
 	    this.createRequest("getMediaTracks", null, onResult).send();
@@ -350,8 +359,8 @@
         /**
          * List the media available for the given graph.
          * @param {string} id The graph ID.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return List of media files available for the given graph.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  List of media files available for the given graph.
          */
         getAvailableMedia(id, onResult) {
 	    this.createRequest("getAvailableMedia", { id : id }, onResult).send();
@@ -360,10 +369,11 @@
         /**
          * Gets a given media track for a given graph.
          * @param {string} id The graph ID.
-         * @param {string} trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
+         * @param {string} trackSuffix The track suffix of the media.
          * @param {string} mimeType The MIME type of the media.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {string} A URL to the given media for the given graph, or null if the given media doesn't exist.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: {string} A URL to the given media for the given
+         * graph, or null if the given media doesn't exist.
          */
         getMedia(id, trackSuffix, mimeType, onResult) {
 	    this.createRequest("getMedia", { id : id, trackSuffix : trackSuffix, mimeType : mimeType}, onResult).send();
@@ -378,14 +388,22 @@
      * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a>.
      * interface
      * @example
+     * // create annotation store client
      * const store = new GraphStore("https://labbcat.canterbury.ac.nz", "demo", "demo");
-     * // get some basic information
-     * var id = store.getId();
-     * var layers = store.getLayerIds();
-     * var corpora = store.getCorpusIds();
-     * var documents = store.getGraphIdsInCorpus(corpora[0]);
-     * // delete a document
+     * // get a corpus
+     * store.getCorpusIds((corpora, errors, messages, call)=>{ 
+     *     console.log("transcripts in: " + corpora[0]); 
+     *     store.getGraphIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
+     *         console.log("Deleting all transcripts in " + id));
+     *         for (i in ids) {
+     *           store.deleteGraph(ids[i], (ids, errors, messages, call, id)=>{ 
+     *               console.log("deleted " + id);
+     *             });
+     *         }
+     *       });
+     *   });
      * store.deleteGraph(documents[0]);
+     * @extends GraphStoreQuery
      * @author Robert Fromont robert@fromont.net.nz
      */
     class GraphStore extends GraphStoreQuery{
@@ -403,8 +421,9 @@
         /**
          * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
          * @param graph The graph to save.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         * @return true if changes were saved, false if there were no changes to save.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be:  true if changes were saved, false if there
+         * were no changes to save.
          */
         saveGraph(graph, onResult) { // TODO
         }
@@ -412,7 +431,7 @@
         /**
          * Saves the given media for the given graph
          * @param {string} id The graph ID
-         * @param {string} trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
+         * @param {string} trackSuffix The track suffix of the media.
          * @param {string} mediaUrl A URL to the media content.
          * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
@@ -452,30 +471,16 @@
      * Labbcat client, for accessing LaBB-CAT server functions programmatically.
      * @example
      * // create LaBB-CAT client
-     * const labbcat = new {@link #Labbcat(String,String,String) Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")};
-     * 
-     * // get a corpus ID
-     * const corpora = labbcat.{@link GraphStoreQuery#getCorpusIds() getCorpusIds()};
-     * const corpus = ids[0];
-     *
-     * // get a transcript type
-     * const typeLayer = labbcat.{@link GraphStoreQuery#getLayer(String) getLayer("transcript_type")};
-     * const transcriptType = typeLayer.getValidLabels().keySet().iterator().next();
-     *
+     * const labbcat = new [Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")]{@link Labbcat};
      * // upload a transcript
-     * const taskId = labbcat.{@link #newTranscript(File,File[],String,String,String,String) newTranscript(transcript, null, null, transcriptType, corpus, "test")};
+     * labbcat.newTranscript(
+     *     transcript, media, null, "interview", "corpus", episode, 
+     *     (result, errors, messages, call, id)=>{
+     *         console.log("Finished uploading " + transcript.name);
+     *         for (var e in errors) console.log("ERROR " + errors[e]);
+     *     });
      *
-     * // wait until all automatic annotations have been generated
-     * const layerGenerationTask = labbcat.{@link #waitForTask(String,int) waitForTask(taskId, 30)};
-     *
-     * // get all the POS annotations
-     * const pos = labbcat.{@link GraphStoreQuery#getAnnotations(String,String,Integer,Integer) getAnnotations(transcript.getName(), "pos")};
-     *
-     * // search for tokens of "and"
-     * const matches = labbcat.{@link #getMatches(String,int) getMatches}(
-     *     labbcat.{@link #search(JSONObject,String[],boolean) search}(
-     *        new {@link PatternBuilder}().addMatchLayer("orthography", "and").build(),
-     *        participantIds, true), 1);
+     * @extends GraphStore
      * @author Robert Fromont robert@fromont.net.nz
      */
     class Labbcat extends GraphStore {
