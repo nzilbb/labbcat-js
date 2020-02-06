@@ -64,11 +64,11 @@
      * @param result The result of the method
      * @param {string[]} errors The error, if any
      * @param {string[]} messages The error, if any
-     * @param call The method that was called
-     * @param id The ID that was passed to the method, if any.
+     * @param {string} call The method that was called
+     * @param {string} id The ID that was passed to the method, if any.
      * @param {object} taskIds A list of IDs of the resulting server tasks, if any.
      */
-
+    
     function callComplete(evt) {
         if (exports.verbose) console.log("callComplete: " + this.responseText);
         try {
@@ -83,6 +83,7 @@
 	    if (!errors || errors.length == 0) errors = null;
 	    var messages = response.messages;
 	    if (!messages || messages.length == 0) messages = null;
+            if (exports.verbose) console.log("onResult: " + result + " " + evt.target.call + " " + evt.target.onResult);
 	    evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
         } catch(exception) {
 	    evt.target.onResult(null, ["" +exception+ ": " + this.responseText], [], evt.target.call, evt.target.id);
@@ -98,21 +99,62 @@
     }
 
     // GraphStoreQuery class - read-only "view" access
-
+    
+    /**
+     * Read-only querying of LaBB-CAT corpora, based on the  
+     * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStoreQuery.html">nzilbb.ag.IGraphStoreQuery</a>
+     * interface.
+     * @example
+     * // create annotation store client
+     * const store = new GraphStoreQuery("https://labbcat.canterbury.ac.nz", "demo", "demo");
+     * // get some basic information
+     * const id = store.getId();
+     * const layers = store.getLayerIds();
+     * const corpora = store.getCorpusIds();
+     * const documents = store.getGraphIdsInCorpus(corpora[0]);
+     * @author Robert Fromont robert@fromont.net.nz
+     */
     class GraphStoreQuery {
-        constructor(baseUrl) {
+        /** 
+         * Create a query client 
+         * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
+         * @param {string} username The LaBB-CAT user name.
+         * @param {string} password The LaBB-CAT password.
+         */
+        constructor(baseUrl, username, password) {
             if (!/\/$/.test(baseUrl)) baseUrl += "/";
-            this.storeQueryUrl = baseUrl + "store/";
+            this._baseUrl = baseUrl;
+            this._storeUrl = baseUrl + "store/";
+            
+            this._username = username;
+            this._password = password;
         }
-
-        get url() { return this.storeQueryUrl; }
-
-        // methods
-
+        
         /**
-         * Creates an http request
+         * The base URL
+         */
+        get baseUrl() {
+            return this._baseUrl;
+        }
+        
+        /**
+         * The graph store URL
+         */
+        get storeUrl() {
+            return this._storeUrl;
+        }
+        
+        /**
+         * The graph store URL
+         */
+        get username() {
+            return this._username;
+        }
+        
+        /**
+         * Creates an http request.
          * @param {string} call The name of the API function to call
-         * @param parameters The arguments of the function, if any
+         * @param {object} parameters The arguments of the function, if any
          * @callback {resultCallback} onResult Invoked when the request has returned a result.
          * @return {XMLHttpRequest} An open request.
          */
@@ -142,20 +184,23 @@
 	        } // next parameter
 	    }
             queryString = queryString.replace(/^&/,"?");
-	    if (!url) url = this.url;
+	    if (!url) url = this.storeUrl;
 
-            if (exports.verbose) console.log("GET: "+url + call + queryString);
+            if (exports.verbose) {
+                console.log("GET: "+url + call + queryString + " as " + this.username);
+            }
 	    xhr.open("GET", url + call + queryString, true);
 	    if (this.username) {
-	        xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
-	    }
+	        xhr.setRequestHeader(
+                    "Authorization", "Basic " + btoa(this.username + ":" + this._password))
+ 	    }
 	    xhr.setRequestHeader("Accept", "application/json");
 	    return xhr;
         }
         
         /**
          * Gets the store's ID.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return {string} The annotation store's ID.
          */
         getId(onResult) {
@@ -164,7 +209,7 @@
         
         /**
          * Gets a list of layer IDs (annotation 'types').
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return {string[]} A list of layer IDs.
          */
         getLayerIds(onResult) {
@@ -173,7 +218,7 @@
         
         /**
          * Gets a list of layer definitions.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return A list of layer definitions.
          */
         getLayers(onResult) {
@@ -182,7 +227,7 @@
         
         /**
          * Gets the layer schema.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return A schema defining the layers and how they relate to each other.
          */
         getSchema(onResult) {
@@ -191,7 +236,7 @@
         
         /**
          * Gets a layer definition.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @param {string} id ID of the layer to get the definition for.
          * @return The definition of the given layer.
          */
@@ -201,7 +246,7 @@
         
         /**
          * Gets a list of corpus IDs.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return {string[]} A list of corpus IDs.
          */
         getCorpusIds(onResult) {
@@ -210,7 +255,7 @@
         
         /**
          * Gets a list of participant IDs.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return {string[]} A list of participant IDs.
          */
         getParticipantIds(onResult) {
@@ -219,7 +264,7 @@
         
         /**
          * Gets a list of graph IDs.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return {string[]} A list of graph IDs.
          */
         getGraphIds(onResult) {
@@ -229,7 +274,7 @@
         /**
          * Gets a list of graph IDs in the given corpus.
          * @param {string} id A corpus ID.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return {string[]} A list of graph IDs.
          */
         getGraphIdsInCorpus(id, onResult) {
@@ -239,7 +284,7 @@
         /**
          * Gets a list of IDs of graphs that include the given participant.
          * @param {string} id A participant ID.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return {string[]} A list of graph IDs.
          */
         getGraphIdsWithParticipant(id, onResult) {
@@ -251,7 +296,7 @@
          * @param {string} id The given graph ID.
          * @param {string[]} layerId The IDs of the layers to load, or null for all
          * layers. If only graph data is required, set this to ["graph"]. 
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return The identified graph.
          */
         getGraph (id, layerId, onResult) {
@@ -262,7 +307,7 @@
          * Gets the number of annotations on the given layer of the given graph.
          * @param {string} id The given graph ID.
          * @param {string} layerId The ID of the layer to load.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return The identified graph.
          */
         countAnnotations (id, layerId, onResult) {
@@ -275,7 +320,7 @@
          * @param {string} layerId The ID of the layer to load.
          * @param {int} pageLength The number of annotations per page (or null for one big page with all annotations on it).
          * @param {int} pageNumber The page number to return (or null for the first page).
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return The identified graph.
          */
         getAnnotations (id, layerId, pageLength, pageNumber, onResult) {
@@ -286,7 +331,7 @@
          * Gets the given anchors in the given graph.
          * @param {string} id The given graph ID.
          * @param {string[]} anchorId The IDs of the anchors to load.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return The identified graph.
          */
         getAnchors (id, anchorId, onResult) {
@@ -295,7 +340,7 @@
         
         /**
          * List the predefined media tracks available for transcripts.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return An ordered list of media track definitions.
          */
         getMediaTracks(onResult) {
@@ -305,7 +350,7 @@
         /**
          * List the media available for the given graph.
          * @param {string} id The graph ID.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return List of media files available for the given graph.
          */
         getAvailableMedia(id, onResult) {
@@ -317,7 +362,7 @@
          * @param {string} id The graph ID.
          * @param {string} trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
          * @param {string} mimeType The MIME type of the media.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return {string} A URL to the given media for the given graph, or null if the given media doesn't exist.
          */
         getMedia(id, trackSuffix, mimeType, onResult) {
@@ -328,15 +373,37 @@
 
     // GraphStore class - read/write "edit" access
 
+    /**
+     * Read/write interaction with LaBB-CAT corpora, based on the  
+     * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a>.
+     * interface
+     * @example
+     * const store = new GraphStore("https://labbcat.canterbury.ac.nz", "demo", "demo");
+     * // get some basic information
+     * var id = store.getId();
+     * var layers = store.getLayerIds();
+     * var corpora = store.getCorpusIds();
+     * var documents = store.getGraphIdsInCorpus(corpora[0]);
+     * // delete a document
+     * store.deleteGraph(documents[0]);
+     * @author Robert Fromont robert@fromont.net.nz
+     */
     class GraphStore extends GraphStoreQuery{
-        constructor(baseUrl) {
-            super(baseUrl);
+        /** 
+         * Create a store client 
+         * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
+         * @param {string} username The LaBB-CAT user name.
+         * @param {string} password The LaBB-CAT password.
+         */
+        constructor(baseUrl, username, password) {
+            super(baseUrl, username, password);
+            this._storeQueryUrl = this.baseUrl + "edit/store/";
         }
 
         /**
          * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
          * @param graph The graph to save.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          * @return true if changes were saved, false if there were no changes to save.
          */
         saveGraph(graph, onResult) { // TODO
@@ -347,7 +414,7 @@
          * @param {string} id The graph ID
          * @param {string} trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
          * @param {string} mediaUrl A URL to the media content.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         saveMedia(id, trackSuffix, mediaUrl, onResult) { // TODO
         }
@@ -356,7 +423,7 @@
          * Saves the given source file (transcript) for the given graph.
          * @param {string} id The graph ID
          * @param {string} url A URL to the transcript.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         saveSource(id, url, onResult) { // TODO
         }
@@ -365,23 +432,62 @@
          * Saves the given document for the episode of the given graph.
          * @param {string} id The graph ID
          * @param {string} url A URL to the document.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         saveEpisodeDocument(id, url, onResult) { // TODO
+        }
+        
+        /**
+         * Deletes the given graph, and all assciated media, from the graph store..
+         * @param {string} id The graph ID
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         */
+        deleteGraph(id, onResult) { // TODO
         }
     }
     
     // Labbcat class - GraphStore plus some LaBB-CAT specific functions
     
+    /**
+     * Labbcat client, for accessing LaBB-CAT server functions programmatically.
+     * @example
+     * // create LaBB-CAT client
+     * const labbcat = new {@link #Labbcat(String,String,String) Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")};
+     * 
+     * // get a corpus ID
+     * const corpora = labbcat.{@link GraphStoreQuery#getCorpusIds() getCorpusIds()};
+     * const corpus = ids[0];
+     *
+     * // get a transcript type
+     * const typeLayer = labbcat.{@link GraphStoreQuery#getLayer(String) getLayer("transcript_type")};
+     * const transcriptType = typeLayer.getValidLabels().keySet().iterator().next();
+     *
+     * // upload a transcript
+     * const taskId = labbcat.{@link #newTranscript(File,File[],String,String,String,String) newTranscript(transcript, null, null, transcriptType, corpus, "test")};
+     *
+     * // wait until all automatic annotations have been generated
+     * const layerGenerationTask = labbcat.{@link #waitForTask(String,int) waitForTask(taskId, 30)};
+     *
+     * // get all the POS annotations
+     * const pos = labbcat.{@link GraphStoreQuery#getAnnotations(String,String,Integer,Integer) getAnnotations(transcript.getName(), "pos")};
+     *
+     * // search for tokens of "and"
+     * const matches = labbcat.{@link #getMatches(String,int) getMatches}(
+     *     labbcat.{@link #search(JSONObject,String[],boolean) search}(
+     *        new {@link PatternBuilder}().addMatchLayer("orthography", "and").build(),
+     *        participantIds, true), 1);
+     * @author Robert Fromont robert@fromont.net.nz
+     */
     class Labbcat extends GraphStore {
+        /** 
+         * Create a query client 
+         * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link).
+         * @param {string} username The LaBB-CAT user name.
+         * @param {string} password The LaBB-CAT password.
+         */
         constructor(baseUrl, username, password) {
-            super(baseUrl); 
-            if (exports.verbose) console.log("Labbcat: "+baseUrl);
-            
-            if (!/\/$/.test(baseUrl)) baseUrl += "/";
-            this.baseUrl = baseUrl;
-            this.username = username;
-            this.password = password;
+            super(baseUrl, username, password); 
+            if (exports.verbose) console.log("Labbcat: "+this.baseUrl);
         }
 
         /**
@@ -392,8 +498,8 @@
          * @param {string} transcriptType The transcript type.
          * @param {string} corpus The corpus for the transcript.
          * @param {string} episode The episode the transcript belongs to.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
-         * @callback onProgress Invoked on XMLHttpRequest progress.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param onProgress Invoked on XMLHttpRequest progress.
          */
         newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
             // create form
@@ -483,7 +589,7 @@
 		        }
 	            };
 	            if (labbcat.username && labbcat.password) {
-		        requestParameters.auth = labbcat.username+':'+labbcat.password;
+		        requestParameters.auth = labbcat.username+':'+labbcat._password;
 	            }
 	            if (/^https.*/.test(labbcat.baseUrl)) {
 		        requestParameters.protocol = "https:";
@@ -521,8 +627,8 @@
         /**
          * Uploads a new version of an existing transcript.
          * @param {file} transcript The transcript to upload.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
-         * @callback onProgress Invoked on XMLHttpRequest progress.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param onProgress Invoked on XMLHttpRequest progress.
          */
         updateTranscript(transcript, onResult, onProgress) {
             // create form
@@ -547,7 +653,7 @@
 	        
 	        xhr.open("POST", this.baseUrl + "edit/transcript/new");
 	        if (this.username) {
-	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this._password))
 	        }
 	        xhr.setRequestHeader("Accept", "application/json");
 	        xhr.send(fd);
@@ -567,8 +673,8 @@
 	            host: urlParts.hostname,
 	            headers: { "Accept" : "application/json" }
 	        };
-	        if (this.username && this.password) {
-	            requestParameters.auth = this.username+':'+this.password;
+	        if (this.username && this._password) {
+	            requestParameters.auth = this.username+':'+this._password;
 	        }
 	        if (/^https.*/.test(this.baseUrl)) {
 	            requestParameters.protocol = "https:";
@@ -605,7 +711,7 @@
         /**
          * Delete a transcript.
          * @param {string} id ID of the transcript.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         deleteTranscript(id, onResult) {
             this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
@@ -619,7 +725,7 @@
         
         /**
          * Gets list of tasks.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         getTasks(onResult) {
             this.createRequest("getTasks", null, onResult, this.baseUrl + "threads").send();
@@ -628,7 +734,7 @@
         /**
          * Gets the status of a task.
          * @param {string} id ID of the task.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         taskStatus(id, onResult) {
             this.createRequest("taskStatus", { id : id, threadId : id }, onResult, this.baseUrl + "thread").send();
@@ -637,7 +743,7 @@
         /**
          * Releases a finished a task so it no longer uses resources on the server.
          * @param {string} id ID of the task.
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         releaseTask(id, onResult) {
             this.createRequest("releaseTask", { id : id, threadId : id, command : "release" }, onResult, this.baseUrl + "threads").send();
