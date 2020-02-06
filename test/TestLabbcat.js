@@ -7,13 +7,19 @@ var username = "labbcat";
 var password = "labbcat";
 
 describe("#Labbcat", function() {
+    beforeEach(function(done) {
+        // verbosity only applies in tests that enable it
+        labbcat.verbose = false;
+        done();
+    });
+    
     it("exports Labbcat", function() {
         expect(labbcat.Labbcat).to.exist;
     });
 
     it("support getId", function(done) {
         const lc = new labbcat.Labbcat(baseUrl, username, password);
-        lc.getId(function(result, errors, messages) {
+        lc.getId(function(result, errors, messages, call) {
             expect(result).to.equal(baseUrl);
             done();
         });
