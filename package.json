@@ -4,7 +4,8 @@
   "description": "Client library for communicating with LaBB-CAT servers",
   "main": "nzilbb.labbcat.js",
   "scripts": {
-    "test": "mocha --reporter spec"
+      "test": "mocha --reporter spec",
+      "docs": "jsdoc -d docs nzilbb.labbcat.js"
   },
   "repository": {
     "type": "git",
