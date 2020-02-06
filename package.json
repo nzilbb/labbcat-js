@@ -1,0 +1,33 @@
+{
+  "name": "@nzilbb/labbcat",
+  "version": "1.0.0",
+  "description": "Client library for communicating with LaBB-CAT servers",
+  "main": "nzilbb.labbcat.js",
+  "scripts": {
+    "test": "mocha --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nzilbb/labbcat-js.git"
+  },
+  "keywords": [
+    "LaBB-CAT"
+  ],
+  "author": "Robert Fromont <robert@fromont.net.nz>",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/nzilbb/labbcat-js/issues"
+  },
+  "homepage": "https://github.com/nzilbb/labbcat-js#readme",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.0.1"
+  },
+  "dependencies": {
+    "btoa": "^1.2.1",
+    "form-data": "^3.0.0",
+    "fs": "0.0.1-security",
+    "url": "^0.11.0",
+    "xhr2": "^0.2.0"
+  }
+}
