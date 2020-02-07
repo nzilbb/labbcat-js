@@ -759,11 +759,11 @@
      * Labbcat client, for accessing LaBB-CAT server functions programmatically.
      * @example
      * // create LaBB-CAT client
-     * const labbcat = new [Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")]{@link Labbcat};
+     * const lc = new labbcat.[Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")]{@link Labbcat};
      * // upload a transcript
      * const transcript = "some-transcript.eaf";
      * const media = "some-transcript.wav";
-     * labbcat.newTranscript(
+     * lc.newTranscript(
      *     transcript, media, null, "interview", "corpus", episode, 
      *     (result, errors, messages, call, id)=>{
      *         console.log("Finished uploading " + transcript);
@@ -1044,12 +1044,6 @@
             this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
         }
         
-        // TODO search(pattern, participantId=NULL, main.participant=TRUE)
-        // TODO getMatches(threadId, words.context=0)
-        // TODO getMatchAnnotations(matchIds, layerIds, targetOffset=0, annotationsPerLayer=1)
-        // TODO getSoundFragments(id, start, end, sampleRate = NULL)
-        // TODO getFragments(id, start, end, layerIds, mimeType = "text/praat-textgrid")
-        
         /**
          * Gets list of tasks.
          * @param {resultCallback} onResult Invoked when the request has returned a
@@ -1102,6 +1096,13 @@
         releaseTask(id, onResult) {
             this.createRequest("releaseTask", { id : id, threadId : id, command : "release" }, onResult, this.baseUrl + "threads").send();
         }
+        
+        // TODO search(pattern, participantId=NULL, main.participant=TRUE)
+        // TODO getMatches(threadId, words.context=0)
+        // TODO getMatchAnnotations(matchIds, layerIds, targetOffset=0, annotationsPerLayer=1)
+        // TODO getSoundFragments(id, start, end, sampleRate = NULL)
+        // TODO getFragments(id, start, end, layerIds, mimeType = "text/praat-textgrid")
+        
     } // class Labbcat
     
     exports.GraphStoreQuery = GraphStoreQuery;
