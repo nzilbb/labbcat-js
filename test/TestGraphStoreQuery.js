@@ -23,9 +23,10 @@ describe("#GraphStoreQuery", function() {
     before((done)=>{
         store = new labbcat.GraphStoreQuery(baseUrl, username, password);
         store.getId((id, errors, messages)=>{
-            assert.isNull(errors, "\nCould not connect to LaBB-CAT."
-                          +"\nThese unit tests require a running LaBB-CAT server to test against."
-                          +"\nPlease check the baseUrl variable refers to a running LaBB-CAT server.");
+            assert.isNull(
+                errors, "\nCould not connect to LaBB-CAT."
+                    +"\nThese unit tests require a running LaBB-CAT server to test against."
+                    +"\nPlease check the baseUrl variable refers to a running LaBB-CAT server.");
             done();
         });
     });
@@ -377,7 +378,8 @@ describe("#GraphStoreQuery", function() {
             store.getEpisodeDocuments(graphId, (files, errors, messages)=>{
                 assert.isNull(errors);
                 if (files.length == 0) {
-                    console.log(graphId + " has no documents, can't test for well-formed response");
+                    console.warn(
+                        graphId + " has no documents, can't test for well-formed response");
                 } else {                
                     let file = files[0];
                     assert.containsAllKeys(
