@@ -31,4 +31,12 @@ describe("#GraphStore", ()=>{
             done();
         });
     });
+    
+    it("implements deleteGraph", (done)=>{
+        store.deleteGraph("nonexistent graph ID", (result, errors, messages) =>{
+            assert.isNotNull(errors, "deleteGraph should fail for nonexistant graph ID");
+            assert.include(errors[0], "Graph not found");
+            done();
+        });
+    });
 });

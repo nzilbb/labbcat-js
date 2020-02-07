@@ -161,6 +161,9 @@
         get storeUrl() {
             return this._storeUrl;
         }
+        set storeUrl(url) {
+            this._storeUrl = url;
+        }
         
         /**
          * The LaBB-CAT user name.
@@ -169,17 +172,22 @@
             return this._username;
         }
         
-        /**
-         * Creates an http request.
-         * @param {string} call The name of the API function to call
-         * @param {object} parameters The arguments of the function, if any
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {XMLHttpRequest} An open request.
-         */
-        createRequest(call, parameters, onResult, url) {
+        //
+        // Creates an http request.
+        // @param {string} call The name of the API function to call
+        // @param {object} parameters The arguments of the function, if any
+        // @param {resultCallback} onResult Invoked when the request has returned a result.
+        // @param {string} [url=this.storeUrl] The URL
+        // @param {string} [method=GET] The HTTP method e.g. "POST"
+        // @return {XMLHttpRequest} An open request.
+        //
+        createRequest(call, parameters, onResult, url, method) {
             if (exports.verbose)  {
-                console.log("createRequest "+url + " " + call + " " + JSON.stringify(parameters));
+                console.log("createRequest "+method+" "+url + " "
+                            + call + " " + JSON.stringify(parameters));
             }
+            method = method || "GET";
+            
 	    var xhr = new XMLHttpRequest();
 	    xhr.call = call;
 	    if (parameters && parameters.id) xhr.id = parameters.id;
@@ -205,9 +213,9 @@
 	    if (!url) url = this.storeUrl;
 
             if (exports.verbose) {
-                console.log("GET: "+url + call + queryString + " as " + this.username);
+                console.log(method + ": "+url + call + queryString + " as " + this.username);
             }
-	    xhr.open("GET", url + call + queryString, true);
+	    xhr.open(method, url + call + queryString, true);
 	    if (this.username) {
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
@@ -685,7 +693,7 @@
          */
         constructor(baseUrl, username, password) {
             super(baseUrl, username, password);
-            this._storeQueryUrl = this.baseUrl + "edit/store/";
+            this.storeUrl = this.baseUrl + "edit/store/";
         }
 
         /**
@@ -731,7 +739,8 @@
          * @param {string} id The graph ID
          * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
-        deleteGraph(id, onResult) { // TODO
+        deleteGraph(id, onResult) {
+	    this.createRequest("deleteGraph", {id : id}, onResult, null, "POST").send();
         }
     }
     
