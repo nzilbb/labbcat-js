@@ -71,31 +71,41 @@
     
     function callComplete(evt) {
         if (exports.verbose) console.log("callComplete: " + this.responseText);
+	var result = null;
+	var errors = null;
+	var messages = null;
         try {
 	    var response = JSON.parse(this.responseText);
-	    var result = null;
             if (response.model != null) {
                 if (response.model.result) result = response.model.result;
 	        if (!result && result != 0) result = response.model;
             }
-            if (exports.verbose) console.log("result: " + result);
+            if (exports.verbose) console.log("result: " + JSON.stringify(result));
 	    var errors = response.errors;
 	    if (!errors || errors.length == 0) errors = null;
 	    var messages = response.messages;
 	    if (!messages || messages.length == 0) messages = null;
-            if (exports.verbose) console.log("onResult: " + result + " " + evt.target.call + " " + evt.target.onResult);
-	    evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
         } catch(exception) {
-	    evt.target.onResult(null, ["" +exception+ ": " + this.responseText], [], evt.target.call, evt.target.id);
+            result = null;
+            errors = ["" +exception+ ": " + this.responseText];
+            messages = [];
+        }
+        if (evt.target.onResult) {
+            evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
         }
     }
     function callFailed(evt) {
         if (exports.verbose) console.log("callFailed: "+this.responseText);
-        evt.target.onResult(null, ["failed: " + this.responseText], [], evt.target.call, evt.target.id);
+        if (evt.target.onResult) {
+            evt.target.onResult(
+                null, ["failed: " + this.responseText], [], evt.target.call, evt.target.id);
+        }
     }
     function callCancelled(evt) {
         if (exports.verbose) console.log("callCancelled");
-        evt.target.onResult(null, ["cancelled"], [], evt.target.call, evt.target.id);
+        if (evt.target.onResult) {
+            evt.target.onResult(null, ["cancelled"], [], evt.target.call, evt.target.id);
+        }
     }
 
     // GraphStoreQuery class - read-only "view" access
@@ -265,10 +275,269 @@
         /**
          * Gets a list of participant IDs.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  {string[]} A list of participant IDs.
+         * <var>result</var> which will be: {string[]} A list of participant IDs.
          */
         getParticipantIds(onResult) {
 	    this.createRequest("getParticipantIds", null, onResult).send();
+        }
+
+        /**
+         * Gets the participant record specified by the given identifier.
+         * @param id The ID of the participant, which could be their name or their
+         * database annotation ID. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:   An annotation representing the participant,
+         * or null if the participant was not found.
+         */
+        getParticipant(id, onResult) {
+	    this.createRequest("getParticipant", {id : id}, onResult).send();
+        }
+        
+        /**
+         * Counts the number of participants that match a particular pattern.
+         * @param {string} expression An expression that determines which participants match.
+         * <p> The expression language is currently not well defined, but expressions such as the
+         * following can be used: 
+         * <ul>
+         *  <li><code>id MATCHES 'Ada.+'</code></li>
+         *  <li><code>'CC' IN labels('corpus')</code></li>
+         *  <li><code>'en' IN labels('participant_languages')</code></li>
+         *  <li><code>'en' IN labels('transcript_language')</code></li>
+         *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+         *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+         *  <li><code>list('participant_rating').length = 0</code></li>
+         *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+         *  <li><code>my('participant_gender').label = 'NA'</code></li>
+         * </ul>
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: The number of matching participants.
+         */
+        countMatchingParticipantIds(expression, onResult) {
+	    this.createRequest("countMatchingParticipantIds", {
+                expression : expression
+            }, onResult).send();
+        }
+        
+        /**
+         * Gets a list of IDs of participants that match a particular pattern.
+         * @param {string} expression An expression that determines which participants match.
+         * <p> The expression language is currently not well defined, but expressions such as the
+         * following can be used: 
+         * <ul>
+         *  <li><code>id MATCHES 'Ada.+'</code></li>
+         *  <li><code>'CC' IN labels('corpus')</code></li>
+         *  <li><code>'en' IN labels('participant_languages')</code></li>
+         *  <li><code>'en' IN labels('transcript_language')</code></li>
+         *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+         *  <li><code>list('transcript_rating').length &gt; 2</code></li>
+         *  <li><code>list('participant_rating').length = 0</code></li>
+         *  <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
+         *  <li><code>my('participant_gender').label = 'NA'</code></li>
+         * </ul>
+         * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
+         * @param {int} [pageNumber] The zero-based page number to return, or null to return the
+         * first page. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A list of participant IDs.
+         */
+        getMatchingParticipantIds(expression, pageLength, pageNumber, onResult) {
+            if (typeof pageLength === "function") { // no pageLength, pageNumber
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+            }
+	    this.createRequest("getMatchingParticipantIds", {
+                expression : expression,
+                pageLength : pageLength,
+                pageNumber : pageNumber
+            }, onResult).send();
+        }
+
+        /**
+         * Counts the number of graphs that match a particular pattern.
+         * @param {string} expression An expression that determines which graphs match.
+         * <p> The expression language is currently not well defined, but expressions such as
+         * the following can be used: 
+         * <ul>
+         *  <li><code>id MATCHES 'Ada.+'</code></li>
+         *  <li><code>'Robert' IN labels('who')</code></li>
+         *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
+         *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+         *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+         *  <li><code>my('participant_languages').label = 'en'</code></li>
+         *  <li><code>my('noise').label = 'bell'</code></li>
+         *  <li><code>'en' IN labels('transcript_languages')</code></li>
+         *  <li><code>'en' IN labels('participant_languages')</code></li>
+         *  <li><code>'bell' IN labels('noise')</code></li>
+         *  <li><code>list('transcript_languages').length &gt; 1</code></li>
+         *  <li><code>list('participant_languages').length &gt; 1</code></li>
+         *  <li><code>list('transcript').length &gt; 100</code></li>
+         *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+         *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+         * labels('who')</code></li> 
+         * </ul>
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: The number of matching graphs.
+         */
+        countMatchingGraphIds(expression, onResult) {
+	    this.createRequest("countMatchingGraphIds", {
+                expression : expression
+            }, onResult).send();
+        }    
+
+        /**
+         * <p>Gets a list of IDs of graphs that match a particular pattern.
+         * <p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
+         * can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
+         * <p>The order of the list can be specified.  If ommitted, the graphs are listed in ID
+         * order.</p> 
+         * @param {string} expression An expression that determines which graphs match.
+         * <p> The expression language is currently not well defined, but expressions such as
+         * the following can be used:
+         * <ul>
+         *  <li><code>id MATCHES 'Ada.+'</code></li>
+         *  <li><code>'Robert' IN labels('who')</code></li>
+         *  <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
+         *  <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
+         *  <li><code>my('transcript_scribe').label = 'Robert'</code></li>
+         *  <li><code>my('participant_languages').label = 'en'</code></li>
+         *  <li><code>my('noise').label = 'bell'</code></li>
+         *  <li><code>'en' IN labels('transcript_languages')</code></li>
+         *  <li><code>'en' IN labels('participant_languages')</code></li>
+         *  <li><code>'bell' IN labels('noise')</code></li>
+         *  <li><code>list('transcript_languages').length &gt; 1</code></li>
+         *  <li><code>list('participant_languages').length &gt; 1</code></li>
+         *  <li><code>list('transcript').length &gt; 100</code></li>
+         *  <li><code>'Robert' IN annotators('transcript_rating')</code></li>
+         *  <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+         * labels('who')</code></li> 
+         * </ul>
+         * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
+         * @param {int} [pageNumber] The zero-based page number to return, or null to return
+         * the first page. 
+         * @param {string} [order] The ordering for the list of IDs, a string containing a
+         * comma-separated list of 
+         * expressions, which may be appended by " ASC" or " DESC", or null for graph ID order. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A list of graph IDs.
+         */
+        getMatchingGraphIds(expression, pageLength, pageNumber, order, onResult) {
+            if (typeof pageLength === "function") { // (expression, onResult)
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+                order = null;
+            } else if (typeof pageNumber === "function") { // (order, onResult)
+                order = pageLength;
+                onResult = pageNumber;
+                pageLength = null;
+                pageNumber = null;
+            } else if (typeof order === "function") { // (pageLength, pageNumber, onResult)
+                onResult = order;
+                order = null;
+            }
+	    this.createRequest("getMatchingGraphIds", {
+                expression : expression,
+                pageLength : pageLength,
+                pageNumber : pageNumber,
+                order : order
+            }, onResult).send();
+        }
+        
+        /**
+         * Gets the number of annotations on the given layer of the given graph.
+         * @param {string} id The ID of the graph.
+         * @param {layerId} The ID of the layer.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A (possibly empty) array of annotations.
+         */
+        countAnnotations(id, layerId, onResult) {
+	    this.createRequest("countAnnotations", {
+                id : id,
+                layerId : layerId
+            }, onResult).send();
+        }
+        
+        /**
+         * Gets the annotations on the given layer of the given graph.
+         * @param {string} id The ID of the graph.
+         * @param {string} layerId The ID of the layer.
+         * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
+         * @param {int} [pageNumber] The zero-based page number to return, or null to return 
+         * the first page. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A (possibly empty) array of annotations.
+         */
+        getAnnotations(id, layerId, pageLength, pageNumber, onResult) {
+            if (typeof pageLength === "function") { // (id, layerId, onResult)
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+            }
+	    this.createRequest("getAnnotations", {
+                id : id,
+                layerId : layerId,
+                pageLength : pageLength,
+                pageNumber : pageNumber
+            }, onResult).send();
+        }
+        
+        /**
+         * Counts the number of annotations that match a particular pattern.
+         * @param {string} expression An expression that determines which participants match.
+         * <p> The expression language is currently not well defined, but expressions such as
+         * the following can be used:
+         * <ul>
+         *  <li><code>id = 'ew_0_456'</code></li>
+         *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+         *  <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
+         * my('utterances').start.offset = 12.345</code></li> 
+         *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+         * &gt; 10.5</code></li> 
+         * </ul>
+         * <p><em>NB</em> all expressions must match by either id or layer.id.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: The number of matching annotations.
+         */
+        countMatchingAnnotations(expression, onResult) {
+	    this.createRequest("countMatchingAnnotations", {
+                expression : expression
+            }, onResult).send();
+        }
+        
+        /**
+         * Gets a list of annotations that match a particular pattern.
+         * @param {string} expression An expression that determines which graphs match.
+         * <p> The expression language is currently not well defined, but expressions such as the
+         * following can be used: 
+         * <ul>
+         *  <li><code>id = 'ew_0_456'</code></li>
+         *  <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
+         *  <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
+         *  <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+         * &gt; 10.5</code></li> 
+         *  <li><code>previous.id = 'ew_0_456'</code></li>
+         * </ul>
+         * <p><em>NB</em> all expressions must match by either id or layer.id.
+         * @param {int} [pageLength] The maximum number of annotations to return, or null
+         * to return all. 
+         * @param {int} [pageNumber] The zero-based page number to return, or null to
+         * return the first page. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A list of matching Annotations.
+         */
+        getMatchingAnnotations(expression, pageLength, pageNumber, onResult) {
+            if (typeof pageLength === "function") { // (expression, onResult)
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+                order = null;
+            }
+	    this.createRequest("getMatchingAnnotations", {
+                expression : expression,
+                pageLength : pageLength,
+                pageNumber : pageNumber
+            }, onResult).send();
         }
         
         /**
@@ -313,38 +582,14 @@
         }
         
         /**
-         * Gets the number of annotations on the given layer of the given graph.
-         * @param {string} id The given graph ID.
-         * @param {string} layerId The ID of the layer to load.
-         * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  The identified graph.
-         */
-        countAnnotations (id, layerId, onResult) {
-	    this.createRequest("countAnnotations", { id : id, layerId : layerId }, onResult).send();
-        }
-        
-        /**
-         * Gets the annotations on the given layer of the given graph.
-         * @param {string} id The given graph ID.
-         * @param {string} layerId The ID of the layer to load.
-         * @param {int} pageLength The number of annotations per page (or null for one big page with all annotations on it).
-         * @param {int} pageNumber The page number to return (or null for the first page).
-         * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  The identified graph.
-         */
-        getAnnotations (id, layerId, pageLength, pageNumber, onResult) {
-	    this.createRequest("getAnnotations", { id : id, layerId : layerId, pageLength : pageLength, pageNumber : pageNumber }, onResult).send();
-        }
-        
-        /**
          * Gets the given anchors in the given graph.
          * @param {string} id The given graph ID.
-         * @param {string[]} anchorId The IDs of the anchors to load.
+         * @param {string[]} anchorIds The IDs of the anchors to load.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:  The identified graph.
          */
-        getAnchors (id, anchorId, onResult) {
-	    this.createRequest("getAnchors", { id : id, anchorId : anchorId }, onResult).send();
+        getAnchors (id, anchorIds, onResult) {
+	    this.createRequest("getAnchors", { id : id, anchorIds : anchorIds }, onResult).send();
         }
         
         /**
@@ -367,16 +612,41 @@
         }
         
         /**
+         * Get a list of documents associated with the episode of the given graph.
+         * @param {string} id The graph ID.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  List of media files available for the given graph.
+         */
+        getEpisodeDocuments(id, onResult) {
+	    this.createRequest("getEpisodeDocuments", { id : id }, onResult).send();
+        }
+        
+        /**
          * Gets a given media track for a given graph.
          * @param {string} id The graph ID.
          * @param {string} trackSuffix The track suffix of the media.
          * @param {string} mimeType The MIME type of the media.
+         * @param {float} [startOffset] The start offset of the media sample, or null for
+         * the start of the whole recording. 
+         * @param {float} [endOffset[ The end offset of the media sample, or null for the
+         * end of the whole recording. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: {string} A URL to the given media for the given
          * graph, or null if the given media doesn't exist.
          */
-        getMedia(id, trackSuffix, mimeType, onResult) {
-	    this.createRequest("getMedia", { id : id, trackSuffix : trackSuffix, mimeType : mimeType}, onResult).send();
+        getMedia(id, trackSuffix, mimeType, startOffset, endOffset, onResult) {
+            if (typeof startOffset === "function") { // (id, trackSuffix, mimeType, onResult)
+                onResult = startOffset;
+                startOffset = null;
+                endOffset = null;
+            }
+	    this.createRequest("getMedia", {
+                id : id,
+                trackSuffix : trackSuffix,
+                mimeType : mimeType,
+                startOffset : startOffset,
+                endOffset : endOffset
+            }, onResult).send();
         }
         
     } // class GraphStoreQuery
