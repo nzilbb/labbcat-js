@@ -1,8 +1,21 @@
 /**
  * @file nzilbb.labbcat module for communicating with a LaBB-CAT web application.
+ * 
+ * <p>This API is has the following object model:
+ * <dl>
+ *  <dt>{@link GraphStoreQuery}</dt><dd> implements read-only functions for a LaBB-CAT graph
+ *   store, corresponding to <q>view</q> permissions in LaBB-CAT.</dd>
+ *  <dt>{@link GraphStore}</dt><dd> inherits all GraphStoreQuery functions, and also
+ *   implements some graph store editing functions, corresponding to <q>edit</q>
+ *   permissions in LaBB-CAT.</dd>
+ *  <dt>{@link Labbcat}</dt><dd> inherits all GraphStore functions, and also implements some
+ *   extra functions including transcript upload and task management.</dd>
+ * </dl> 
+ *
+ * A complete list of functions is available [here]{@link Labbcat}.
  *
  * @example
- * var lc = new labbcat.Labbcat(baseUrl);
+ * var lc = new labbcat.Labbcat(baseUrl, username, password);
  * // load corpora
  * lc.getCorpusIds(function(result, errors, messages, call, id) {
  *     if (errors) {
@@ -12,12 +25,8 @@
  *       for (var i in result) {
  *         var option = document.createElement("option");
  *         option.appendChild(document.createTextNode(result[i]));
- *         if (result[i] == "${sessionScope['corpus']}") {
- *           option.selected = "selected";
- *         }
  *         corpora.appendChild(option);
  *       }
- *       
  *     }
  *   });
  *
@@ -61,12 +70,12 @@
      * Callback invoked when the result of a request is available.
      *
      * @callback resultCallback
-     * @param result The result of the method
-     * @param {string[]} errors The error, if any
-     * @param {string[]} messages The error, if any
-     * @param {string} call The method that was called
+     * @param result The result of the function. This may be null, a string, number,
+     * array, or complex object, depending on what function was called.
+     * @param {string[]} errors A list of errors, or null if there were no errors.
+     * @param {string[]} messages A list of messages from the server if any.
+     * @param {string} call The name of the function that was called
      * @param {string} id The ID that was passed to the method, if any.
-     * @param {object} taskIds A list of IDs of the resulting server tasks, if any.
      */
     
     function callComplete(evt) {
@@ -778,8 +787,11 @@
 
         /**
          * Uploads a new transcript.
-         * @param {file} transcript The transcript to upload.
-         * @param {file|file[]} media The media to upload, if any.
+         * @param {file|string} transcript The transcript to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {file|file[]|string|string[]} media The media to upload, if any. In a
+         * browser, these must be file objects, and in Node, they must be the full paths
+         * to the files.
          * @param {string} mediaSuffix The media suffix for the media.
          * @param {string} transcriptType The transcript type.
          * @param {string} corpus The corpus for the transcript.
@@ -930,7 +942,8 @@
         
         /**
          * Uploads a new version of an existing transcript.
-         * @param {file} transcript The transcript to upload.
+         * @param {file|string} transcript The transcript to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
          * @param {resultCallback} onResult Invoked when the request has returned a result, 
          * which is an map of graph IDs (transcript names) to task threadIds. The 
          * task status can be updated using {@link Labbcat#taskStatus}
@@ -1057,7 +1070,7 @@
 
         /**
          * Wait for the given task to finish.
-         * @param {string} threadId
+         * @param {string} threadId The task ID.
          * @param {int} maxSeconds The maximum time to wait for the task, or 0 for forever.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: The final task status. To determine whether

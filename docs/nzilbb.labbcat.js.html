@@ -28,9 +28,22 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * @file nzilbb.labbcat module for communicating with a LaBB-CAT web application.
+ * 
+ * &lt;p>This API is has the following object model:
+ * &lt;dl>
+ *  &lt;dt>{@link GraphStoreQuery}&lt;/dt>&lt;dd> implements read-only functions for a LaBB-CAT graph
+ *   store, corresponding to &lt;q>view&lt;/q> permissions in LaBB-CAT.&lt;/dd>
+ *  &lt;dt>{@link GraphStore}&lt;/dt>&lt;dd> inherits all GraphStoreQuery functions, and also
+ *   implements some graph store editing functions, corresponding to &lt;q>edit&lt;/q>
+ *   permissions in LaBB-CAT.&lt;/dd>
+ *  &lt;dt>{@link Labbcat}&lt;/dt>&lt;dd> inherits all GraphStore functions, and also implements some
+ *   extra functions including transcript upload and task management.&lt;/dd>
+ * &lt;/dl> 
+ *
+ * A complete list of functions is available [here]{@link Labbcat}.
  *
  * @example
- * var lc = new labbcat.Labbcat(baseUrl);
+ * var lc = new labbcat.Labbcat(baseUrl, username, password);
  * // load corpora
  * lc.getCorpusIds(function(result, errors, messages, call, id) {
  *     if (errors) {
@@ -40,12 +53,8 @@
  *       for (var i in result) {
  *         var option = document.createElement("option");
  *         option.appendChild(document.createTextNode(result[i]));
- *         if (result[i] == "${sessionScope['corpus']}") {
- *           option.selected = "selected";
- *         }
  *         corpora.appendChild(option);
  *       }
- *       
  *     }
  *   });
  *
@@ -89,41 +98,51 @@
      * Callback invoked when the result of a request is available.
      *
      * @callback resultCallback
-     * @param result The result of the method
-     * @param {string[]} errors The error, if any
-     * @param {string[]} messages The error, if any
-     * @param {string} call The method that was called
+     * @param result The result of the function. This may be null, a string, number,
+     * array, or complex object, depending on what function was called.
+     * @param {string[]} errors A list of errors, or null if there were no errors.
+     * @param {string[]} messages A list of messages from the server if any.
+     * @param {string} call The name of the function that was called
      * @param {string} id The ID that was passed to the method, if any.
-     * @param {object} taskIds A list of IDs of the resulting server tasks, if any.
      */
     
     function callComplete(evt) {
         if (exports.verbose) console.log("callComplete: " + this.responseText);
+	var result = null;
+	var errors = null;
+	var messages = null;
         try {
 	    var response = JSON.parse(this.responseText);
-	    var result = null;
             if (response.model != null) {
                 if (response.model.result) result = response.model.result;
 	        if (!result &amp;&amp; result != 0) result = response.model;
             }
-            if (exports.verbose) console.log("result: " + result);
+            if (exports.verbose) console.log("result: " + JSON.stringify(result));
 	    var errors = response.errors;
 	    if (!errors || errors.length == 0) errors = null;
 	    var messages = response.messages;
 	    if (!messages || messages.length == 0) messages = null;
-            if (exports.verbose) console.log("onResult: " + result + " " + evt.target.call + " " + evt.target.onResult);
-	    evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
         } catch(exception) {
-	    evt.target.onResult(null, ["" +exception+ ": " + this.responseText], [], evt.target.call, evt.target.id);
+            result = null;
+            errors = ["" +exception+ ": " + this.responseText];
+            messages = [];
+        }
+        if (evt.target.onResult) {
+            evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
         }
     }
     function callFailed(evt) {
         if (exports.verbose) console.log("callFailed: "+this.responseText);
-        evt.target.onResult(null, ["failed: " + this.responseText], [], evt.target.call, evt.target.id);
+        if (evt.target.onResult) {
+            evt.target.onResult(
+                null, ["failed: " + this.responseText], [], evt.target.call, evt.target.id);
+        }
     }
     function callCancelled(evt) {
         if (exports.verbose) console.log("callCancelled");
-        evt.target.onResult(null, ["cancelled"], [], evt.target.call, evt.target.id);
+        if (evt.target.onResult) {
+            evt.target.onResult(null, ["cancelled"], [], evt.target.call, evt.target.id);
+        }
     }
 
     // GraphStoreQuery class - read-only "view" access
@@ -179,6 +198,9 @@
         get storeUrl() {
             return this._storeUrl;
         }
+        set storeUrl(url) {
+            this._storeUrl = url;
+        }
         
         /**
          * The LaBB-CAT user name.
@@ -187,17 +209,22 @@
             return this._username;
         }
         
-        /**
-         * Creates an http request.
-         * @param {string} call The name of the API function to call
-         * @param {object} parameters The arguments of the function, if any
-         * @callback {resultCallback} onResult Invoked when the request has returned a result.
-         * @return {XMLHttpRequest} An open request.
-         */
-        createRequest(call, parameters, onResult, url) {
+        //
+        // Creates an http request.
+        // @param {string} call The name of the API function to call
+        // @param {object} parameters The arguments of the function, if any
+        // @param {resultCallback} onResult Invoked when the request has returned a result.
+        // @param {string} [url=this.storeUrl] The URL
+        // @param {string} [method=GET] The HTTP method e.g. "POST"
+        // @return {XMLHttpRequest} An open request.
+        //
+        createRequest(call, parameters, onResult, url, method) {
             if (exports.verbose)  {
-                console.log("createRequest "+url + " " + call + " " + JSON.stringify(parameters));
+                console.log("createRequest "+method+" "+url + " "
+                            + call + " " + JSON.stringify(parameters));
             }
+            method = method || "GET";
+            
 	    var xhr = new XMLHttpRequest();
 	    xhr.call = call;
 	    if (parameters &amp;&amp; parameters.id) xhr.id = parameters.id;
@@ -223,9 +250,9 @@
 	    if (!url) url = this.storeUrl;
 
             if (exports.verbose) {
-                console.log("GET: "+url + call + queryString + " as " + this.username);
+                console.log(method + ": "+url + call + queryString + " as " + this.username);
             }
-	    xhr.open("GET", url + call + queryString, true);
+	    xhr.open(method, url + call + queryString, true);
 	    if (this.username) {
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
@@ -293,10 +320,269 @@
         /**
          * Gets a list of participant IDs.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * &lt;var>result&lt;/var> which will be:  {string[]} A list of participant IDs.
+         * &lt;var>result&lt;/var> which will be: {string[]} A list of participant IDs.
          */
         getParticipantIds(onResult) {
 	    this.createRequest("getParticipantIds", null, onResult).send();
+        }
+
+        /**
+         * Gets the participant record specified by the given identifier.
+         * @param id The ID of the participant, which could be their name or their
+         * database annotation ID. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be:   An annotation representing the participant,
+         * or null if the participant was not found.
+         */
+        getParticipant(id, onResult) {
+	    this.createRequest("getParticipant", {id : id}, onResult).send();
+        }
+        
+        /**
+         * Counts the number of participants that match a particular pattern.
+         * @param {string} expression An expression that determines which participants match.
+         * &lt;p> The expression language is currently not well defined, but expressions such as the
+         * following can be used: 
+         * &lt;ul>
+         *  &lt;li>&lt;code>id MATCHES 'Ada.+'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'CC' IN labels('corpus')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'en' IN labels('participant_languages')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'en' IN labels('transcript_language')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript_rating').length &amp;gt; 2&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('participant_rating').length = 0&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'labbcat' NOT IN annotators('transcript_rating')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('participant_gender').label = 'NA'&lt;/code>&lt;/li>
+         * &lt;/ul>
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: The number of matching participants.
+         */
+        countMatchingParticipantIds(expression, onResult) {
+	    this.createRequest("countMatchingParticipantIds", {
+                expression : expression
+            }, onResult).send();
+        }
+        
+        /**
+         * Gets a list of IDs of participants that match a particular pattern.
+         * @param {string} expression An expression that determines which participants match.
+         * &lt;p> The expression language is currently not well defined, but expressions such as the
+         * following can be used: 
+         * &lt;ul>
+         *  &lt;li>&lt;code>id MATCHES 'Ada.+'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'CC' IN labels('corpus')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'en' IN labels('participant_languages')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'en' IN labels('transcript_language')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript_rating').length &amp;gt; 2&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('participant_rating').length = 0&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'labbcat' NOT IN annotators('transcript_rating')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('participant_gender').label = 'NA'&lt;/code>&lt;/li>
+         * &lt;/ul>
+         * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
+         * @param {int} [pageNumber] The zero-based page number to return, or null to return the
+         * first page. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: A list of participant IDs.
+         */
+        getMatchingParticipantIds(expression, pageLength, pageNumber, onResult) {
+            if (typeof pageLength === "function") { // no pageLength, pageNumber
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+            }
+	    this.createRequest("getMatchingParticipantIds", {
+                expression : expression,
+                pageLength : pageLength,
+                pageNumber : pageNumber
+            }, onResult).send();
+        }
+
+        /**
+         * Counts the number of graphs that match a particular pattern.
+         * @param {string} expression An expression that determines which graphs match.
+         * &lt;p> The expression language is currently not well defined, but expressions such as
+         * the following can be used: 
+         * &lt;ul>
+         *  &lt;li>&lt;code>id MATCHES 'Ada.+'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'Robert' IN labels('who')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('corpus').label IN ('CC', 'IA', 'MU')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('episode').label = 'Ada Aitcheson'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('transcript_scribe').label = 'Robert'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('participant_languages').label = 'en'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('noise').label = 'bell'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'en' IN labels('transcript_languages')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'en' IN labels('participant_languages')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'bell' IN labels('noise')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript_languages').length &amp;gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('participant_languages').length &amp;gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript').length &amp;gt; 100&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'Robert' IN annotators('transcript_rating')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+         * labels('who')&lt;/code>&lt;/li> 
+         * &lt;/ul>
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: The number of matching graphs.
+         */
+        countMatchingGraphIds(expression, onResult) {
+	    this.createRequest("countMatchingGraphIds", {
+                expression : expression
+            }, onResult).send();
+        }    
+
+        /**
+         * &lt;p>Gets a list of IDs of graphs that match a particular pattern.
+         * &lt;p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
+         * can be a subset (a 'page') of results, by given pageLength and pageNumber values.&lt;/p>
+         * &lt;p>The order of the list can be specified.  If ommitted, the graphs are listed in ID
+         * order.&lt;/p> 
+         * @param {string} expression An expression that determines which graphs match.
+         * &lt;p> The expression language is currently not well defined, but expressions such as
+         * the following can be used:
+         * &lt;ul>
+         *  &lt;li>&lt;code>id MATCHES 'Ada.+'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'Robert' IN labels('who')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('corpus').label IN ('CC', 'IA', 'MU')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('episode').label = 'Ada Aitcheson'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('transcript_scribe').label = 'Robert'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('participant_languages').label = 'en'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('noise').label = 'bell'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'en' IN labels('transcript_languages')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'en' IN labels('participant_languages')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'bell' IN labels('noise')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript_languages').length &amp;gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('participant_languages').length &amp;gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript').length &amp;gt; 100&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>'Robert' IN annotators('transcript_rating')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
+         * labels('who')&lt;/code>&lt;/li> 
+         * &lt;/ul>
+         * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
+         * @param {int} [pageNumber] The zero-based page number to return, or null to return
+         * the first page. 
+         * @param {string} [order] The ordering for the list of IDs, a string containing a
+         * comma-separated list of 
+         * expressions, which may be appended by " ASC" or " DESC", or null for graph ID order. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: A list of graph IDs.
+         */
+        getMatchingGraphIds(expression, pageLength, pageNumber, order, onResult) {
+            if (typeof pageLength === "function") { // (expression, onResult)
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+                order = null;
+            } else if (typeof pageNumber === "function") { // (order, onResult)
+                order = pageLength;
+                onResult = pageNumber;
+                pageLength = null;
+                pageNumber = null;
+            } else if (typeof order === "function") { // (pageLength, pageNumber, onResult)
+                onResult = order;
+                order = null;
+            }
+	    this.createRequest("getMatchingGraphIds", {
+                expression : expression,
+                pageLength : pageLength,
+                pageNumber : pageNumber,
+                order : order
+            }, onResult).send();
+        }
+        
+        /**
+         * Gets the number of annotations on the given layer of the given graph.
+         * @param {string} id The ID of the graph.
+         * @param {layerId} The ID of the layer.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: A (possibly empty) array of annotations.
+         */
+        countAnnotations(id, layerId, onResult) {
+	    this.createRequest("countAnnotations", {
+                id : id,
+                layerId : layerId
+            }, onResult).send();
+        }
+        
+        /**
+         * Gets the annotations on the given layer of the given graph.
+         * @param {string} id The ID of the graph.
+         * @param {string} layerId The ID of the layer.
+         * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
+         * @param {int} [pageNumber] The zero-based page number to return, or null to return 
+         * the first page. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: A (possibly empty) array of annotations.
+         */
+        getAnnotations(id, layerId, pageLength, pageNumber, onResult) {
+            if (typeof pageLength === "function") { // (id, layerId, onResult)
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+            }
+	    this.createRequest("getAnnotations", {
+                id : id,
+                layerId : layerId,
+                pageLength : pageLength,
+                pageNumber : pageNumber
+            }, onResult).send();
+        }
+        
+        /**
+         * Counts the number of annotations that match a particular pattern.
+         * @param {string} expression An expression that determines which participants match.
+         * &lt;p> The expression language is currently not well defined, but expressions such as
+         * the following can be used:
+         * &lt;ul>
+         *  &lt;li>&lt;code>id = 'ew_0_456'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>label NOT MATCHES 'th[aeiou].*'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
+         * my('utterances').start.offset = 12.345&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+         * &amp;gt; 10.5&lt;/code>&lt;/li> 
+         * &lt;/ul>
+         * &lt;p>&lt;em>NB&lt;/em> all expressions must match by either id or layer.id.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: The number of matching annotations.
+         */
+        countMatchingAnnotations(expression, onResult) {
+	    this.createRequest("countMatchingAnnotations", {
+                expression : expression
+            }, onResult).send();
+        }
+        
+        /**
+         * Gets a list of annotations that match a particular pattern.
+         * @param {string} expression An expression that determines which graphs match.
+         * &lt;p> The expression language is currently not well defined, but expressions such as the
+         * following can be used: 
+         * &lt;ul>
+         *  &lt;li>&lt;code>id = 'ew_0_456'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>label NOT MATCHES 'th[aeiou].*'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
+         * &amp;gt; 10.5&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>previous.id = 'ew_0_456'&lt;/code>&lt;/li>
+         * &lt;/ul>
+         * &lt;p>&lt;em>NB&lt;/em> all expressions must match by either id or layer.id.
+         * @param {int} [pageLength] The maximum number of annotations to return, or null
+         * to return all. 
+         * @param {int} [pageNumber] The zero-based page number to return, or null to
+         * return the first page. 
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: A list of matching Annotations.
+         */
+        getMatchingAnnotations(expression, pageLength, pageNumber, onResult) {
+            if (typeof pageLength === "function") { // (expression, onResult)
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+                order = null;
+            }
+	    this.createRequest("getMatchingAnnotations", {
+                expression : expression,
+                pageLength : pageLength,
+                pageNumber : pageNumber
+            }, onResult).send();
         }
         
         /**
@@ -341,38 +627,14 @@
         }
         
         /**
-         * Gets the number of annotations on the given layer of the given graph.
-         * @param {string} id The given graph ID.
-         * @param {string} layerId The ID of the layer to load.
-         * @param {resultCallback} onResult Invoked when the request has returned a
-         * &lt;var>result&lt;/var> which will be:  The identified graph.
-         */
-        countAnnotations (id, layerId, onResult) {
-	    this.createRequest("countAnnotations", { id : id, layerId : layerId }, onResult).send();
-        }
-        
-        /**
-         * Gets the annotations on the given layer of the given graph.
-         * @param {string} id The given graph ID.
-         * @param {string} layerId The ID of the layer to load.
-         * @param {int} pageLength The number of annotations per page (or null for one big page with all annotations on it).
-         * @param {int} pageNumber The page number to return (or null for the first page).
-         * @param {resultCallback} onResult Invoked when the request has returned a
-         * &lt;var>result&lt;/var> which will be:  The identified graph.
-         */
-        getAnnotations (id, layerId, pageLength, pageNumber, onResult) {
-	    this.createRequest("getAnnotations", { id : id, layerId : layerId, pageLength : pageLength, pageNumber : pageNumber }, onResult).send();
-        }
-        
-        /**
          * Gets the given anchors in the given graph.
          * @param {string} id The given graph ID.
-         * @param {string[]} anchorId The IDs of the anchors to load.
+         * @param {string[]} anchorIds The IDs of the anchors to load.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be:  The identified graph.
          */
-        getAnchors (id, anchorId, onResult) {
-	    this.createRequest("getAnchors", { id : id, anchorId : anchorId }, onResult).send();
+        getAnchors (id, anchorIds, onResult) {
+	    this.createRequest("getAnchors", { id : id, anchorIds : anchorIds }, onResult).send();
         }
         
         /**
@@ -395,16 +657,41 @@
         }
         
         /**
+         * Get a list of documents associated with the episode of the given graph.
+         * @param {string} id The graph ID.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be:  List of media files available for the given graph.
+         */
+        getEpisodeDocuments(id, onResult) {
+	    this.createRequest("getEpisodeDocuments", { id : id }, onResult).send();
+        }
+        
+        /**
          * Gets a given media track for a given graph.
          * @param {string} id The graph ID.
          * @param {string} trackSuffix The track suffix of the media.
          * @param {string} mimeType The MIME type of the media.
+         * @param {float} [startOffset] The start offset of the media sample, or null for
+         * the start of the whole recording. 
+         * @param {float} [endOffset[ The end offset of the media sample, or null for the
+         * end of the whole recording. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be: {string} A URL to the given media for the given
          * graph, or null if the given media doesn't exist.
          */
-        getMedia(id, trackSuffix, mimeType, onResult) {
-	    this.createRequest("getMedia", { id : id, trackSuffix : trackSuffix, mimeType : mimeType}, onResult).send();
+        getMedia(id, trackSuffix, mimeType, startOffset, endOffset, onResult) {
+            if (typeof startOffset === "function") { // (id, trackSuffix, mimeType, onResult)
+                onResult = startOffset;
+                startOffset = null;
+                endOffset = null;
+            }
+	    this.createRequest("getMedia", {
+                id : id,
+                trackSuffix : trackSuffix,
+                mimeType : mimeType,
+                startOffset : startOffset,
+                endOffset : endOffset
+            }, onResult).send();
         }
         
     } // class GraphStoreQuery
@@ -443,7 +730,7 @@
          */
         constructor(baseUrl, username, password) {
             super(baseUrl, username, password);
-            this._storeQueryUrl = this.baseUrl + "edit/store/";
+            this.storeUrl = this.baseUrl + "edit/store/";
         }
 
         /**
@@ -487,9 +774,10 @@
         /**
          * Deletes the given graph, and all assciated media, from the graph store..
          * @param {string} id The graph ID
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has completed.
          */
-        deleteGraph(id, onResult) { // TODO
+        deleteGraph(id, onResult) {
+	    this.createRequest("deleteGraph", {id : id}, onResult, null, "POST").send();
         }
     }
     
@@ -501,10 +789,12 @@
      * // create LaBB-CAT client
      * const labbcat = new [Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")]{@link Labbcat};
      * // upload a transcript
+     * const transcript = "some-transcript.eaf";
+     * const media = "some-transcript.wav";
      * labbcat.newTranscript(
      *     transcript, media, null, "interview", "corpus", episode, 
      *     (result, errors, messages, call, id)=>{
-     *         console.log("Finished uploading " + transcript.name);
+     *         console.log("Finished uploading " + transcript);
      *         for (var e in errors) console.log("ERROR " + errors[e]);
      *     });
      *
@@ -525,16 +815,25 @@
 
         /**
          * Uploads a new transcript.
-         * @param {file} transcript The transcript to upload.
-         * @param {file|file[]} media The media to upload, if any.
+         * @param {file|string} transcript The transcript to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {file|file[]|string|string[]} media The media to upload, if any. In a
+         * browser, these must be file objects, and in Node, they must be the full paths
+         * to the files.
          * @param {string} mediaSuffix The media suffix for the media.
          * @param {string} transcriptType The transcript type.
          * @param {string} corpus The corpus for the transcript.
          * @param {string} episode The episode the transcript belongs to.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * result, which is an map of graph IDs (transcript names) to task threadIds. The
+         * task status can be updated using {@link Labbcat#taskStatus} 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
+            if (exports.verbose) {
+                console.log("newTranscript(" + transcript + ", " + media + ", " + mediaSuffix
+                            + ", " + transcriptType + ", " + corpus + ", " + episode + ")");
+            }
             // create form
             var fd = new FormData();
             fd.append("todo", "new");
@@ -578,6 +877,8 @@
 	        
 	        // on node.js, files are actually paths
 	        var transcriptName = transcript.replace(/.*\//g, "");
+                if (exports.verbose) console.log("transcriptName: " + transcriptName);
+
 	        fd.append("uploadfile1_0", 
 		          fs.createReadStream(transcript).on('error', function(){
 		              onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
@@ -610,6 +911,7 @@
 	        var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
 	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
 	        var labbcat = this;
+                var password = this._password;
 	        fd.getLength(function(something, contentLength) {
 	            var requestParameters = {
 		        port: urlParts.port,
@@ -621,12 +923,15 @@
 		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
 		        }
 	            };
-	            if (labbcat.username &amp;&amp; labbcat.password) {
-		        requestParameters.auth = labbcat.username+':'+labbcat._password;
+	            if (labbcat.username &amp;&amp; password) {
+		        requestParameters.auth = labbcat.username+':'+password;
 	            }
 	            if (/^https.*/.test(labbcat.baseUrl)) {
 		        requestParameters.protocol = "https:";
 	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+                    }
 	            fd.submit(requestParameters, function(err, res) {
 		        var responseText = "";
 		        if (!err) {
@@ -635,17 +940,23 @@
 			        responseText += buffer;
 		            });
 		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
 			        try {
 			            var response = JSON.parse(responseText);
-			            var result = response.model.result || response.model;
-			            var errors = response.errors;
+			            result = response.model.result || response.model;
+			            errors = response.errors;
 			            if (errors.length == 0) errors = null
-			            var messages = response.messages;
+			            messages = response.messages;
 			            if (messages.length == 0) messages = null
-			            onResult(result, errors, messages, "newTranscript", transcriptName);
 			        } catch(exception) {
-			            onResult(null, ["" +exception+ ": " + labbcat.responseText], [], "newTranscript", transcript.name);
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
 			        }
+			        onResult(result, errors, messages, "newTranscript", transcriptName);
 		            });
 		        } else {
 		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "newTranscript", transcriptName);
@@ -659,11 +970,16 @@
         
         /**
          * Uploads a new version of an existing transcript.
-         * @param {file} transcript The transcript to upload.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {file|string} transcript The transcript to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {resultCallback} onResult Invoked when the request has returned a result, 
+         * which is an map of graph IDs (transcript names) to task threadIds. The 
+         * task status can be updated using {@link Labbcat#taskStatus}
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         updateTranscript(transcript, onResult, onProgress) {
+            if (exports.verbose) console.log("updateTranscript(" + transcript + ")");
+            
             // create form
             var fd = new FormData();
             fd.append("todo", "update");
@@ -675,7 +991,7 @@
                 
 	        // create HTTP request
 	        var xhr = new XMLHttpRequest();
-	        xhr.call = "newTranscript";
+	        xhr.call = "updateTranscript";
 	        xhr.id = transcript.name;
 	        xhr.onResult = onResult;
 	        xhr.addEventListener("load", callComplete, false);
@@ -696,7 +1012,7 @@
 	        var transcriptName = transcript.replace(/.*\//g, "");
 	        fd.append("uploadfile1_0", 
 		          fs.createReadStream(transcript).on('error', function(){
-		              onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
+		              onResult(null, ["Invalid transcript: " + transcriptName], [], "updateTranscript", transcriptName);
 		          }), transcriptName);
 	        
 	        var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
@@ -716,24 +1032,30 @@
 	            var responseText = "";
 	            if (!err) {
 		        res.on('data',function(buffer) {
-		            console.log('data ' + buffer);
+		            //console.log('data ' + buffer);
 		            responseText += buffer;
 		        });
 		        res.on('end',function(){
+                            if (exports.verbose) console.log("response: " + responseText);
+	                    var result = null;
+	                    var errors = null;
+	                    var messages = null;
 		            try {
 			        var response = JSON.parse(responseText);
-			        var result = response.model.result || response.model;
-			        var errors = response.errors;
+			        result = response.model.result || response.model;
+			        errors = response.errors;
 			        if (errors.length == 0) errors = null
-			        var messages = response.messages;
+			        messages = response.messages;
 			        if (messages.length == 0) messages = null
-			        onResult(result, errors, messages, "newTranscript", transcriptName);
+;
 		            } catch(exception) {
-			        onResult(null, ["" +exception+ ": " + this.responseText], [], "newTranscript", transcript.name);
+			        result = null
+                                errors = ["" +exception+ ": " + labbcat.responseText];
+                                messages = [];
 		            }
-		        });
+			    onResult(result, errors, messages, "updateTranscript", transcriptName)		        });
 	            } else {
-		        onResult(null, ["" +err+ ": " + this.responseText], [], "newTranscript", transcriptName);
+		        onResult(null, ["" +err+ ": " + this.responseText], [], "updateTranscript", transcriptName);
 	            }
                     
 	            if (res) res.resume();
@@ -744,7 +1066,7 @@
         /**
          * Delete a transcript.
          * @param {string} id ID of the transcript.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteTranscript(id, onResult) {
             this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
@@ -758,10 +1080,11 @@
         
         /**
          * Gets list of tasks.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * result, which is an map of task IDs to statuses.
          */
         getTasks(onResult) {
-            this.createRequest("getTasks", null, onResult, this.baseUrl + "threads").send();
+            this.createRequest("threads", null, onResult, this.baseUrl).send();
         }
         
         /**
@@ -770,13 +1093,39 @@
          * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         taskStatus(id, onResult) {
-            this.createRequest("taskStatus", { id : id, threadId : id }, onResult, this.baseUrl + "thread").send();
+            this.createRequest("thread", { id : id, threadId : id }, onResult, this.baseUrl).send();
+        }
+
+        /**
+         * Wait for the given task to finish.
+         * @param {string} threadId The task ID.
+         * @param {int} maxSeconds The maximum time to wait for the task, or 0 for forever.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: The final task status. To determine whether
+         * the task finished or waiting timed out, check &lt;var>result.running&lt;/var>, which
+         * will be false if the task finished.
+         */
+        waitForTask(threadId, maxSeconds, onResult) {
+            if (exports.verbose) console.log("waitForTask("+threadId+", "+maxSeconds+")");
+            const labbcat = this;
+            this.taskStatus(threadId, (thread, errors, messages)=> {
+                const waitTimeMS = thread &amp;&amp; thread.refreshSeconds?
+                      thread.refreshSeconds*1000 : 2000;
+                if (thread.running &amp;&amp; maxSeconds > waitTimeMS/1000) {
+                    setTimeout(()=>labbcat.waitForTask(
+                        threadId, maxSeconds - waitTimeMS/1000, onResult), waitTimeMS);
+                } else {
+                    if (onResult) {
+                        onResult(thread, errors, messages);
+                    }
+                }
+            });
         }
 
         /**
          * Releases a finished a task so it no longer uses resources on the server.
          * @param {string} id ID of the task.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has completed.
          */
         releaseTask(id, onResult) {
             this.createRequest("releaseTask", { id : id, threadId : id, command : "release" }, onResult, this.baseUrl + "threads").send();
@@ -805,7 +1154,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Feb 06 2020 19:38:05 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Feb 07 2020 18:06:05 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
