@@ -737,7 +737,7 @@
         /**
          * Deletes the given graph, and all assciated media, from the graph store..
          * @param {string} id The graph ID
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteGraph(id, onResult) {
 	    this.createRequest("deleteGraph", {id : id}, onResult, null, "POST").send();
@@ -752,10 +752,12 @@
      * // create LaBB-CAT client
      * const labbcat = new [Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")]{@link Labbcat};
      * // upload a transcript
+     * const transcript = "some-transcript.eaf";
+     * const media = "some-transcript.wav";
      * labbcat.newTranscript(
      *     transcript, media, null, "interview", "corpus", episode, 
      *     (result, errors, messages, call, id)=>{
-     *         console.log("Finished uploading " + transcript.name);
+     *         console.log("Finished uploading " + transcript);
      *         for (var e in errors) console.log("ERROR " + errors[e]);
      *     });
      *
@@ -782,10 +784,16 @@
          * @param {string} transcriptType The transcript type.
          * @param {string} corpus The corpus for the transcript.
          * @param {string} episode The episode the transcript belongs to.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * result, which is an map of graph IDs (transcript names) to task threadIds. The
+         * task status can be updated using {@link Labbcat#taskStatus} 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
+            if (exports.verbose) {
+                console.log("newTranscript(" + transcript + ", " + media + ", " + mediaSuffix
+                            + ", " + transcriptType + ", " + corpus + ", " + episode + ")");
+            }
             // create form
             var fd = new FormData();
             fd.append("todo", "new");
@@ -829,6 +837,8 @@
 	        
 	        // on node.js, files are actually paths
 	        var transcriptName = transcript.replace(/.*\//g, "");
+                if (exports.verbose) console.log("transcriptName: " + transcriptName);
+
 	        fd.append("uploadfile1_0", 
 		          fs.createReadStream(transcript).on('error', function(){
 		              onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
@@ -861,6 +871,7 @@
 	        var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
 	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
 	        var labbcat = this;
+                var password = this._password;
 	        fd.getLength(function(something, contentLength) {
 	            var requestParameters = {
 		        port: urlParts.port,
@@ -872,12 +883,15 @@
 		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
 		        }
 	            };
-	            if (labbcat.username && labbcat.password) {
-		        requestParameters.auth = labbcat.username+':'+labbcat._password;
+	            if (labbcat.username && password) {
+		        requestParameters.auth = labbcat.username+':'+password;
 	            }
 	            if (/^https.*/.test(labbcat.baseUrl)) {
 		        requestParameters.protocol = "https:";
 	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+                    }
 	            fd.submit(requestParameters, function(err, res) {
 		        var responseText = "";
 		        if (!err) {
@@ -886,17 +900,23 @@
 			        responseText += buffer;
 		            });
 		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
 			        try {
 			            var response = JSON.parse(responseText);
-			            var result = response.model.result || response.model;
-			            var errors = response.errors;
+			            result = response.model.result || response.model;
+			            errors = response.errors;
 			            if (errors.length == 0) errors = null
-			            var messages = response.messages;
+			            messages = response.messages;
 			            if (messages.length == 0) messages = null
-			            onResult(result, errors, messages, "newTranscript", transcriptName);
 			        } catch(exception) {
-			            onResult(null, ["" +exception+ ": " + labbcat.responseText], [], "newTranscript", transcript.name);
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
 			        }
+			        onResult(result, errors, messages, "newTranscript", transcriptName);
 		            });
 		        } else {
 		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "newTranscript", transcriptName);
@@ -911,10 +931,14 @@
         /**
          * Uploads a new version of an existing transcript.
          * @param {file} transcript The transcript to upload.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a result, 
+         * which is an map of graph IDs (transcript names) to task threadIds. The 
+         * task status can be updated using {@link Labbcat#taskStatus}
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         updateTranscript(transcript, onResult, onProgress) {
+            if (exports.verbose) console.log("updateTranscript(" + transcript + ")");
+            
             // create form
             var fd = new FormData();
             fd.append("todo", "update");
@@ -926,7 +950,7 @@
                 
 	        // create HTTP request
 	        var xhr = new XMLHttpRequest();
-	        xhr.call = "newTranscript";
+	        xhr.call = "updateTranscript";
 	        xhr.id = transcript.name;
 	        xhr.onResult = onResult;
 	        xhr.addEventListener("load", callComplete, false);
@@ -947,7 +971,7 @@
 	        var transcriptName = transcript.replace(/.*\//g, "");
 	        fd.append("uploadfile1_0", 
 		          fs.createReadStream(transcript).on('error', function(){
-		              onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
+		              onResult(null, ["Invalid transcript: " + transcriptName], [], "updateTranscript", transcriptName);
 		          }), transcriptName);
 	        
 	        var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
@@ -967,24 +991,30 @@
 	            var responseText = "";
 	            if (!err) {
 		        res.on('data',function(buffer) {
-		            console.log('data ' + buffer);
+		            //console.log('data ' + buffer);
 		            responseText += buffer;
 		        });
 		        res.on('end',function(){
+                            if (exports.verbose) console.log("response: " + responseText);
+	                    var result = null;
+	                    var errors = null;
+	                    var messages = null;
 		            try {
 			        var response = JSON.parse(responseText);
-			        var result = response.model.result || response.model;
-			        var errors = response.errors;
+			        result = response.model.result || response.model;
+			        errors = response.errors;
 			        if (errors.length == 0) errors = null
-			        var messages = response.messages;
+			        messages = response.messages;
 			        if (messages.length == 0) messages = null
-			        onResult(result, errors, messages, "newTranscript", transcriptName);
+;
 		            } catch(exception) {
-			        onResult(null, ["" +exception+ ": " + this.responseText], [], "newTranscript", transcript.name);
+			        result = null
+                                errors = ["" +exception+ ": " + labbcat.responseText];
+                                messages = [];
 		            }
-		        });
+			    onResult(result, errors, messages, "updateTranscript", transcriptName)		        });
 	            } else {
-		        onResult(null, ["" +err+ ": " + this.responseText], [], "newTranscript", transcriptName);
+		        onResult(null, ["" +err+ ": " + this.responseText], [], "updateTranscript", transcriptName);
 	            }
                     
 	            if (res) res.resume();
@@ -995,7 +1025,7 @@
         /**
          * Delete a transcript.
          * @param {string} id ID of the transcript.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteTranscript(id, onResult) {
             this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
@@ -1009,10 +1039,11 @@
         
         /**
          * Gets list of tasks.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * result, which is an map of task IDs to statuses.
          */
         getTasks(onResult) {
-            this.createRequest("getTasks", null, onResult, this.baseUrl + "threads").send();
+            this.createRequest("threads", null, onResult, this.baseUrl).send();
         }
         
         /**
@@ -1021,13 +1052,39 @@
          * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         taskStatus(id, onResult) {
-            this.createRequest("taskStatus", { id : id, threadId : id }, onResult, this.baseUrl + "thread").send();
+            this.createRequest("thread", { id : id, threadId : id }, onResult, this.baseUrl).send();
+        }
+
+        /**
+         * Wait for the given task to finish.
+         * @param {string} threadId
+         * @param {int} maxSeconds The maximum time to wait for the task, or 0 for forever.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: The final task status. To determine whether
+         * the task finished or waiting timed out, check <var>result.running</var>, which
+         * will be false if the task finished.
+         */
+        waitForTask(threadId, maxSeconds, onResult) {
+            if (exports.verbose) console.log("waitForTask("+threadId+", "+maxSeconds+")");
+            const labbcat = this;
+            this.taskStatus(threadId, (thread, errors, messages)=> {
+                const waitTimeMS = thread && thread.refreshSeconds?
+                      thread.refreshSeconds*1000 : 2000;
+                if (thread.running && maxSeconds > waitTimeMS/1000) {
+                    setTimeout(()=>labbcat.waitForTask(
+                        threadId, maxSeconds - waitTimeMS/1000, onResult), waitTimeMS);
+                } else {
+                    if (onResult) {
+                        onResult(thread, errors, messages);
+                    }
+                }
+            });
         }
 
         /**
          * Releases a finished a task so it no longer uses resources on the server.
          * @param {string} id ID of the task.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param {resultCallback} onResult Invoked when the request has completed.
          */
         releaseTask(id, onResult) {
             this.createRequest("releaseTask", { id : id, threadId : id, command : "release" }, onResult, this.baseUrl + "threads").send();
