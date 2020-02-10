@@ -709,7 +709,7 @@
          * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
          * @param graph The graph to save.
          * @param {resultCallback} onResult Invoked when the request has returned a 
-         * <var>result</var> which will be:  true if changes were saved, false if there
+         * <var>result</var> which will be: true if changes were saved, false if there
          * were no changes to save.
          */
         saveGraph(graph, onResult) { // TODO
@@ -1041,6 +1041,7 @@
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteTranscript(id, onResult) {
+            if (exports.verbose) console.log("deleteTranscript(" + id + ")");
             this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
         }
         
@@ -1050,6 +1051,7 @@
          * result, which is an map of task IDs to statuses.
          */
         getTasks(onResult) {
+            if (exports.verbose) console.log("getTasks()");
             this.createRequest("threads", null, onResult, this.baseUrl).send();
         }
         
@@ -1089,17 +1091,329 @@
         }
 
         /**
-         * Releases a finished a task so it no longer uses resources on the server.
+         * Releases a finished task so it no longer uses resources on the server.
          * @param {string} id ID of the task.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         releaseTask(id, onResult) {
-            this.createRequest("releaseTask", { id : id, threadId : id, command : "release" }, onResult, this.baseUrl + "threads").send();
+            if (exports.verbose) console.log("releaseTask("+threadId+")");
+            this.createRequest("threads", {
+                threadId : id,
+                command : "release"
+            }, onResult, this.baseUrl).send();
         }
         
-        // TODO search(pattern, participantId=NULL, main.participant=TRUE)
-        // TODO getMatches(threadId, words.context=0)
-        // TODO getMatchAnnotations(matchIds, layerIds, targetOffset=0, annotationsPerLayer=1)
+        /**
+         * Cancels a running task.
+         * @param threadId The ID of the task.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        cancelTask(threadId, onResult) {
+            if (exports.verbose) console.log("cancelTask("+threadId+")");
+            this.createRequest("threads", {
+                threadId : threadId,
+                command : "cancel"
+            }, onResult, this.baseUrl).send();
+        }
+        
+        /**
+         * Searches for tokens that match the given pattern.
+         * <p> The <var>pattern</var> should match the structure of the search matrix in the
+         * browser interface of LaBB-CAT. This is a JSON object with one attribute called
+         * <q>columns</q>, which is an array of JSON objects.
+         * <p>Each element in the <q>columns</q> array contains am JSON object named
+         * <q>layers</q>, whose value is a JSON object for patterns to match on each layer, and
+         * optionally an element named <q>adj</q>, whose value is a number representing the
+         * maximum distance, in tokens, between this column and the next column - if <q>adj</q>
+         * is not specified, the value defaults to 1, so tokens are contiguous.
+         * Each element in the <q>layers</q> JSON object is named after the layer it matches, and
+         * the value is a named list with the following possible attributes:
+         * <dl>
+         *  <dt>pattern</dt> <dd>A regular expression to match against the label</dd>
+         *  <dt>min</dt> <dd>An inclusive minimum numeric value for the label</dd>
+         *  <dt>max</dt> <dd>An exclusive maximum numeric value for the label</dd>
+         *  <dt>not</dt> <dd>TRUE to negate the match</dd>
+         *  <dt>anchorStart</dt> <dd>TRUE to anchor to the start of the annotation on this layer
+         *     (i.e. the matching word token will be the first at/after the start of the matching
+         *     annotation on this layer)</dd>
+         *  <dt>anchorEnd</dt> <dd>TRUE to anchor to the end of the annotation on this layer
+         *     (i.e. the matching word token will be the last before/at the end of the matching
+         *     annotation on this layer)</dd>
+         *  <dt>target</dt> <dd>TRUE to make this layer the target of the search; the results will
+         *     contain one row for each match on the target layer</dd>
+         * </dl>
+         *
+         * <p>Examples of valid pattern objects include:
+         * <pre>// words starting with 'ps...'
+         * const pattern1 = {
+         *     "columns" : [
+         *         {
+         *             "layers" : {
+         *                 "orthography" : {
+         *                     "pattern" : "ps.*"
+         *                 }
+         *             }
+         *         }
+         *     ]};
+         * 
+         * // the word 'the' followed immediately or with one intervening word by
+         * // a hapax legomenon (word with a frequency of 1) that doesn't start with a vowel
+         * const pattern2 = {
+         *     "columns" : [
+         *         {
+         *             "layers" : {
+         *                 "orthography" : {
+         *                     "pattern" : "the"
+         *                 }
+         *             }
+         *             "adj" : 2 },
+         *         {
+         *             "layers" : {
+         *                 "phonemes" : {
+         *                     "not" : true,
+         *                     "pattern" : "[cCEFHiIPqQuUV0123456789~#\\$@]."}
+         *                 "frequency" {
+         *                     "max" : "2"
+         *                 }
+         *             }
+         *         }
+         *     ]};
+         * </pre>
+         *
+         * For ease of use, the function will also accept the following abbreviated forms:
+         * <pre>
+         * // a single list representing a 'one column' search, 
+         * // and string values, representing regular expression pattern matching
+         * const pattern3 = { orthography : "ps.*" };
+         *
+         * // a list containing the columns (adj defaults to 1, so matching tokens are contiguous)
+         * const pattrn4 = [{
+         *     orthography : "the"
+         * }, {
+         *     phonemes : {
+         *         not : true,
+         *         pattern : "[cCEFHiIPqQuUV0123456789~#\\$@]." },
+         *     frequency : {
+         *         max = "2" }
+         * }];
+         * </pre>
+         * @param {object} pattern An object representing the pattern to search for, which
+         * mirrors the Search Matrix in the browser interface.
+         * @param {string[]} participantIds An optional list of participant IDs to search
+         * the utterances of. If not null, all utterances in the corpus will be searched.
+         * @param mainParticipant true to search only main-participant utterances, false to
+         * search all utterances. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An object with one attribtue, "threadId",
+         * which identifies the resulting task, which can be passed to 
+         * {@link Labbcat#getMatches}, {@link Labbcat#taskStatus}, 
+         * {@link Labbcat#waitForTask}, etc.
+         */
+        search(pattern, participantIds, mainParticipant, onResult) {
+            if (exports.verbose) {
+                console.log("search("+JSON.stringify(pattern)
+                            +", "+JSON.stringify(mainParticipant)+", "+mainParticipant+")");
+            }
+
+            // first normalize the pattern...
+
+            // if pattern isn't a list with a "columns" element, wrap a list around it
+            if (!pattern.columns) pattern = { columns : pattern };
+
+            // if pattern.columns isn't an array wrap an array list around it
+            if (!(pattern.columns instanceof Array)) pattern.columns = [ pattern.columns ];
+
+            // columns contain lists with no "layers" element, wrap a list around them
+            for (let c = 0; c < pattern.columns.length; c++) {
+                if (!("layers" in pattern.columns[c])) {
+                    pattern.columns[c] = { layers : pattern.columns[c] };
+                }
+            } // next column
+
+            // convert layer:string to layer : { pattern:string }
+            for (let c = 0; c < pattern.columns.length; c++) { // for each column
+                for (let l in pattern.columns[c].layers) { // for each layer in the column
+                    // if the layer value isn't an object
+                    if (typeof pattern.columns[c].layers[l] == "string") {
+                        // wrap a list(pattern=...) around it
+                        pattern.columns[c].layers[l] = { pattern : pattern.columns[c].layers[l] };
+                    } // value isn't a list
+                } // next layer
+            } // next column
+
+            const parameters = {
+                command : "search",
+                searchJson : JSON.stringify(pattern),
+                words_context : 0
+            }
+            if (mainParticipant) parameters.only_main_speaker = true;
+            if (participantIds) parameters.participant_id = participantIds;
+
+            this.createRequest("search", parameters, onResult, this.baseUrl).send();
+        }
+        
+        /**
+         * Gets a list of tokens that were matched by {@link Labbcat#search}.
+         * <p>If the task is still running, then this function will wait for it to finish.
+         * <p>This means calls can be stacked like this:
+         *  <pre>const matches = labbcat.getMatches(
+         *     labbcat.search(
+         *        {"orthography", "and"},
+         *        participantIds, true), 1);</pre>
+         * @param {string} threadId A task ID returned by {@link Labbcat#search}.
+         * @param {int} [wordsContext=0] Number of words context to include in the <q>Before
+         * Match</q> and <q>After Match</q> columns in the results.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An object with two attributes:
+         * <dl>
+         *  <dt>name</dt><dd>The name of the search results collection</dd>
+         *  <dt>matches</dt><dd>A list of IDs that can be used to identify
+         *   utterances/tokens that were matched by {@link Labbcat#search}</dd> 
+         * </dl>
+         */
+        getMatches(threadId, wordsContext, onResult) {
+            if (exports.verbose) console.log("getMatches("+threadId+", "+wordsContext+")");
+            wordsContext = wordsContext || 0;
+            
+            this.createRequest("resultsStream", {
+                threadId : threadId,
+                "words_context" : wordsContext
+            }, onResult, this.baseUrl).send();
+        }
+        
+        /**
+         * Gets annotations on selected layers related to search results returned by a previous
+         * call to {@link Labbcat#getMatches}.
+         * @param {string[]} matchIds A list of MatchIds. 
+         * @param {string[]} layerIds A list of layer IDs.
+         * @param {int} [targetOffset=0] The distance from the original target of the match, e.g.
+         * <ul>
+         *  <li>0 - find annotations of the match target itself</li>
+         *  <li>1 - find annotations of the token immediately <em>after</em> match target</li>
+         *  <li>-1 - find annotations of the token immediately <em>before</em> match target</li>
+         * </ul>
+         * @param {int} [annotationsPerLayer=1] The number of annotations on the given layer to
+         * retrieve. In most cases, there's only one annotation available. However, tokens may,
+         * for example, be annotated with `all possible phonemic transcriptions', in which case
+         * using a value of greater than 1 for this parameter provides other phonemic
+         * transcriptions, for tokens that have more than one.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An array of arrays of Annotations, of
+         * dimensions <var>matchIds</var>.length &times; (<var>layerIds</var>.length *
+         * <var>annotationsPerLayer</var>). The first index matches the corresponding
+         * index in <var>matchIds</var>. 
+         */
+        getMatchAnnotations(matchIds, layerIds, targetOffset, annotationsPerLayer, onResult) {
+            if (typeof targetOffset === "function") { // (matchIds, layerIds, onResult)
+                onResult = targetOffset;
+                targetOffset = null;
+                annotationsPerLayer = null;
+            } else if (typeof annotationsPerLayer === "function") {
+                // (matchIds, layerIds, targetOffset, onResult)
+                onResult = annotationsPerLayer;
+                annotationsPerLayer = null;
+            }
+            
+            if (exports.verbose) {
+                console.log("getMatchAnnotations("+JSON.stringify(matchIds)+", "
+                            +JSON.stringify(layerIds)+", "+targetOffset+", "
+                            +annotationsPerLayer+")");
+            }
+            targetOffset = targetOffset || 0;
+            annotationsPerLayer = annotationsPerLayer || 1;
+
+            // create form
+            var fd = new FormData();
+            fd.append("targetOffset", targetOffset);
+            fd.append("annotationsPerLayer", annotationsPerLayer);
+            fd.append("csvFieldDelimiter", ",");
+            fd.append("targetColumn", "0");
+            fd.append("copyColumns", "false");
+            for (let layerId of layerIds ) fd.append("layer", layerId);
+
+            // getMatchAnnotations expects an uploaded CSV file for MatchIds, 
+            const uploadfile = "MatchId\n"+matchIds.join("\n");
+            fd.append("uploadfile", uploadfile, {
+                filename: 'uploadfile.csv',
+                contentType: 'text/csv',
+                knownLength: uploadfile.length
+            });
+
+            if (!runningOnNode) {	
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "newTranscript";
+	        xhr.id = transcript.name;
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);	        
+	        xhr.open("POST", this.baseUrl + "api/getMatchAnnotations");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+	        var urlParts = parseUrl(this.baseUrl + "api/getMatchAnnotations");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username && password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+			        onResult(result, errors, messages, "getMatchAnnotations");
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "getMatchAnnotations");
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
         // TODO getSoundFragments(id, start, end, sampleRate = NULL)
         // TODO getFragments(id, start, end, layerIds, mimeType = "text/praat-textgrid")
         

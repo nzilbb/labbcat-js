@@ -21,8 +21,8 @@ const password = "labbcat";
 var corpus = null;
 
 describe("#Labbcat", function() { // not an arrow function because we want to this.timeout...
-    // waitForTask can take a few seconds
-    this.timeout(7000);
+    // waitForTask and getMatches can take a few seconds
+    this.timeout(15000);
     
     before((done)=>{
         corpus = new labbcat.Labbcat(baseUrl, username, password);
@@ -109,7 +109,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
             }
         });
    });
-
+    
     it("implements newTranscript, updateTranscript, and deleteGraph", (done)=>{
         const transcriptName = "labbcat-js.test.txt";
         const transcriptPath = "test/" + transcriptName;
@@ -219,75 +219,185 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
             done();
         });
     });
+    
+    it("fails with search and invalid pattern", (done)=>{
+        corpus.search({}, null, false, (response, errors, messages)=>{
+            assert.isNotNull(errors, JSON.stringify(errors))
+            done();
+        });
+    });
+    
+    it("implements search and cancelTask", (done)=>{
+        // start a long-running search - all words
+        const pattern = {"columns" : [{
+            "layers" : {
+                "orthography" : { "pattern" : ".*"}}}]};
+        
+        corpus.search(pattern, null, false, (response, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors))
+            assert.isNotNull(response, JSON.stringify(errors))
+            assert.isObject(response, JSON.stringify(errors))
+            const threadId = response.threadId
+            assert.isNotNull(threadId);
+            
+            corpus.cancelTask(threadId, (result, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
 
-   // @Test(expected = StoreException.class) public void searchInvalidPattern()
-   //    String threadId = corpus.search(new JSONObject(), null, false);
-   // }
+                setTimeout(()=>{ // wait a second to give it a chance to stop
+                    // ensure task is no longer running
+                    corpus.taskStatus(threadId, (task, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors));
+                        assert.isNotNull(task);
+                        assert.isFalse(task.running);
+                        corpus.releaseTask(threadId);
+                        done();
+                    });
+                }, 1000);
+            });
+        });
+    });
+    
+    it("implements search, getMatches and getMatchAnnotations", (done)=>{
+        // get a participant ID to use
+        corpus.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some participant IDs exist");
+            const participantId = ids[0];
 
-   // it("implements searchAndCancelTask", (done)=>{
-   //    // start a long-running search - all words
-   //    JSONObject pattern = new JSONObject()
-   //       .put("columns", new JSONArray()
-   //            .put(new JSONObject()
-   //                 .put("layers", new JSONObject()
-   //                      .put("orthography", new JSONObject()
-   //                           .put("pattern", ".*")))));
-   //    String threadId = corpus.search(pattern, null, false);
-   //    corpus.cancelTask(threadId);
-   // }
+            // all instances of "and"
+            const pattern = {"columns" : [{
+                "layers" : {
+                    "orthography" : { "pattern" : "i"}}}]};
+            corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
+                assert.isNotNull(response)
+                assert.isObject(response)
+                const threadId = response.threadId
 
-   // it("implements searchAndGetMatchesAndGetMatchAnnotations", (done)=>{
-   //    // get a participant ID to use
-   //    String[] ids = corpus.getParticipantIds();
-   //    assertTrue("getParticipantIds: Some IDs are returned",
-   //               ids.length > 0);
-   //    String[] participantId = { ids[0] };
+                corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    
+                    // if the task is still running, it's taking too long, so cancel it
+                    if (task.running) corpus.cancelTask(threadId);
+                    assert.isFalse(task.running, "Search finished in a timely manner");
 
-   //    // all instances of "and"
-   //    JSONObject pattern = new PatternBuilder().addMatchLayer("orthography", "and").build();
-   //    String threadId = corpus.search(pattern, participantId, false);
-   //    try
-   //    {
-   //       TaskStatus task = corpus.waitForTask(threadId, 30);
-   //       // if the task is still running, it's taking too long, so cancel it
-   //       if (task.getRunning()) try { corpus.cancelTask(threadId); } catch(Exception exception) {}
-   //       assertFalse("Search task finished in a timely manner",
-   //                   task.getRunning());
-         
-   //       Match[] matches = corpus.getMatches(threadId, 2);
-   //       if (matches.length == 0)
-   //       {
-   //          console.log(
-   //             "getMatches: No matches were returned, cannot test getMatchAnnotations");
-   //       }
-   //       else
-   //       {
-   //          int upTo = Math.min(10, matches.length);
-   //          // for (int m = 0; m < upTo; m++) console.log("Match: " + matches[m]);
+                    corpus.getMatches(threadId, 2, (result, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(result)
+                        assert.isNotNull(result.name)
+                        const matches = result.matches;
+                        assert.isArray(result.matches)
+                        assert.isAtLeast(matches.length, 1,
+                                         "getMatches: No matches were returned,"
+                                         +" cannot test getMatchAnnotations");
+                        
+                        const layerIds = [ "orthography" ];
+                        const matchIds = matches.map(match => match.MatchId);
+                        corpus.getMatchAnnotations(
+                            matchIds, layerIds, 0, 1, (annotations, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors))
+                                assert.isNotNull(annotations)
+                                assert.isArray(annotations, JSON.stringify(annotations));
+                                
+                                assert.equal(matchIds.length, annotations.length,
+                                             "annotations array is same size as matches array");
+                                assert.equal(1, annotations[0].length,
+                                             "row arrays are the right size");
 
-   //          String[] layerIds = { "orthography" };
-   //          Annotation[][] annotations = corpus.getMatchAnnotations(matches, layerIds, 0, 1);
-   //          assertEquals("annotations array is same size as matches array",
-   //                       matches.length, annotations.length);
-   //          assertEquals("row arrays are the right size",
-   //                       1, annotations[0].length);
+                                let annotation = annotations[0][0];
+                                assert.containsAllKeys(
+                                    annotation, ["id", "label", "startId", "endId"],
+                                    "Looks like an annotation");
+                                
+                                corpus.releaseTask(threadId);
+                                done();
+                            });
+                    });
+                });
+            });
+        });
+    });
+    
+    it("implements abbreviated search patterns", (done)=>{
+        // get a participant ID to use
+        corpus.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some participant IDs exist");
+            const participantId = ids[0];
+            
+            // all instances of "and"
+            const fullPattern = {"columns" : [{
+                "layers" : {
+                    "orthography" : { "pattern" : "i"}}}]};
+            corpus.search(fullPattern, [ participantId ], false, (response, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
+                assert.isNotNull(response)
+                assert.isObject(response)
+                const abbreviatedThreadId = response.threadId
 
-   //          layerIds[0] = "invalid layer ID";
-   //          try
-   //          {
-   //             corpus.getMatchAnnotations(matches, layerIds, 0, 1);
-   //             fail("getMatchAnnotations with invalid layerId should fail");
-   //          }
-   //          catch(StoreException exception)
-   //          {}
-   //       }
-   //    }
-   //    finally
-   //    {
-   //       corpus.releaseTask(threadId);
-   //    }
-   // }
+                corpus.waitForTask(abbreviatedThreadId, 30, (task, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    
+                    // if the task is still running, it's taking too long, so cancel it
+                    if (task.running) corpus.cancelTask(abbreviatedThreadId);
+                    assert.isFalse(task.running, "Search finished in a timely manner");
 
+                    corpus.getMatches(abbreviatedThreadId, 2, (result, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(result)
+                        assert.isNotNull(result.name)
+                        const unabbreviatedMatches = result.matches;
+                        assert.isArray(unabbreviatedMatches)
+
+                        // try again with abbreviated syntax...
+                        
+                        // all instances of "and"
+                        const abbreviatedPattern = {"orthography" : "i"};
+                        corpus.search(
+                            abbreviatedPattern, [ participantId ], false,
+                            (response, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors))
+                                assert.isNotNull(response)
+                                assert.isObject(response)
+                                const unabbreviatedThreadId = response.threadId
+                                
+                                corpus.waitForTask(
+                                    unabbreviatedThreadId, 30, (task, errors, messages)=>{
+                                        assert.isNull(errors, JSON.stringify(errors));
+                                        
+                                        // if the task is still running, it's taking too long, so cancel it
+                                        if (task.running) corpus.cancelTask(unabbreviatedThreadId);
+                                        assert.isFalse(
+                                            task.running,
+                                            "Second search finished in a timely manner");
+                                        
+                                        corpus.getMatches(
+                                            unabbreviatedThreadId, 2, (result, errors, messages)=>{
+                                                assert.isNull(errors, JSON.stringify(errors))
+                                                assert.isNotNull(result)
+                                                assert.isNotNull(result.name)
+                                                const abbreviatedMatches = result.matches;
+                                                assert.isArray(abbreviatedMatches)
+
+                                                assert.equal(
+                                                    abbreviatedMatches.length,
+                                                    unabbreviatedMatches.length,
+                                                    "abbreviated an unabbreviated patterns return the same number of results");
+
+                                                // be tidy
+                                                corpus.releaseTask(abbreviatedThreadId);
+                                                corpus.releaseTask(unabbreviatedThreadId);
+
+                                                done();
+                                            });
+                                    });
+                            });
+                    });
+                });
+            });
+        });
+    });
+    
    // it("implements getSoundFragments", (done)=>{
    //    // get a participant ID to use
    //    String[] ids = corpus.getParticipantIds();
