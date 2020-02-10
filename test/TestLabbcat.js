@@ -22,7 +22,7 @@ var corpus = null;
 
 describe("#Labbcat", function() { // not an arrow function because we want to this.timeout...
     // waitForTask and getMatches can take a few seconds
-    this.timeout(15000);
+    this.timeout(30000);
     
     before((done)=>{
         corpus = new labbcat.Labbcat(baseUrl, username, password);
@@ -333,16 +333,16 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                 assert.isNull(errors, JSON.stringify(errors))
                 assert.isNotNull(response)
                 assert.isObject(response)
-                const abbreviatedThreadId = response.threadId
+                const unabbreviatedThreadId = response.threadId
 
-                corpus.waitForTask(abbreviatedThreadId, 30, (task, errors, messages)=>{
+                corpus.waitForTask(unabbreviatedThreadId, 30, (task, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors));
                     
                     // if the task is still running, it's taking too long, so cancel it
-                    if (task.running) corpus.cancelTask(abbreviatedThreadId);
+                    if (task.running) corpus.cancelTask(unabbreviatedThreadId);
                     assert.isFalse(task.running, "Search finished in a timely manner");
 
-                    corpus.getMatches(abbreviatedThreadId, 2, (result, errors, messages)=>{
+                    corpus.getMatches(unabbreviatedThreadId, 2, (result, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(result)
                         assert.isNotNull(result.name)
@@ -359,20 +359,20 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 assert.isNull(errors, JSON.stringify(errors))
                                 assert.isNotNull(response)
                                 assert.isObject(response)
-                                const unabbreviatedThreadId = response.threadId
+                                const abbreviatedThreadId = response.threadId
                                 
                                 corpus.waitForTask(
-                                    unabbreviatedThreadId, 30, (task, errors, messages)=>{
+                                    abbreviatedThreadId, 30, (task, errors, messages)=>{
                                         assert.isNull(errors, JSON.stringify(errors));
                                         
                                         // if the task is still running, it's taking too long, so cancel it
-                                        if (task.running) corpus.cancelTask(unabbreviatedThreadId);
+                                        if (task.running) corpus.cancelTask(abbreviatedThreadId);
                                         assert.isFalse(
                                             task.running,
                                             "Second search finished in a timely manner");
                                         
                                         corpus.getMatches(
-                                            unabbreviatedThreadId, 2, (result, errors, messages)=>{
+                                            abbreviatedThreadId, 2, (result, errors, messages)=>{
                                                 assert.isNull(errors, JSON.stringify(errors))
                                                 assert.isNotNull(result)
                                                 assert.isNotNull(result.name)
@@ -385,9 +385,9 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                     "abbreviated an unabbreviated patterns return the same number of results");
 
                                                 // be tidy
+                                                corpus.releaseTask(unabbreviatedThreadId); 
                                                 corpus.releaseTask(abbreviatedThreadId);
-                                                corpus.releaseTask(unabbreviatedThreadId);
-
+                                               
                                                 done();
                                             });
                                     });
@@ -398,58 +398,71 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
         });
     });
     
-   // it("implements getSoundFragments", (done)=>{
-   //    // get a participant ID to use
-   //    String[] ids = corpus.getParticipantIds();
-   //    assertTrue("getParticipantIds: Some IDs are returned",
-   //               ids.length > 0);
-   //    String[] participantId = { ids[0] };      
+   it("implements getSoundFragments", (done)=>{
+        // get a participant ID to use
+        corpus.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some participant IDs exist");
+            const participantId = ids[0];
+            
+            // all instances of "and"
+            const pattern = {"orthography" : "i"};
+            corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
+                assert.isNotNull(response)
+                assert.isObject(response)
+                const threadId = response.threadId
 
-   //    // all instances of "and"
-   //    JSONObject pattern = new PatternBuilder().addMatchLayer("orthography", "and").build();
-   //    String threadId = corpus.search(pattern, participantId, false);
-   //    try
-   //    {
-   //       TaskStatus task = corpus.waitForTask(threadId, 30);
-   //       // if the task is still running, it's taking too long, so cancel it
-   //       if (task.getRunning()) try { corpus.cancelTask(threadId); } catch(Exception exception) {}
-   //       assertFalse("Search task finished in a timely manner",
-   //                   task.getRunning());
-         
-   //       Match[] matches = corpus.getMatches(threadId, 2);
-   //       if (matches.length == 0)
-   //       {
-   //          console.log(
-   //             "getMatches: No matches were returned, cannot test getSoundFragments");
-   //       }
-   //       else
-   //       {
-   //          int upTo = Math.min(5, matches.length);
-   //          Match[] subset = Arrays.copyOfRange(matches, 0, upTo);
-
-   //          File[] wavs = corpus.getSoundFragments(subset, null, null);
-   //          try {
-   //             assertEquals("files array is same size as matches array",
-   //                          subset.length, wavs.length);
-               
-   //             for (int m = 0; m < upTo; m++) {
-   //                assertNotNull("Non-null sized file: " + subset[m],
-   //                              wavs[m]);
-   //                assertTrue("Non-zero sized file: " + subset[m],
-   //                           wavs[m].length() > 0);
-   //                // console.log(wavs[m].getPath());
-   //             }
-   //          } finally {
-   //             for (File wav : wavs) if (wav != null) wav.delete(); 
-   //          }
-   //       }
-   //    }
-   //    finally
-   //    {
-   //       corpus.releaseTask(threadId);
-   //    }
-   // }
-
+                corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    
+                    // if the task is still running, it's taking too long, so cancel it
+                    if (task.running) corpus.cancelTask(threadId);
+                    assert.isFalse(task.running, "Search finished in a timely manner");
+                    
+                    corpus.getMatches(threadId, (result, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(result)
+                        assert.isNotNull(result.name)
+                        const matches = result.matches;
+                        assert.isAtLeast(matches.length, 0,
+                                         "No matches were returned, cannot test getSoundFragments");
+                        
+                        corpus.releaseTask(threadId);
+                        
+                        const upTo = Math.min(5, matches.length);
+                        const subset = matches.slice(0, upTo);
+                        // convert MatchIds to arrays of individual Ids
+                        const graphIds = subset.map(match => match.Transcript);
+                        const startOffsets = subset.map(match => match.Line);
+                        const endOffsets = subset.map(match => match.LineEnd);
+                        corpus.getSoundFragments(
+                            graphIds, startOffsets, endOffsets, null, null,
+                            (wavs, errors, messages)=>{
+                                assert.equal(subset.length, wavs.length,
+                                             "files array is same size as matches array");
+                                
+                                for (let m = 0; m < upTo; m++) {
+                                    console.log(wavs[m]);
+                                    assert.isNotNull(wavs[m],
+                                                     "Non-null file: " + subset[m]);
+                                    assert.isTrue(fs.existsSync(wavs[m]),
+                                                  "File exists: " + subset[m]);
+                                    assert.isAbove(fs.statSync(wavs[m]).size, 0,
+                                                   "Non-zero sized file: " + subset[m]);
+                                    
+                                    // be tidy
+                                    fs.unlinkSync(wavs[m]);
+                                }
+                                
+                                done();
+                            });
+                    });
+                });
+            });
+        });
+   });
+    
    // it("implements getFragments", (done)=>{
    //    // get a participant ID to use
    //    String[] ids = corpus.getParticipantIds();

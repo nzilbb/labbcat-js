@@ -1272,6 +1272,10 @@
          * </dl>
          */
         getMatches(threadId, wordsContext, onResult) {
+            if (typeof wordsContext === "function") { // (threadId, onResult)
+                onResult = wordsContext;
+                wordsContext = null;
+            }
             if (exports.verbose) console.log("getMatches("+threadId+", "+wordsContext+")");
             wordsContext = wordsContext || 0;
             
@@ -1414,14 +1418,224 @@
 	        }); // got length
             } // runningOnNode
         }
-        // TODO getSoundFragments(id, start, end, sampleRate = NULL)
+        
+        /**
+         * Downloads WAV sound fragments.
+         * @param {string[]} graphIds A list of graph IDs (transcript names).
+         * @param {float[]} startOffsets A list of start offsets, with one element for each
+         * element in <var>graphIds</var>. 
+         * @param {float[]} endOffsets A list of end offsets, with one element for each element in
+         * <var>graphIds</var>. 
+         * @param {int} [sampleRate] The desired sample rate, or null for no preference.
+         * @param {string} [dir] A directory in which the files should be stored, or null
+         * for a temporary folder.  If specified, and the directory doesn't exist, it will
+         * be created.  
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of WAV files. If <var>dir</var> is
+         * null, these files will be stored under the system's temporary directory, so
+         * once processing is finished, they should be deleted by the caller, or moved to
+         * a more permanent location.  
+         */
+        getSoundFragments(graphIds, startOffsets, endOffsets, sampleRate, dir, onResult) {
+            if (graphIds.length != startOffsets.length || graphIds.length != endOffsets.length) {
+                onResult && onResult(null, [
+                    "graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
+                        +"), and endOffsets ("+endOffsets.length+") must be arrays of equal size."],
+                                     [], "getSoundFragments");
+                return;
+            }
+
+            let fragments = [];
+            let errors = [];
+            
+            // get fragments individually to ensure elements in result map 1:1 to element
+            // in graphIds
+	    const url = this.baseUrl + "soundfragment";
+            const lc = this;
+            const nextFragment = function(i) {
+                if (i < graphIds.length) { // next file
+	            const xhr = new XMLHttpRequest();
+	            let queryString = "?id="+encodeURIComponent(graphIds[i])
+                        +"&start="+encodeURIComponent(startOffsets[i])
+                        +"&end="+encodeURIComponent(endOffsets[i]);
+                    if (sampleRate) queryString += "&sampleRate="+sampleRate;
+                    if (exports.verbose) {
+                        console.log(method + ": "+url + queryString + " as " + lc.username);
+                    }
+	            xhr.open("GET", url + queryString, true);
+	            if (lc.username) {
+	                xhr.setRequestHeader(
+                            "Authorization", "Basic " + btoa(lc.username + ":" + lc._password))
+ 	            }
+	            xhr.setRequestHeader("Accept", "audio/wav");
+	            xhr.addEventListener("error", function(evt) {
+                        if (exports.verbose) {
+                            console.log("getSoundFragments "+i+" ERROR: "+this.responseText);
+                        }
+                        errors.push("Could not get fragment "+i+": "+this.responseText);
+                        fragments.push(null); // add a blank element
+                        nextFragment(i+1);
+                    }, false);
+	            xhr.addEventListener("load", function(evt) {
+                        if (exports.verbose) {
+                            console.log("getSoundFragments "+i+" loaded.");
+                        }
+                        // save the result to a file
+                        let fileName = graphIds[i]+"__"+startOffsets[i]+"-"+endOffsets[i]+".wav";
+                        let contentDisposition = this.getResponseHeader("content-disposition");
+                        if (contentDisposition != null) {
+                            // something like attachment; filename=blah.wav
+                            const equals = contentDisposition.indexOf("=");
+                            if (equals > 0) {
+                                fileName = contentDisposition.substring(equals + 1);
+                            }
+                        }
+                        
+                        fs.writeFile(fileName, this.response, function(err) {
+                            if (err) {
+                                if (exports.verbose) {
+                                    console.log("getSoundFragments "+i+" SAVE ERROR: "+err);
+                                }
+                                errors.push("Could not save fragment "+i+": "+err);
+                            }
+                            // add the file name to the result
+                            fragments.push(fileName); // add a blank element
+                            nextFragment(i+1);
+                        });
+                    }, false);
+                    xhr.send();
+                } else { // there are no more triples
+                    if (onResult) {
+                        onResult(fragments, errors.length?errors:null, [], "getSoundFragments");
+                    }
+                }
+            }
+            nextFragment(0);
+        }
+        
         // TODO getFragments(id, start, end, layerIds, mimeType = "text/praat-textgrid")
         
     } // class Labbcat
+
+    /**
+     * Interpreter for match ID strings.
+     * <p>The schema is:</p>
+     * <ul>
+     * 	<li>
+     * 		when there's a defining annotation UID:<br>
+     * 		g_<i>ag_id</i>;<em>uid</em><br>
+     * 		e.g. <tt>g_243;em_12_20035</tt></li>
+     * 	<li>
+     * 		when there's anchor IDs:<br>
+     * 		g_<i>ag_id</i>;<em>startuid</em>-<em>enduid</em><br>
+     * 		e.g. <tt>g_243;n_72700-n_72709</tt></li>
+     * 	<li>
+     * 		when there's anchor offsets:<br>
+     * 		g_<i>ag_id</i>;<em>startoffset</em>-<em>endoffset</em><br>
+     * 		e.g. <tt>g_243;39.400-46.279</tt></li>
+     * 	<li>
+     * 		when there's a participant/speaker number, it will be appended:<br>
+     * 		<em>...</em>;p_<em>speakernumber</em><br>
+     * 		e.g.&nbsp;<tt>g_243;n_72700-n_72709;p_76</tt></li>
+     * 	<li>
+     * 		matching subparts can be identified by appending a list of annotation UIDs for insertion into {@link #mMatchAnnotationUids}, the keys being enclosed in square brackets:<br>
+     * 		...;<em>[key]=uid;[key]=uid</em><br>
+     * 		e.g. <samp>g_243;n_72700-n_72709;[0,0]=ew_0_123;[1,0]ew_0_234</samp></li>
+     * 	<li>
+     * 		a target annotation by appending a uid prefixed by <samp>#=</samp>:<br>
+     * 		...;#=<em>uid</em><br>
+     * 		e.g. <samp>g_243;n_72700-n_72709;#=ew_0_123</samp></li>
+     * 	<li>
+     * 		other items (search name or prefix) could then come after all that, and key=value pairs:<br>
+     * 		...;<em>key</em>=<em>value</em><br>
+     * 		e.g.&nbsp;<tt>g_243;n_72700-n_72709;ew_0_123-ew_0_234;prefix=024-;name=the_aeiou</tt></li>
+     * <p>These can be something like:
+     * <ul>
+     * <li><q>g_3;em_11_23;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611</q></li>
+     * <li><q>AgnesShacklock-01.trs;60.897-67.922;prefix=001-</q></li>
+     * <li><q>AgnesShacklock-01.trs;60.897-67.922;m_-1_23-</q></li>
+     * </ul>
+     */
+    class MatchId {
+        /**
+         * String constructor.
+         */
+        constructor(matchId) {
+            this._graphId = null;
+            this._startAnchorId = null;
+            this._endAnchorId = null;
+            this._startOffset = null;
+            this._endOffset = null;
+            this._utteranceId = null;
+            this._targetId = null;
+            this._prefix = null;
+            if (matchId) {
+                const parts = matchId.split(";");
+                this._graphId = parts[0];
+                let intervalPart = null;
+                for (let part of parts) {
+                    if (part.indexOf("-") > 0) {
+                        intervalPart = part;
+                        break;
+                    }
+                } // next part
+                const interval = intervalPart.split("-");
+                if (interval[0].startsWith("n_")) { // anchor IDs
+                    _startAnchorId = interval[0];
+                    _endAnchorId = interval[1];
+                } else { // offsets
+                    _startOffset = parseFloat(interval[0]);
+                    _endOffset = parseFloat(interval[1]);
+                }
+                for (let part of parts) {
+                    if (part.startsWith("prefix=")) {
+                        _prefix = part.substring("prefix=".length);
+                    } else if (part.startsWith("em_") || part.startsWith("m_")) {
+                        _utteranceId = part;
+                    } else if (part.startsWith("#=")) {
+                        _targetId = part.substring("#=".length);
+                    }
+                } // next part
+            } // string was given
+        }
+        /**
+         * The graph identifier.
+         */
+        get graphId() { return this._graphId; }
+        /**
+         * ID of the start anchor.
+         */
+        get startAnchorId() { return this._startAnchorId; }
+        /**
+         * ID of the end anchor.
+         */
+        get endAnchorId() { return this._endAnchorId; }
+        /**
+         * Offset of the start anchor.
+         */
+        get startOffset() { return this._startOffset; }
+        /**
+         * Offset of the end anchor.
+         */
+        get endOffset() { return this._endOffset; }
+        /**
+         * ID of the match utterance.
+         */
+        get utteranceId() { return this._utteranceId; }
+        /**
+         * ID of the match target annotation.
+         */
+        get targetId() { return this._targetId; }
+        /**
+         * Match prefix for fragments.
+         */
+        get prefix() { return this._prefix; }
+    }
     
     exports.GraphStoreQuery = GraphStoreQuery;
     exports.GraphStore = GraphStore;
     exports.Labbcat = Labbcat;
+    exports.MatchId = MatchId;
     exports.verbose = false;
 
 }(typeof exports === 'undefined' ? this.labbcat = {} : exports));
