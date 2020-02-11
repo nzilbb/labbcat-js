@@ -1447,8 +1447,8 @@
          * Downloads WAV sound fragments.
          * <p>For convenience, the first three arguments, <var>graphIds</var>, 
          * <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
-         * array of match objects of the kind returned by {@link Labbcat#getMatches} -
-         * e.g.
+         * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
+         * which case the start/end times are the utterance boundaries - e.g.
          * <pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
          *   labbcat.getMatchAnnotations(result.matches, sampleRate, dir, (files, e, m) => {
          *       ...
@@ -1603,8 +1603,8 @@
          * Get graph fragments in a specified format.
          * <p>For convenience, the first three arguments, <var>graphIds</var>, 
          * <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
-         * array of match objects of the kind returned by {@link Labbcat#getMatches} -
-         * e.g.
+         * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
+         * which case the start/end times are the utterance boundaries - e.g.
          * <pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
          *   labbcat.getFragments(result.matches, layerIds, mimeType, dir, (files, e, m) => {
          *       ...
@@ -1787,7 +1787,7 @@
      * <ul>
      * <li><q>g_3;em_11_23;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611</q></li>
      * <li><q>AgnesShacklock-01.trs;60.897-67.922;prefix=001-</q></li>
-     * <li><q>AgnesShacklock-01.trs;60.897-67.922;m_-1_23-</q></li>
+     * <li><q>AgnesShacklock-01.trs;60.897-67.922;m_-1_23</q></li>
      * </ul>
      */
     class MatchId {
@@ -1801,6 +1801,7 @@
             this._startOffset = null;
             this._endOffset = null;
             this._utteranceId = null;
+            this._participantId = null;
             this._targetId = null;
             this._prefix = null;
             if (matchId) {
@@ -1808,6 +1809,7 @@
                 this._graphId = parts[0];
                 let intervalPart = null;
                 for (let part of parts) {
+                    if (part == parts[0]) continue;
                     if (part.indexOf("-") > 0) {
                         intervalPart = part;
                         break;
@@ -1815,19 +1817,21 @@
                 } // next part
                 const interval = intervalPart.split("-");
                 if (interval[0].startsWith("n_")) { // anchor IDs
-                    _startAnchorId = interval[0];
-                    _endAnchorId = interval[1];
+                    this._startAnchorId = interval[0];
+                    this._endAnchorId = interval[1];
                 } else { // offsets
-                    _startOffset = parseFloat(interval[0]);
-                    _endOffset = parseFloat(interval[1]);
+                    this._startOffset = parseFloat(interval[0]);
+                    this._endOffset = parseFloat(interval[1]);
                 }
                 for (let part of parts) {
                     if (part.startsWith("prefix=")) {
-                        _prefix = part.substring("prefix=".length);
+                        this._prefix = part.substring("prefix=".length);
                     } else if (part.startsWith("em_") || part.startsWith("m_")) {
-                        _utteranceId = part;
+                        this._utteranceId = part;
+                    } else if (part.startsWith("p_")) {
+                        this._participantId = part;
                     } else if (part.startsWith("#=")) {
-                        _targetId = part.substring("#=".length);
+                        this._targetId = part.substring("#=".length);
                     }
                 } // next part
             } // string was given
@@ -1852,6 +1856,10 @@
          * Offset of the end anchor.
          */
         get endOffset() { return this._endOffset; }
+        /**
+         * ID of the participant.
+         */
+        get participantId() { return this._participantId; }
         /**
          * ID of the match utterance.
          */
