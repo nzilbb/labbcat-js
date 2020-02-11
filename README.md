@@ -8,6 +8,9 @@ from JavaScript.
 
 ## Basic usage
 
+The following example shows how to perform a search and download audio and Praat TextGrids
+for the results.
+
 ```javascript
 const labbcat = require("@nzilbb/labbcat");
 
@@ -61,13 +64,15 @@ corpus.getParticipantIds((ids, errors, messages)=>{
 
 Detailed documentation is available [here](https://nzilbb.github.io/labbcat-js/)
 
-## Running unit tests
+## Developers
+
+### Running unit tests
 
 ```
 npm test
 ```
 
-## Generating documentation
+### Generating documentation
 
 Documentation is generated using *jsdoc*, which you must install first:
 
