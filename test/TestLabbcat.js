@@ -726,7 +726,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                             matches.length, 0,
                             "No matches were returned, cannot test getSoundFragments");
 
-                        console.log("There were " + matches.length + " matches for " + participantId);
+                        //console.log("There were " + matches.length + " matches for " + participantId);
                         
                         corpus.releaseTask(taskId);
 
@@ -740,7 +740,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                              "files array is same size as matches array");
                                 
                                 for (let textgrid of textgrids) {
-                                    console.log(textgrid);
+                                    //console.log(textgrid);
                                     // be tidy
                                     fs.unlinkSync(textgrid);
                                 }
@@ -754,7 +754,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                             "files array is same size as matches");
                                         
                                         for (let wav of wavs) {
-                                            console.log(wav);
+                                            //console.log(wav);
                                             // be tidy
                                             fs.unlinkSync(wav);
                                         }
