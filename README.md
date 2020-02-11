@@ -8,7 +8,7 @@ from JavaScript.
 
 ## Basic usage
 
-```
+```javascript
 const labbcat = require("@nzilbb/labbcat");
 
 const corpus = new labbcat.Labbcat("https://sometld.com", "your username", "your password");
