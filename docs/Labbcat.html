@@ -199,7 +199,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line783">line 783</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line785">line 785</a>
     </li></ul></dd>
     
 
@@ -231,11 +231,11 @@
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>// create LaBB-CAT client
-const labbcat = new <a href="Labbcat.html">Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")</a>;
+const lc = new labbcat.<a href="Labbcat.html">Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")</a>;
 // upload a transcript
 const transcript = "some-transcript.eaf";
 const media = "some-transcript.wav";
-labbcat.newTranscript(
+lc.newTranscript(
     transcript, media, null, "interview", "corpus", episode, 
     (result, errors, messages, call, id)=>{
         console.log("Finished uploading " + transcript);
@@ -324,7 +324,7 @@ labbcat.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line163">line 163</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -391,7 +391,7 @@ labbcat.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line170">line 170</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line172">line 172</a>
     </li></ul></dd>
     
 
@@ -458,7 +458,7 @@ labbcat.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line180">line 180</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line182">line 182</a>
     </li></ul></dd>
     
 
@@ -479,6 +479,161 @@ labbcat.newTranscript(
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="cancelTask"><span class="type-signature"></span>cancelTask<span class="signature">(threadId, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Cancels a running task.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>threadId</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The ID of the task.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has completed.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1113">line 1113</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
             
@@ -639,7 +794,7 @@ labbcat.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line471">line 471</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line473">line 473</a>
     </li></ul></dd>
     
 
@@ -816,7 +971,7 @@ my('utterances').start.offset = 12.345</code></li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line519">line 519</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line521">line 521</a>
     </li></ul></dd>
     
 
@@ -1002,7 +1157,7 @@ labels('who')</code></li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line399">line 399</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line401">line 401</a>
     </li></ul></dd>
     
 
@@ -1181,7 +1336,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line332">line 332</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line334">line 334</a>
     </li></ul></dd>
     
 
@@ -1346,7 +1501,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line751">line 751</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line753">line 753</a>
     </li></ul></dd>
     
 
@@ -1506,7 +1661,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1043">line 1043</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1045">line 1045</a>
     </li></ul></dd>
     
 
@@ -1695,7 +1850,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line608">line 608</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line610">line 610</a>
     </li></ul></dd>
     
 
@@ -1977,7 +2132,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line488">line 488</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line490">line 490</a>
     </li></ul></dd>
     
 
@@ -2143,7 +2298,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line627">line 627</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line629">line 629</a>
     </li></ul></dd>
     
 
@@ -2286,7 +2441,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line288">line 288</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line290">line 290</a>
     </li></ul></dd>
     
 
@@ -2452,7 +2607,361 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line637">line 637</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line639">line 639</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getFragments"><span class="type-signature"></span>getFragments<span class="signature">(graphIds, startOffsets, endOffsets, layerIds, mimeType, dir<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get graph fragments in a specified format.
+<p>For convenience, the first three arguments, <var>graphIds</var>, 
+<var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
+array of match objects of the kind returned by <a href="Labbcat.html#getMatches">Labbcat#getMatches</a>, in
+which case the start/end times are the utterance boundaries - e.g.
+<pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
+  labbcat.getFragments(result.matches, layerIds, mimeType, dir, (files, e, m) => {
+      ...
+  });
+});</pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>graphIds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A list of graph IDs (transcript names).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>startOffsets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;float></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A list of start offsets, with one element for
+each element in <var>graphIds</var>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>endOffsets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;float></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A list of end offsets, with one element for each element in
+<var>graphIds</var>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>layerIds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A list of IDs of annotation layers to include in the
+fragment.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mimeType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The desired format, for example "text/praat-textgrid" for Praat
+TextGrids, "text/plain" for plain text, etc.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dir</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A directory in which the files should be stored, or null
+for a temporary folder.   If specified, and the directory doesn't exist, it will
+be created.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be:  A list of files. If <var>dir</var> is null,
+these files will be stored under the system's temporary directory, so once
+processing is finished, they should be deleted by the caller, or moved to a
+more permanent location.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1631">line 1631</a>
     </li></ul></dd>
     
 
@@ -2642,7 +3151,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line597">line 597</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line599">line 599</a>
     </li></ul></dd>
     
 
@@ -2785,7 +3294,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line565">line 565</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line567">line 567</a>
     </li></ul></dd>
     
 
@@ -2951,7 +3460,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line575">line 575</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line577">line 577</a>
     </li></ul></dd>
     
 
@@ -3117,7 +3626,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line585">line 585</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line587">line 587</a>
     </li></ul></dd>
     
 
@@ -3260,7 +3769,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line241">line 241</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line243">line 243</a>
     </li></ul></dd>
     
 
@@ -3426,7 +3935,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line279">line 279</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line281">line 281</a>
     </li></ul></dd>
     
 
@@ -3569,7 +4078,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line250">line 250</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line252">line 252</a>
     </li></ul></dd>
     
 
@@ -3712,7 +4221,581 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line259">line 259</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line261">line 261</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getMatchAnnotations"><span class="type-signature"></span>getMatchAnnotations<span class="signature">(matchIds, layerIds, targetOffset<span class="signature-attributes">opt</span>, annotationsPerLayer<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets annotations on selected layers related to search results returned by a previous
+call to <a href="Labbcat.html#getMatches">Labbcat#getMatches</a>.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>matchIds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+|
+
+<span class="param-type">Array.&lt;object></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A list of MatchIds, or a list of match
+objects returned by <a href="Labbcat.html#getMatches">Labbcat#getMatches</a></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>layerIds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A list of layer IDs.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>targetOffset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The distance from the original target of the match, e.g.
+<ul>
+ <li>0 - find annotations of the match target itself</li>
+ <li>1 - find annotations of the token immediately <em>after</em> match target</li>
+ <li>-1 - find annotations of the token immediately <em>before</em> match target</li>
+</ul></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>annotationsPerLayer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last">The number of annotations on the given layer to
+retrieve. In most cases, there's only one annotation available. However, tokens may,
+for example, be annotated with `all possible phonemic transcriptions', in which case
+using a value of greater than 1 for this parameter provides other phonemic
+transcriptions, for tokens that have more than one.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: An array of arrays of Annotations, of
+dimensions <var>matchIds</var>.length &times; (<var>layerIds</var>.length *
+<var>annotationsPerLayer</var>). The first index matches the corresponding
+index in <var>matchIds</var>.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1328">line 1328</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getMatches"><span class="type-signature"></span>getMatches<span class="signature">(threadId, wordsContext<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets a list of tokens that were matched by <a href="Labbcat.html#search">Labbcat#search</a>.
+<p>If the task is still running, then this function will wait for it to finish.
+<p>This means calls can be stacked like this:
+ <pre>const matches = labbcat.getMatches(
+    labbcat.search(
+       {"orthography", "and"},
+       participantIds, true), 1);</pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>threadId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A task ID returned by <a href="Labbcat.html#search">Labbcat#search</a>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>wordsContext</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Number of words context to include in the <q>Before
+Match</q> and <q>After Match</q> columns in the results.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: An object with two attributes:
+<dl>
+ <dt>name</dt><dd>The name of the search results collection</dd>
+ <dt>matches</dt>
+  <dd>A list of match objects, with the following attributes
+   <dl>
+     <dt>MatchId</dt> <dd>A string identifying the match, of the kind expected
+       by <a href="Labbcat.html#getMatchAnnotations">Labbcat#getMatchAnnotations</a></dd>
+     <dt>Transcript</dt> <dd>The name of the transcript</dd>
+     <dt>Participant</dt> <dd>The name of the participant</dd>
+     <dt>Corpus</dt> <dd>The name of corpus the transcript belongs to</dd>
+     <dt>Line</dt> <dd>The start offset of the utterance, usually in seconds</dd>
+     <dt>LineEnd</dt> <dd>The end offset of the uttereance, usually in seconds</dd>
+     <dt>BeforeMatch</dt> <dd>The context of the trascript text just before the
+      match</dd> 
+     <dt>Transcript</dt> <dd>The transcript text that matched</dd>
+     <dt>BeforeMatch</dt> <dd>The context of the transcript text just after
+      the match</dd> 
+   </dl>
+  </dd> 
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1291">line 1291</a>
     </li></ul></dd>
     
 
@@ -3975,7 +5058,7 @@ return the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line546">line 546</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line548">line 548</a>
     </li></ul></dd>
     
 
@@ -4285,7 +5368,7 @@ expressions, which may be appended by " ASC" or " DESC", or null for graph ID or
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line441">line 441</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line443">line 443</a>
     </li></ul></dd>
     
 
@@ -4549,7 +5632,7 @@ first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line360">line 360</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line362">line 362</a>
     </li></ul></dd>
     
 
@@ -4862,7 +5945,7 @@ graph, or null if the given media doesn't exist.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line654">line 654</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line656">line 656</a>
     </li></ul></dd>
     
 
@@ -5005,7 +6088,7 @@ graph, or null if the given media doesn't exist.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line617">line 617</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line619">line 619</a>
     </li></ul></dd>
     
 
@@ -5168,7 +6251,7 @@ or null if the participant was not found.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line309">line 309</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line311">line 311</a>
     </li></ul></dd>
     
 
@@ -5311,7 +6394,7 @@ or null if the participant was not found.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line297">line 297</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line299">line 299</a>
     </li></ul></dd>
     
 
@@ -5455,7 +6538,330 @@ relate to each other.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line269">line 269</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line271">line 271</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getSoundFragments"><span class="type-signature"></span>getSoundFragments<span class="signature">(graphIds, startOffsets, endOffsets, sampleRate<span class="signature-attributes">opt</span>, dir<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Downloads WAV sound fragments.
+<p>For convenience, the first three arguments, <var>graphIds</var>, 
+<var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
+array of match objects of the kind returned by <a href="Labbcat.html#getMatches">Labbcat#getMatches</a>, in
+which case the start/end times are the utterance boundaries - e.g.
+<pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
+  labbcat.getMatchAnnotations(result.matches, sampleRate, dir, (files, e, m) => {
+      ...
+  });
+});</pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>graphIds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A list of graph IDs (transcript names).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>startOffsets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;float></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A list of start offsets, with one element for each
+element in <var>graphIds</var>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>endOffsets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;float></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A list of end offsets, with one element for each element in
+<var>graphIds</var>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sampleRate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The desired sample rate, or null for no preference.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dir</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A directory in which the files should be stored, or null
+for a temporary folder.  If specified, and the directory doesn't exist, it will
+be created.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of WAV files. If <var>dir</var> is
+null, these files will be stored under the system's temporary directory, so
+once processing is finished, they should be deleted by the caller, or moved to
+a more permanent location.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1472">line 1472</a>
     </li></ul></dd>
     
 
@@ -5593,7 +6999,7 @@ result, which is an map of task IDs to statuses.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1058">line 1058</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1055">line 1055</a>
     </li></ul></dd>
     
 
@@ -5903,7 +7309,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line804">line 804</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line806">line 806</a>
     </li></ul></dd>
     
 
@@ -5947,7 +7353,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
 
 
 <div class="description">
-    Releases a finished a task so it no longer uses resources on the server.
+    Releases a finished task so it no longer uses resources on the server.
 </div>
 
 
@@ -6063,7 +7469,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1102">line 1102</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1100">line 1100</a>
     </li></ul></dd>
     
 
@@ -6251,7 +7657,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line743">line 743</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line745">line 745</a>
     </li></ul></dd>
     
 
@@ -6366,7 +7772,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
             
 
             <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be:  true if changes were saved, false if there
+<var>result</var> which will be: true if changes were saved, false if there
 were no changes to save.</td>
         </tr>
 
@@ -6413,7 +7819,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line715">line 715</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line717">line 717</a>
     </li></ul></dd>
     
 
@@ -6624,7 +8030,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line725">line 725</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line727">line 727</a>
     </li></ul></dd>
     
 
@@ -6812,7 +8218,294 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line734">line 734</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line736">line 736</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="search"><span class="type-signature"></span>search<span class="signature">(pattern, participantIds, mainParticipant, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Searches for tokens that match the given pattern.
+<p> The <var>pattern</var> should match the structure of the search matrix in the
+browser interface of LaBB-CAT. This is a JSON object with one attribute called
+<q>columns</q>, which is an array of JSON objects.
+<p>Each element in the <q>columns</q> array contains am JSON object named
+<q>layers</q>, whose value is a JSON object for patterns to match on each layer, and
+optionally an element named <q>adj</q>, whose value is a number representing the
+maximum distance, in tokens, between this column and the next column - if <q>adj</q>
+is not specified, the value defaults to 1, so tokens are contiguous.
+Each element in the <q>layers</q> JSON object is named after the layer it matches, and
+the value is a named list with the following possible attributes:
+<dl>
+ <dt>pattern</dt> <dd>A regular expression to match against the label</dd>
+ <dt>min</dt> <dd>An inclusive minimum numeric value for the label</dd>
+ <dt>max</dt> <dd>An exclusive maximum numeric value for the label</dd>
+ <dt>not</dt> <dd>TRUE to negate the match</dd>
+ <dt>anchorStart</dt> <dd>TRUE to anchor to the start of the annotation on this layer
+    (i.e. the matching word token will be the first at/after the start of the matching
+    annotation on this layer)</dd>
+ <dt>anchorEnd</dt> <dd>TRUE to anchor to the end of the annotation on this layer
+    (i.e. the matching word token will be the last before/at the end of the matching
+    annotation on this layer)</dd>
+ <dt>target</dt> <dd>TRUE to make this layer the target of the search; the results will
+    contain one row for each match on the target layer</dd>
+</dl>
+
+<p>Examples of valid pattern objects include:
+<pre>// words starting with 'ps...'
+const pattern1 = {
+    "columns" : [
+        {
+            "layers" : {
+                "orthography" : {
+                    "pattern" : "ps.*"
+                }
+            }
+        }
+    ]};
+
+// the word 'the' followed immediately or with one intervening word by
+// a hapax legomenon (word with a frequency of 1) that doesn't start with a vowel
+const pattern2 = {
+    "columns" : [
+        {
+            "layers" : {
+                "orthography" : {
+                    "pattern" : "the"
+                }
+            }
+            "adj" : 2 },
+        {
+            "layers" : {
+                "phonemes" : {
+                    "not" : true,
+                    "pattern" : "[cCEFHiIPqQuUV0123456789~#\\$@]."}
+                "frequency" {
+                    "max" : "2"
+                }
+            }
+        }
+    ]};
+</pre>
+
+For ease of use, the function will also accept the following abbreviated forms:
+<pre>
+// a single list representing a 'one column' search, 
+// and string values, representing regular expression pattern matching
+const pattern3 = { orthography : "ps.*" };
+
+// a list containing the columns (adj defaults to 1, so matching tokens are contiguous)
+const pattrn4 = [{
+    orthography : "the"
+}, {
+    phonemes : {
+        not : true,
+        pattern : "[cCEFHiIPqQuUV0123456789~#\\$@]." },
+    frequency : {
+        max = "2" }
+}];
+</pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pattern</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An object representing the pattern to search for, which
+mirrors the Search Matrix in the browser interface.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>participantIds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An optional list of participant IDs to search
+the utterances of. If not null, all utterances in the corpus will be searched.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mainParticipant</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">true to search only main-participant utterances, false to
+search all utterances.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: An object with one attribtue, "threadId",
+which identifies the resulting task, which can be passed to 
+<a href="Labbcat.html#getMatches">Labbcat#getMatches</a>, <a href="Labbcat.html#taskStatus">Labbcat#taskStatus</a>, 
+<a href="Labbcat.html#waitForTask">Labbcat#waitForTask</a>, etc.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1214">line 1214</a>
     </li></ul></dd>
     
 
@@ -6972,7 +8665,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1067">line 1067</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1065">line 1065</a>
     </li></ul></dd>
     
 
@@ -7156,7 +8849,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line952">line 952</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line954">line 954</a>
     </li></ul></dd>
     
 
@@ -7342,7 +9035,7 @@ will be false if the task finished.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1080">line 1080</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1078">line 1078</a>
     </li></ul></dd>
     
 
@@ -7388,13 +9081,13 @@ will be false if the task finished.</td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="GraphStore.html">GraphStore</a></li><li><a href="GraphStoreQuery.html">GraphStoreQuery</a></li><li><a href="Labbcat.html">Labbcat</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="GraphStore.html">GraphStore</a></li><li><a href="GraphStoreQuery.html">GraphStoreQuery</a></li><li><a href="Labbcat.html">Labbcat</a></li><li><a href="MatchId.html">MatchId</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Feb 07 2020 18:06:05 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 11 2020 13:02:29 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

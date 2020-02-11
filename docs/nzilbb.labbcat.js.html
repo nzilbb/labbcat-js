@@ -89,6 +89,8 @@
         XMLHttpRequest = require('xhr2');
         FormData = require('form-data');
         fs = require('fs');
+        path = require('path');
+        os = require('os');
         btoa = require('btoa');
         parseUrl = require('url').parse;
         runningOnNode = true;
@@ -737,7 +739,7 @@
          * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
          * @param graph The graph to save.
          * @param {resultCallback} onResult Invoked when the request has returned a 
-         * &lt;var>result&lt;/var> which will be:  true if changes were saved, false if there
+         * &lt;var>result&lt;/var> which will be: true if changes were saved, false if there
          * were no changes to save.
          */
         saveGraph(graph, onResult) { // TODO
@@ -787,11 +789,11 @@
      * Labbcat client, for accessing LaBB-CAT server functions programmatically.
      * @example
      * // create LaBB-CAT client
-     * const labbcat = new [Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")]{@link Labbcat};
+     * const lc = new labbcat.[Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")]{@link Labbcat};
      * // upload a transcript
      * const transcript = "some-transcript.eaf";
      * const media = "some-transcript.wav";
-     * labbcat.newTranscript(
+     * lc.newTranscript(
      *     transcript, media, null, "interview", "corpus", episode, 
      *     (result, errors, messages, call, id)=>{
      *         console.log("Finished uploading " + transcript);
@@ -1069,14 +1071,9 @@
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteTranscript(id, onResult) {
+            if (exports.verbose) console.log("deleteTranscript(" + id + ")");
             this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
         }
-        
-        // TODO search(pattern, participantId=NULL, main.participant=TRUE)
-        // TODO getMatches(threadId, words.context=0)
-        // TODO getMatchAnnotations(matchIds, layerIds, targetOffset=0, annotationsPerLayer=1)
-        // TODO getSoundFragments(id, start, end, sampleRate = NULL)
-        // TODO getFragments(id, start, end, layerIds, mimeType = "text/praat-textgrid")
         
         /**
          * Gets list of tasks.
@@ -1084,6 +1081,7 @@
          * result, which is an map of task IDs to statuses.
          */
         getTasks(onResult) {
+            if (exports.verbose) console.log("getTasks()");
             this.createRequest("threads", null, onResult, this.baseUrl).send();
         }
         
@@ -1123,18 +1121,791 @@
         }
 
         /**
-         * Releases a finished a task so it no longer uses resources on the server.
+         * Releases a finished task so it no longer uses resources on the server.
          * @param {string} id ID of the task.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         releaseTask(id, onResult) {
-            this.createRequest("releaseTask", { id : id, threadId : id, command : "release" }, onResult, this.baseUrl + "threads").send();
+            if (exports.verbose) console.log("releaseTask("+threadId+")");
+            this.createRequest("threads", {
+                threadId : id,
+                command : "release"
+            }, onResult, this.baseUrl).send();
         }
+        
+        /**
+         * Cancels a running task.
+         * @param threadId The ID of the task.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        cancelTask(threadId, onResult) {
+            if (exports.verbose) console.log("cancelTask("+threadId+")");
+            this.createRequest("threads", {
+                threadId : threadId,
+                command : "cancel"
+            }, onResult, this.baseUrl).send();
+        }
+        
+        /**
+         * Searches for tokens that match the given pattern.
+         * &lt;p> The &lt;var>pattern&lt;/var> should match the structure of the search matrix in the
+         * browser interface of LaBB-CAT. This is a JSON object with one attribute called
+         * &lt;q>columns&lt;/q>, which is an array of JSON objects.
+         * &lt;p>Each element in the &lt;q>columns&lt;/q> array contains am JSON object named
+         * &lt;q>layers&lt;/q>, whose value is a JSON object for patterns to match on each layer, and
+         * optionally an element named &lt;q>adj&lt;/q>, whose value is a number representing the
+         * maximum distance, in tokens, between this column and the next column - if &lt;q>adj&lt;/q>
+         * is not specified, the value defaults to 1, so tokens are contiguous.
+         * Each element in the &lt;q>layers&lt;/q> JSON object is named after the layer it matches, and
+         * the value is a named list with the following possible attributes:
+         * &lt;dl>
+         *  &lt;dt>pattern&lt;/dt> &lt;dd>A regular expression to match against the label&lt;/dd>
+         *  &lt;dt>min&lt;/dt> &lt;dd>An inclusive minimum numeric value for the label&lt;/dd>
+         *  &lt;dt>max&lt;/dt> &lt;dd>An exclusive maximum numeric value for the label&lt;/dd>
+         *  &lt;dt>not&lt;/dt> &lt;dd>TRUE to negate the match&lt;/dd>
+         *  &lt;dt>anchorStart&lt;/dt> &lt;dd>TRUE to anchor to the start of the annotation on this layer
+         *     (i.e. the matching word token will be the first at/after the start of the matching
+         *     annotation on this layer)&lt;/dd>
+         *  &lt;dt>anchorEnd&lt;/dt> &lt;dd>TRUE to anchor to the end of the annotation on this layer
+         *     (i.e. the matching word token will be the last before/at the end of the matching
+         *     annotation on this layer)&lt;/dd>
+         *  &lt;dt>target&lt;/dt> &lt;dd>TRUE to make this layer the target of the search; the results will
+         *     contain one row for each match on the target layer&lt;/dd>
+         * &lt;/dl>
+         *
+         * &lt;p>Examples of valid pattern objects include:
+         * &lt;pre>// words starting with 'ps...'
+         * const pattern1 = {
+         *     "columns" : [
+         *         {
+         *             "layers" : {
+         *                 "orthography" : {
+         *                     "pattern" : "ps.*"
+         *                 }
+         *             }
+         *         }
+         *     ]};
+         * 
+         * // the word 'the' followed immediately or with one intervening word by
+         * // a hapax legomenon (word with a frequency of 1) that doesn't start with a vowel
+         * const pattern2 = {
+         *     "columns" : [
+         *         {
+         *             "layers" : {
+         *                 "orthography" : {
+         *                     "pattern" : "the"
+         *                 }
+         *             }
+         *             "adj" : 2 },
+         *         {
+         *             "layers" : {
+         *                 "phonemes" : {
+         *                     "not" : true,
+         *                     "pattern" : "[cCEFHiIPqQuUV0123456789~#\\$@]."}
+         *                 "frequency" {
+         *                     "max" : "2"
+         *                 }
+         *             }
+         *         }
+         *     ]};
+         * &lt;/pre>
+         *
+         * For ease of use, the function will also accept the following abbreviated forms:
+         * &lt;pre>
+         * // a single list representing a 'one column' search, 
+         * // and string values, representing regular expression pattern matching
+         * const pattern3 = { orthography : "ps.*" };
+         *
+         * // a list containing the columns (adj defaults to 1, so matching tokens are contiguous)
+         * const pattrn4 = [{
+         *     orthography : "the"
+         * }, {
+         *     phonemes : {
+         *         not : true,
+         *         pattern : "[cCEFHiIPqQuUV0123456789~#\\$@]." },
+         *     frequency : {
+         *         max = "2" }
+         * }];
+         * &lt;/pre>
+         * @param {object} pattern An object representing the pattern to search for, which
+         * mirrors the Search Matrix in the browser interface.
+         * @param {string[]} participantIds An optional list of participant IDs to search
+         * the utterances of. If not null, all utterances in the corpus will be searched.
+         * @param mainParticipant true to search only main-participant utterances, false to
+         * search all utterances. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: An object with one attribtue, "threadId",
+         * which identifies the resulting task, which can be passed to 
+         * {@link Labbcat#getMatches}, {@link Labbcat#taskStatus}, 
+         * {@link Labbcat#waitForTask}, etc.
+         */
+        search(pattern, participantIds, mainParticipant, onResult) {
+            if (exports.verbose) {
+                console.log("search("+JSON.stringify(pattern)
+                            +", "+JSON.stringify(mainParticipant)+", "+mainParticipant+")");
+            }
+
+            // first normalize the pattern...
+
+            // if pattern isn't a list with a "columns" element, wrap a list around it
+            if (!pattern.columns) pattern = { columns : pattern };
+
+            // if pattern.columns isn't an array wrap an array list around it
+            if (!(pattern.columns instanceof Array)) pattern.columns = [ pattern.columns ];
+
+            // columns contain lists with no "layers" element, wrap a list around them
+            for (let c = 0; c &lt; pattern.columns.length; c++) {
+                if (!("layers" in pattern.columns[c])) {
+                    pattern.columns[c] = { layers : pattern.columns[c] };
+                }
+            } // next column
+
+            // convert layer:string to layer : { pattern:string }
+            for (let c = 0; c &lt; pattern.columns.length; c++) { // for each column
+                for (let l in pattern.columns[c].layers) { // for each layer in the column
+                    // if the layer value isn't an object
+                    if (typeof pattern.columns[c].layers[l] == "string") {
+                        // wrap a list(pattern=...) around it
+                        pattern.columns[c].layers[l] = { pattern : pattern.columns[c].layers[l] };
+                    } // value isn't a list
+                } // next layer
+            } // next column
+
+            const parameters = {
+                command : "search",
+                searchJson : JSON.stringify(pattern),
+                words_context : 0
+            }
+            if (mainParticipant) parameters.only_main_speaker = true;
+            if (participantIds) parameters.participant_id = participantIds;
+
+            this.createRequest("search", parameters, onResult, this.baseUrl).send();
+        }
+        
+        /**
+         * Gets a list of tokens that were matched by {@link Labbcat#search}.
+         * &lt;p>If the task is still running, then this function will wait for it to finish.
+         * &lt;p>This means calls can be stacked like this:
+         *  &lt;pre>const matches = labbcat.getMatches(
+         *     labbcat.search(
+         *        {"orthography", "and"},
+         *        participantIds, true), 1);&lt;/pre>
+         * @param {string} threadId A task ID returned by {@link Labbcat#search}.
+         * @param {int} [wordsContext=0] Number of words context to include in the &lt;q>Before
+         * Match&lt;/q> and &lt;q>After Match&lt;/q> columns in the results.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: An object with two attributes:
+         * &lt;dl>
+         *  &lt;dt>name&lt;/dt>&lt;dd>The name of the search results collection&lt;/dd>
+         *  &lt;dt>matches&lt;/dt>
+         *   &lt;dd>A list of match objects, with the following attributes
+         *    &lt;dl>
+         *      &lt;dt>MatchId&lt;/dt> &lt;dd>A string identifying the match, of the kind expected
+         *        by {@link Labbcat#getMatchAnnotations}&lt;/dd>
+         *      &lt;dt>Transcript&lt;/dt> &lt;dd>The name of the transcript&lt;/dd>
+         *      &lt;dt>Participant&lt;/dt> &lt;dd>The name of the participant&lt;/dd>
+         *      &lt;dt>Corpus&lt;/dt> &lt;dd>The name of corpus the transcript belongs to&lt;/dd>
+         *      &lt;dt>Line&lt;/dt> &lt;dd>The start offset of the utterance, usually in seconds&lt;/dd>
+         *      &lt;dt>LineEnd&lt;/dt> &lt;dd>The end offset of the uttereance, usually in seconds&lt;/dd>
+         *      &lt;dt>BeforeMatch&lt;/dt> &lt;dd>The context of the trascript text just before the
+         *       match&lt;/dd> 
+         *      &lt;dt>Transcript&lt;/dt> &lt;dd>The transcript text that matched&lt;/dd>
+         *      &lt;dt>BeforeMatch&lt;/dt> &lt;dd>The context of the transcript text just after
+         *       the match&lt;/dd> 
+         *    &lt;/dl>
+         *   &lt;/dd> 
+         * &lt;/dl>
+         */
+        getMatches(threadId, wordsContext, onResult) {
+            if (typeof wordsContext === "function") { // (threadId, onResult)
+                onResult = wordsContext;
+                wordsContext = null;
+            }
+            if (exports.verbose) console.log("getMatches("+threadId+", "+wordsContext+")");
+            wordsContext = wordsContext || 0;
+            
+            this.createRequest("resultsStream", {
+                threadId : threadId,
+                "words_context" : wordsContext
+            }, onResult, this.baseUrl).send();
+        }
+        
+        /**
+         * Gets annotations on selected layers related to search results returned by a previous
+         * call to {@link Labbcat#getMatches}.
+         * @param {string[]|object[]} matchIds A list of MatchIds, or a list of match
+         * objects returned by {@link Labbcat#getMatches} 
+         * @param {string[]} layerIds A list of layer IDs.
+         * @param {int} [targetOffset=0] The distance from the original target of the match, e.g.
+         * &lt;ul>
+         *  &lt;li>0 - find annotations of the match target itself&lt;/li>
+         *  &lt;li>1 - find annotations of the token immediately &lt;em>after&lt;/em> match target&lt;/li>
+         *  &lt;li>-1 - find annotations of the token immediately &lt;em>before&lt;/em> match target&lt;/li>
+         * &lt;/ul>
+         * @param {int} [annotationsPerLayer=1] The number of annotations on the given layer to
+         * retrieve. In most cases, there's only one annotation available. However, tokens may,
+         * for example, be annotated with `all possible phonemic transcriptions', in which case
+         * using a value of greater than 1 for this parameter provides other phonemic
+         * transcriptions, for tokens that have more than one.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: An array of arrays of Annotations, of
+         * dimensions &lt;var>matchIds&lt;/var>.length &amp;times; (&lt;var>layerIds&lt;/var>.length *
+         * &lt;var>annotationsPerLayer&lt;/var>). The first index matches the corresponding
+         * index in &lt;var>matchIds&lt;/var>. 
+         */
+        getMatchAnnotations(matchIds, layerIds, targetOffset, annotationsPerLayer, onResult) {
+            if (typeof targetOffset === "function") { // (matchIds, layerIds, onResult)
+                onResult = targetOffset;
+                targetOffset = null;
+                annotationsPerLayer = null;
+            } else if (typeof annotationsPerLayer === "function") {
+                // (matchIds, layerIds, targetOffset, onResult)
+                onResult = annotationsPerLayer;
+                annotationsPerLayer = null;
+            }
+
+            // check that an array of matches hasn't been passed.
+            if (typeof matchIds[0] != "string" &amp;&amp; matchIds[0].MatchId) {
+                // convert the array of matches into an array of MatchIds
+                matchIds = matchIds.map(match => match.MatchId);
+            }
+            
+            if (exports.verbose) {
+                console.log("getMatchAnnotations("+JSON.stringify(matchIds)+", "
+                            +JSON.stringify(layerIds)+", "+targetOffset+", "
+                            +annotationsPerLayer+")");
+            }
+            targetOffset = targetOffset || 0;
+            annotationsPerLayer = annotationsPerLayer || 1;
+
+            // create form
+            var fd = new FormData();
+            fd.append("targetOffset", targetOffset);
+            fd.append("annotationsPerLayer", annotationsPerLayer);
+            fd.append("csvFieldDelimiter", ",");
+            fd.append("targetColumn", "0");
+            fd.append("copyColumns", "false");
+            for (let layerId of layerIds ) fd.append("layer", layerId);
+
+            // getMatchAnnotations expects an uploaded CSV file for MatchIds, 
+            const uploadfile = "MatchId\n"+matchIds.join("\n");
+            fd.append("uploadfile", uploadfile, {
+                filename: 'uploadfile.csv',
+                contentType: 'text/csv',
+                knownLength: uploadfile.length
+            });
+
+            if (!runningOnNode) {	
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "newTranscript";
+	        xhr.id = transcript.name;
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);	        
+	        xhr.open("POST", this.baseUrl + "api/getMatchAnnotations");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+	        var urlParts = parseUrl(this.baseUrl + "api/getMatchAnnotations");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username &amp;&amp; password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+			        onResult(result, errors, messages, "getMatchAnnotations");
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "getMatchAnnotations");
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
+        
+        /**
+         * Downloads WAV sound fragments.
+         * &lt;p>For convenience, the first three arguments, &lt;var>graphIds&lt;/var>, 
+         * &lt;var>startOffsets&lt;/var>, and &lt;var>endOffsets&lt;/var>, can be replaced by a single
+         * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
+         * which case the start/end times are the utterance boundaries - e.g.
+         * &lt;pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
+         *   labbcat.getMatchAnnotations(result.matches, sampleRate, dir, (files, e, m) => {
+         *       ...
+         *   });
+         * });&lt;/pre>
+         * @param {string[]} graphIds A list of graph IDs (transcript names).
+         * @param {float[]} startOffsets A list of start offsets, with one element for each
+         * element in &lt;var>graphIds&lt;/var>. 
+         * @param {float[]} endOffsets A list of end offsets, with one element for each element in
+         * &lt;var>graphIds&lt;/var>. 
+         * @param {int} [sampleRate] The desired sample rate, or null for no preference.
+         * @param {string} [dir] A directory in which the files should be stored, or null
+         * for a temporary folder.  If specified, and the directory doesn't exist, it will
+         * be created.  
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A list of WAV files. If &lt;var>dir&lt;/var> is
+         * null, these files will be stored under the system's temporary directory, so
+         * once processing is finished, they should be deleted by the caller, or moved to
+         * a more permanent location.  
+         */
+        getSoundFragments(graphIds, startOffsets, endOffsets, sampleRate, dir, onResult) {
+            // ensure graphIds is a list of strings, not a list of matches
+            if (typeof graphIds[0] != "string" &amp;&amp; graphIds[0].Transcript) {
+                // convert the array of matches into an arrays of graphIds, startOffset,
+                // and endOffsets...
+
+                // shift remaining arguments to the right
+                onResult = sampleRate
+                dir = endOffsets
+                sampleRate = startOffsets
+
+                // create arrays
+                startOffsets = graphIds.map(match => match.Line);
+                endOffsets = graphIds.map(match => match.LineEnd);
+                graphIds = graphIds.map(match => match.Transcript);
+            }            
+
+            if (graphIds.length != startOffsets.length || graphIds.length != endOffsets.length) {
+                onResult &amp;&amp; onResult(null, [
+                    "graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
+                        +"), and endOffsets ("+endOffsets.length+") must be arrays of equal size."],
+                                     [], "getSoundFragments");
+                return;
+            }
+
+            if (typeof sampleRate === "function") {
+                // (graphIds, startOffsets, endOffsets, onResult)
+                onResult = sampleRate;
+                sampleRate = null;
+                dir = null;
+            } else if (typeof dir === "function") {
+                onResult = dir;
+                if (typeof sampleRate === "string") {
+                    // (graphIds, startOffsets, endOffsets, dir, onResult)
+                    dir = sampleRate;
+                    sampleRate = null;
+                } else {
+                    // (graphIds, startOffsets, endOffsets, sampleRate, onResult)
+                    dir = null;
+                }
+            }
+            if (exports.verbose) {
+                console.log("getSoundFragments("+graphIds.length+" graphIds, "
+                            +startOffsets.length+" startOffsets, "
+                            +endOffsets.length+" endOffsets, "
+                            +sampleRate+", "+dir+")");
+            }
+
+            if (dir == null) {
+                dir = os.tmpdir();
+            } else {
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+            }
+            
+            let fragments = [];
+            let errors = [];
+            
+            // get fragments individually to ensure elements in result map 1:1 to element
+            // in graphIds
+	    const url = this.baseUrl + "soundfragment";
+            const lc = this;
+            const nextFragment = function(i) {
+                if (i &lt; graphIds.length) { // next file
+	            const xhr = new XMLHttpRequest();
+                    
+	            let queryString = "?id="+encodeURIComponent(graphIds[i])
+                        +"&amp;start="+encodeURIComponent(startOffsets[i])
+                        +"&amp;end="+encodeURIComponent(endOffsets[i]);
+                    if (sampleRate) queryString += "&amp;sampleRate="+sampleRate;
+                    
+                    if (exports.verbose) {
+                        console.log(method + ": "+url + queryString + " as " + lc.username);
+                    }
+	            xhr.open("GET", url + queryString, true);
+	            if (lc.username) {
+	                xhr.setRequestHeader(
+                            "Authorization", "Basic " + btoa(lc.username + ":" + lc._password))
+ 	            }
+                    
+	            xhr.setRequestHeader("Accept", "audio/wav");
+                    // we want binary data, not text
+                    xhr.responseType = "arraybuffer";
+                    
+	            xhr.addEventListener("error", function(evt) {
+                        if (exports.verbose) {
+                            console.log("getSoundFragments "+i+" ERROR: "+this.responseText);
+                        }
+                        errors.push("Could not get fragment "+i+": "+this.responseText);
+                        fragments.push(null); // add a blank element
+                        nextFragment(i+1);
+                    }, false);
+                    
+	            xhr.addEventListener("load", function(evt) {
+                        if (exports.verbose) {
+                            console.log("getSoundFragments "+i+" loaded.");
+                        }
+                        // save the result to a file
+                        let fileName = graphIds[i]+"__"+startOffsets[i]+"-"+endOffsets[i]+".wav";
+                        let contentDisposition = this.getResponseHeader("content-disposition");
+                        if (contentDisposition != null) {
+                            // something like attachment; filename=blah.wav
+                            const equals = contentDisposition.indexOf("=");
+                            if (equals > 0) {
+                                fileName = contentDisposition.substring(equals + 1);
+                            }
+                        }
+                        const filePath = path.join(dir, fileName);
+                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                            if (err) {
+                                if (exports.verbose) {
+                                    console.log("getSoundFragments "+i+" SAVE ERROR: "+err);
+                                }
+                                errors.push("Could not save fragment "+i+": "+err);
+                            }
+                            // add the file name to the result
+                            fragments.push(filePath); // add a blank element
+                            nextFragment(i+1);
+                        });
+                    }, false);
+                    
+                    xhr.send();
+                } else { // there are no more triples
+                    if (onResult) {
+                        onResult(fragments, errors.length?errors:null, [], "getSoundFragments");
+                    }
+                }
+            }
+            nextFragment(0);
+        }
+        
+        /**
+         * Get graph fragments in a specified format.
+         * &lt;p>For convenience, the first three arguments, &lt;var>graphIds&lt;/var>, 
+         * &lt;var>startOffsets&lt;/var>, and &lt;var>endOffsets&lt;/var>, can be replaced by a single
+         * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
+         * which case the start/end times are the utterance boundaries - e.g.
+         * &lt;pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
+         *   labbcat.getFragments(result.matches, layerIds, mimeType, dir, (files, e, m) => {
+         *       ...
+         *   });
+         * });&lt;/pre>
+         * @param {string[]} graphIds A list of graph IDs (transcript names).
+         * @param {float[]} startOffsets A list of start offsets, with one element for
+         * each element in &lt;var>graphIds&lt;/var>. 
+         * @param {float[]} endOffsets A list of end offsets, with one element for each element in
+         * &lt;var>graphIds&lt;/var>. 
+         * @param {string[]} layerIds A list of IDs of annotation layers to include in the
+         * fragment. 
+         * @param {string} mimeType The desired format, for example "text/praat-textgrid" for Praat
+         * TextGrids, "text/plain" for plain text, etc.
+         * @param {string} [dir] A directory in which the files should be stored, or null
+         * for a temporary folder.   If specified, and the directory doesn't exist, it will
+         * be created.  
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be:  A list of files. If &lt;var>dir&lt;/var> is null,
+         * these files will be stored under the system's temporary directory, so once
+         * processing is finished, they should be deleted by the caller, or moved to a
+         * more permanent location. 
+         */
+        getFragments(graphIds, startOffsets, endOffsets, layerIds, mimeType, dir, onResult) {
+            // ensure graphIds is a list of strings, not a list of matches
+            if (typeof graphIds[0] != "string" &amp;&amp; graphIds[0].Transcript) {
+                // convert the array of matches into an arrays of graphIds, startOffset,
+                // and endOffsets...
+
+                // shift remaining arguments to the right
+                onResult = mimeType
+                dir = layerIds
+                mimeType = endOffsets
+                layerIds = startOffsets
+
+                // create arrays
+                startOffsets = graphIds.map(match => match.Line);
+                endOffsets = graphIds.map(match => match.LineEnd);
+                graphIds = graphIds.map(match => match.Transcript);
+            }
+            
+            if (graphIds.length != startOffsets.length || graphIds.length != endOffsets.length) {
+                onResult &amp;&amp; onResult(
+                    null,
+                    ["graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
+                     +"), and endOffsets ("+endOffsets.length+") must be arrays of equal size."],
+                    [], "getFragments");
+                return;
+            }
+
+            if (typeof dir === "function") {
+                // (graphIds, startOffsets, endOffsets, layerIds, mimeType, onResult)
+                onResult = dir;
+                dir = null;
+            }
+            if (exports.verbose) {
+                console.log("getFragments("+graphIds.length+" graphIds, "
+                            +startOffsets.length+" startOffsets, "
+                            +endOffsets.length+" endOffsets, "
+                            +JSON.stringify(layerIds)+", "+mimeType+", "+dir+")");
+            }
+            
+            if (dir == null) {
+                dir = os.tmpdir();
+            } else {
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+            }
+            
+            let fragments = [];
+            let errors = [];
+            
+            // get fragments individually to ensure elements in result map 1:1 to element
+            // in graphIds
+	    let url = this.baseUrl + "convertfragment?mimeType="+encodeURIComponent(mimeType);
+            for (let layerId of layerIds) url += "&amp;layerId=" + layerId;
+            const lc = this;
+            const nextFragment = function(i) {
+                if (i &lt; graphIds.length) { // next file
+	            const xhr = new XMLHttpRequest();
+                    
+	            let queryString = "&amp;id="+encodeURIComponent(graphIds[i])
+                        +"&amp;start="+encodeURIComponent(startOffsets[i])
+                        +"&amp;end="+encodeURIComponent(endOffsets[i]);
+                    
+                    if (exports.verbose) {
+                        console.log(method + ": "+url + queryString + " as " + lc.username);
+                    }
+	            xhr.open("GET", url + queryString, true);
+	            if (lc.username) {
+	                xhr.setRequestHeader(
+                            "Authorization", "Basic " + btoa(lc.username + ":" + lc._password))
+ 	            }
+                    
+	            xhr.setRequestHeader("Accept", mimeType);
+                    // we want binary data, not text
+                    xhr.responseType = "arraybuffer";
+                    
+	            xhr.addEventListener("error", function(evt) {
+                        if (exports.verbose) {
+                            console.log("getFragments "+i+" ERROR: "+this.responseText);
+                        }
+                        errors.push("Could not get fragment "+i+": "+this.responseText);
+                        fragments.push(null); // add a blank element
+                        nextFragment(i+1);
+                    }, false);
+                    
+	            xhr.addEventListener("load", function(evt) {
+                        if (exports.verbose) {
+                            console.log("getSoundFragments "+i+" loaded.");
+                        }
+                        // save the result to a file
+                        let fileName = graphIds[i]+"__"+startOffsets[i]+"-"+endOffsets[i];
+                        let contentDisposition = this.getResponseHeader("content-disposition");
+                        if (contentDisposition != null) {
+                            // something like attachment; filename=blah.wav
+                            const equals = contentDisposition.indexOf("=");
+                            if (equals > 0) {
+                                fileName = contentDisposition.substring(equals + 1);
+                            }
+                        }
+                        const filePath = path.join(dir, fileName);
+                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                            if (err) {
+                                if (exports.verbose) {
+                                    console.log("getFragments "+i+" SAVE ERROR: "+err);
+                                }
+                                errors.push("Could not save fragment "+i+": "+err);
+                            }
+                            // add the file name to the result
+                            fragments.push(filePath); // add a blank element
+                            nextFragment(i+1);
+                        });
+                    }, false);
+                    
+                    xhr.send();
+                } else { // there are no more triples
+                    if (onResult) {
+                        onResult(fragments, errors.length?errors:null, [], "getSoundFragments");
+                    }
+                }
+            }
+            nextFragment(0);
+        }
+        
     } // class Labbcat
+
+    /**
+     * Interpreter for match ID strings.
+     * &lt;p>The schema is:&lt;/p>
+     * &lt;ul>
+     * 	&lt;li>
+     * 		when there's a defining annotation UID:&lt;br>
+     * 		g_&lt;i>ag_id&lt;/i>;&lt;em>uid&lt;/em>&lt;br>
+     * 		e.g. &lt;tt>g_243;em_12_20035&lt;/tt>&lt;/li>
+     * 	&lt;li>
+     * 		when there's anchor IDs:&lt;br>
+     * 		g_&lt;i>ag_id&lt;/i>;&lt;em>startuid&lt;/em>-&lt;em>enduid&lt;/em>&lt;br>
+     * 		e.g. &lt;tt>g_243;n_72700-n_72709&lt;/tt>&lt;/li>
+     * 	&lt;li>
+     * 		when there's anchor offsets:&lt;br>
+     * 		g_&lt;i>ag_id&lt;/i>;&lt;em>startoffset&lt;/em>-&lt;em>endoffset&lt;/em>&lt;br>
+     * 		e.g. &lt;tt>g_243;39.400-46.279&lt;/tt>&lt;/li>
+     * 	&lt;li>
+     * 		when there's a participant/speaker number, it will be appended:&lt;br>
+     * 		&lt;em>...&lt;/em>;p_&lt;em>speakernumber&lt;/em>&lt;br>
+     * 		e.g.&amp;nbsp;&lt;tt>g_243;n_72700-n_72709;p_76&lt;/tt>&lt;/li>
+     * 	&lt;li>
+     * 		matching subparts can be identified by appending a list of annotation UIDs for insertion into {@link #mMatchAnnotationUids}, the keys being enclosed in square brackets:&lt;br>
+     * 		...;&lt;em>[key]=uid;[key]=uid&lt;/em>&lt;br>
+     * 		e.g. &lt;samp>g_243;n_72700-n_72709;[0,0]=ew_0_123;[1,0]ew_0_234&lt;/samp>&lt;/li>
+     * 	&lt;li>
+     * 		a target annotation by appending a uid prefixed by &lt;samp>#=&lt;/samp>:&lt;br>
+     * 		...;#=&lt;em>uid&lt;/em>&lt;br>
+     * 		e.g. &lt;samp>g_243;n_72700-n_72709;#=ew_0_123&lt;/samp>&lt;/li>
+     * 	&lt;li>
+     * 		other items (search name or prefix) could then come after all that, and key=value pairs:&lt;br>
+     * 		...;&lt;em>key&lt;/em>=&lt;em>value&lt;/em>&lt;br>
+     * 		e.g.&amp;nbsp;&lt;tt>g_243;n_72700-n_72709;ew_0_123-ew_0_234;prefix=024-;name=the_aeiou&lt;/tt>&lt;/li>
+     * &lt;p>These can be something like:
+     * &lt;ul>
+     * &lt;li>&lt;q>g_3;em_11_23;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611&lt;/q>&lt;/li>
+     * &lt;li>&lt;q>AgnesShacklock-01.trs;60.897-67.922;prefix=001-&lt;/q>&lt;/li>
+     * &lt;li>&lt;q>AgnesShacklock-01.trs;60.897-67.922;m_-1_23&lt;/q>&lt;/li>
+     * &lt;/ul>
+     */
+    class MatchId {
+        /**
+         * String constructor.
+         */
+        constructor(matchId) {
+            this._graphId = null;
+            this._startAnchorId = null;
+            this._endAnchorId = null;
+            this._startOffset = null;
+            this._endOffset = null;
+            this._utteranceId = null;
+            this._participantId = null;
+            this._targetId = null;
+            this._prefix = null;
+            if (matchId) {
+                const parts = matchId.split(";");
+                this._graphId = parts[0];
+                let intervalPart = null;
+                for (let part of parts) {
+                    if (part == parts[0]) continue;
+                    if (part.indexOf("-") > 0) {
+                        intervalPart = part;
+                        break;
+                    }
+                } // next part
+                const interval = intervalPart.split("-");
+                if (interval[0].startsWith("n_")) { // anchor IDs
+                    this._startAnchorId = interval[0];
+                    this._endAnchorId = interval[1];
+                } else { // offsets
+                    this._startOffset = parseFloat(interval[0]);
+                    this._endOffset = parseFloat(interval[1]);
+                }
+                for (let part of parts) {
+                    if (part.startsWith("prefix=")) {
+                        this._prefix = part.substring("prefix=".length);
+                    } else if (part.startsWith("em_") || part.startsWith("m_")) {
+                        this._utteranceId = part;
+                    } else if (part.startsWith("p_")) {
+                        this._participantId = part;
+                    } else if (part.startsWith("#=")) {
+                        this._targetId = part.substring("#=".length);
+                    }
+                } // next part
+            } // string was given
+        }
+        /**
+         * The graph identifier.
+         */
+        get graphId() { return this._graphId; }
+        /**
+         * ID of the start anchor.
+         */
+        get startAnchorId() { return this._startAnchorId; }
+        /**
+         * ID of the end anchor.
+         */
+        get endAnchorId() { return this._endAnchorId; }
+        /**
+         * Offset of the start anchor.
+         */
+        get startOffset() { return this._startOffset; }
+        /**
+         * Offset of the end anchor.
+         */
+        get endOffset() { return this._endOffset; }
+        /**
+         * ID of the participant.
+         */
+        get participantId() { return this._participantId; }
+        /**
+         * ID of the match utterance.
+         */
+        get utteranceId() { return this._utteranceId; }
+        /**
+         * ID of the match target annotation.
+         */
+        get targetId() { return this._targetId; }
+        /**
+         * Match prefix for fragments.
+         */
+        get prefix() { return this._prefix; }
+    }
     
     exports.GraphStoreQuery = GraphStoreQuery;
     exports.GraphStore = GraphStore;
     exports.Labbcat = Labbcat;
+    exports.MatchId = MatchId;
     exports.verbose = false;
 
 }(typeof exports === 'undefined' ? this.labbcat = {} : exports));
@@ -1148,13 +1919,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="GraphStore.html">GraphStore</a></li><li><a href="GraphStoreQuery.html">GraphStoreQuery</a></li><li><a href="Labbcat.html">Labbcat</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="GraphStore.html">GraphStore</a></li><li><a href="GraphStoreQuery.html">GraphStoreQuery</a></li><li><a href="Labbcat.html">Labbcat</a></li><li><a href="MatchId.html">MatchId</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Feb 07 2020 18:06:05 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 11 2020 13:02:29 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
