@@ -11,6 +11,8 @@ from JavaScript.
 The following example shows how to perform a search and download audio and Praat TextGrids
 for the results.
 
+For batch uploading and other example code, see the *examples* subdirectory.
+
 ```javascript
 const labbcat = require("@nzilbb/labbcat");
 
