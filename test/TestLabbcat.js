@@ -398,14 +398,14 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
         });
     });
     
-   it("implements getSoundFragments", (done)=>{
+    it("implements getSoundFragments", (done)=>{
         // get a participant ID to use
         corpus.getParticipantIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
             
-            // all instances of "and"
+            // all instances of "I"
             const pattern = {"orthography" : "i"};
             corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
                 assert.isNull(errors, JSON.stringify(errors))
@@ -425,8 +425,9 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         assert.isNotNull(result)
                         assert.isNotNull(result.name)
                         const matches = result.matches;
-                        assert.isAtLeast(matches.length, 0,
-                                         "No matches were returned, cannot test getSoundFragments");
+                        assert.isAtLeast(
+                            matches.length, 0,
+                            "No matches were returned, cannot test getSoundFragments");
                         
                         corpus.releaseTask(threadId);
                         
@@ -436,14 +437,16 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         const graphIds = subset.map(match => match.Transcript);
                         const startOffsets = subset.map(match => match.Line);
                         const endOffsets = subset.map(match => match.LineEnd);
+
+                        // getSoundFragments with all parameters
                         corpus.getSoundFragments(
-                            graphIds, startOffsets, endOffsets, null, null,
+                            graphIds, startOffsets, endOffsets, 16000, "test",
                             (wavs, errors, messages)=>{
                                 assert.equal(subset.length, wavs.length,
                                              "files array is same size as matches array");
                                 
                                 for (let m = 0; m < upTo; m++) {
-                                    console.log(wavs[m]);
+                                    // console.log(wavs[m]);
                                     assert.isNotNull(wavs[m],
                                                      "Non-null file: " + subset[m]);
                                     assert.isTrue(fs.existsSync(wavs[m]),
@@ -454,69 +457,147 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                     // be tidy
                                     fs.unlinkSync(wavs[m]);
                                 }
+
+                                // getSoundFragments without dir
+                                corpus.getSoundFragments(
+                                    graphIds, startOffsets, endOffsets, 16000,
+                                    (wavs, errors, messages)=>{
+                                        assert.equal(subset.length, wavs.length,
+                                                     "files array is same size as matches array");
+                                        
+                                        for (let m = 0; m < upTo; m++) {
+                                            // console.log(wavs[m]);
+                                            assert.isNotNull(wavs[m],
+                                                             "Non-null file: " + subset[m]);
+                                            assert.isTrue(fs.existsSync(wavs[m]),
+                                                          "File exists: " + subset[m]);
+                                            assert.isAbove(fs.statSync(wavs[m]).size, 0,
+                                                   "Non-zero sized file: " + subset[m]);
+                                            
+                                            // be tidy
+                                            fs.unlinkSync(wavs[m]);
+                                        }
+                                        
+                                        // getSoundFragments without sampleRate
+                                        corpus.getSoundFragments(
+                                            graphIds, startOffsets, endOffsets,
+                                            (wavs, errors, messages)=>{
+                                                assert.equal(
+                                                    subset.length, wavs.length,
+                                                    "files array is same size as matches array");
+                                                
+                                                for (let m = 0; m < upTo; m++) {
+                                                    // console.log(wavs[m]);
+                                                    assert.isNotNull(
+                                                        wavs[m],
+                                                        "Non-null file: " + subset[m]);
+                                                    assert.isTrue(fs.existsSync(wavs[m]),
+                                                                  "File exists: " + subset[m]);
+                                                    assert.isAbove(
+                                                        fs.statSync(wavs[m]).size, 0,
+                                                        "Non-zero sized file: " + subset[m]);
+                                                    
+                                                    // be tidy
+                                                    fs.unlinkSync(wavs[m]);
+                                                }
+                                                
+                                                done();
+                                            });
+                                    });
+                            });
+                    });
+                });
+            });
+        });
+    });
+    
+    it("implements getFragments", (done)=>{
+        // get a participant ID to use
+        corpus.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some participant IDs exist");
+            const participantId = ids[0];
+            
+            // all instances of "I"
+            const pattern = {"orthography" : "i"};
+            corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
+                assert.isNotNull(response)
+                assert.isObject(response)
+                const threadId = response.threadId
+                
+                corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    
+                    // if the task is still running, it's taking too long, so cancel it
+                    if (task.running) corpus.cancelTask(threadId);
+                    assert.isFalse(task.running, "Search finished in a timely manner");
+                    
+                    corpus.getMatches(threadId, (result, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(result)
+                        assert.isNotNull(result.name)
+                        const matches = result.matches;
+                        assert.isAtLeast(
+                            matches.length, 0,
+                            "No matches were returned, cannot test getSoundFragments");
+                        
+                        corpus.releaseTask(threadId);
+                        
+                        const upTo = Math.min(5, matches.length);
+                        const subset = matches.slice(0, upTo);
+                        // convert MatchIds to arrays of individual Ids
+                        const graphIds = subset.map(match => match.Transcript);
+                        const startOffsets = subset.map(match => match.Line);
+                        const endOffsets = subset.map(match => match.LineEnd);
+
+                        const layerIds = [ "orthography" ];
+                        // getFragments with dir
+                        corpus.getFragments(
+                            graphIds, startOffsets, endOffsets, layerIds, "text/praat-textgrid",
+                            "test", (textgrids, errors, messages)=>{
+                                assert.equal(subset.length, textgrids.length,
+                                             "files array is same size as matches array");
                                 
-                                done();
+                                for (let m = 0; m < upTo; m++) {
+                                    // console.log(textgrids[m]);
+                                    assert.isNotNull(textgrids[m],
+                                                     "Non-null file: " + subset[m]);
+                                    assert.isTrue(fs.existsSync(textgrids[m]),
+                                                  "File exists: " + subset[m]);
+                                    assert.isAbove(fs.statSync(textgrids[m]).size, 0,
+                                                   "Non-zero sized file: " + subset[m]);
+                                    
+                                    // be tidy
+                                    fs.unlinkSync(textgrids[m]);
+                                }
+                                
+                                // getFragments without dir
+                                corpus.getFragments(
+                                    graphIds, startOffsets, endOffsets, layerIds,
+                                    "text/praat-textgrid", (textgrids, errors, messages)=>{
+                                        assert.equal(subset.length, textgrids.length,
+                                                     "files array is same size as matches array");
+                                        
+                                        for (let m = 0; m < upTo; m++) {
+                                            // console.log(textgrids[m]);
+                                            assert.isNotNull(textgrids[m],
+                                                             "Non-null file: " + subset[m]);
+                                            assert.isTrue(fs.existsSync(textgrids[m]),
+                                                          "File exists: " + subset[m]);
+                                            assert.isAbove(fs.statSync(textgrids[m]).size, 0,
+                                                           "Non-zero sized file: " + subset[m]);
+                                            
+                                            // be tidy
+                                            fs.unlinkSync(textgrids[m]);
+                                        }
+
+                                        done();
+                                    });
                             });
                     });
                 });
             });
         });
    });
-    
-   // it("implements getFragments", (done)=>{
-   //    // get a participant ID to use
-   //    String[] ids = corpus.getParticipantIds();
-   //    assertTrue("getParticipantIds: Some IDs are returned",
-   //               ids.length > 0);
-   //    String[] participantId = { ids[0] };      
-
-   //    // all instances of "and"
-   //    JSONObject pattern = new PatternBuilder().addMatchLayer("orthography", "and").build();
-   //    String threadId = corpus.search(pattern, participantId, false);
-   //    try
-   //    {
-   //       TaskStatus task = corpus.waitForTask(threadId, 30);
-   //       // if the task is still running, it's taking too long, so cancel it
-   //       if (task.getRunning()) try { corpus.cancelTask(threadId); } catch(Exception exception) {}
-   //       assertFalse("Search task finished in a timely manner",
-   //                   task.getRunning());
-         
-   //       Match[] matches = corpus.getMatches(threadId, 2);
-   //       if (matches.length == 0)
-   //       {
-   //          console.log(
-   //             "getMatches: No matches were returned, cannot test getFragments");
-   //       }
-   //       else
-   //       {
-   //          int upTo = Math.min(5, matches.length);
-   //          Match[] subset = Arrays.copyOfRange(matches, 0, upTo);
-
-   //          File dir = new File("getFragments");
-   //          String[] layerIds = { "orthography" };
-   //          File[] fragments = corpus.getFragments(subset, layerIds, "text/praat-textgrid", dir);
-   //          try {
-   //             assertEquals("files array is same size as matches array",
-   //                          subset.length, fragments.length);
-               
-   //             for (int m = 0; m < upTo; m++) {
-   //                assertNotNull("Non-null sized file: " + subset[m],
-   //                              fragments[m]);
-   //                assertTrue("Non-zero sized file: " + subset[m],
-   //                           fragments[m].length() > 0);
-   //                // console.log(fragments[m].getPath());
-   //             }
-   //          } finally {
-   //             for (File fragment : fragments) if (fragment != null) fragment.delete();
-   //             dir.delete();
-   //          }
-   //       }
-   //    }
-   //    finally
-   //    {
-   //       corpus.releaseTask(threadId);
-   //    }
-   // }
-
-
 });

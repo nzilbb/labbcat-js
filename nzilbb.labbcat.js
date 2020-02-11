@@ -61,6 +61,8 @@
         XMLHttpRequest = require('xhr2');
         FormData = require('form-data');
         fs = require('fs');
+        path = require('path');
+        os = require('os');
         btoa = require('btoa');
         parseUrl = require('url').parse;
         runningOnNode = true;
@@ -1445,6 +1447,35 @@
                 return;
             }
 
+            if (typeof sampleRate === "function") {
+                // (graphIds, startOffsets, endOffsets, onResult)
+                onResult = sampleRate;
+                sampleRate = null;
+                dir = null;
+            } else if (typeof dir === "function") {
+                onResult = dir;
+                if (typeof sampleRate === "string") {
+                    // (graphIds, startOffsets, endOffsets, dir, onResult)
+                    dir = sampleRate;
+                    sampleRate = null;
+                } else {
+                    // (graphIds, startOffsets, endOffsets, sampleRate, onResult)
+                    dir = null;
+                }
+            }
+            if (exports.verbose) {
+                console.log("getSoundFragments("+graphIds.length+" graphIds, "
+                            +startOffsets.length+" startOffsets, "
+                            +endOffsets.length+" endOffsets, "
+                            +sampleRate+", "+dir+")");
+            }
+
+            if (dir == null) {
+                dir = os.tmpdir();
+            } else {
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+            }
+            
             let fragments = [];
             let errors = [];
             
@@ -1455,10 +1486,12 @@
             const nextFragment = function(i) {
                 if (i < graphIds.length) { // next file
 	            const xhr = new XMLHttpRequest();
+                    
 	            let queryString = "?id="+encodeURIComponent(graphIds[i])
                         +"&start="+encodeURIComponent(startOffsets[i])
                         +"&end="+encodeURIComponent(endOffsets[i]);
                     if (sampleRate) queryString += "&sampleRate="+sampleRate;
+                    
                     if (exports.verbose) {
                         console.log(method + ": "+url + queryString + " as " + lc.username);
                     }
@@ -1467,7 +1500,11 @@
 	                xhr.setRequestHeader(
                             "Authorization", "Basic " + btoa(lc.username + ":" + lc._password))
  	            }
+                    
 	            xhr.setRequestHeader("Accept", "audio/wav");
+                    // we want binary data, not text
+                    xhr.responseType = "arraybuffer";
+                    
 	            xhr.addEventListener("error", function(evt) {
                         if (exports.verbose) {
                             console.log("getSoundFragments "+i+" ERROR: "+this.responseText);
@@ -1476,6 +1513,7 @@
                         fragments.push(null); // add a blank element
                         nextFragment(i+1);
                     }, false);
+                    
 	            xhr.addEventListener("load", function(evt) {
                         if (exports.verbose) {
                             console.log("getSoundFragments "+i+" loaded.");
@@ -1490,8 +1528,8 @@
                                 fileName = contentDisposition.substring(equals + 1);
                             }
                         }
-                        
-                        fs.writeFile(fileName, this.response, function(err) {
+                        const filePath = path.join(dir, fileName);
+                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
                             if (err) {
                                 if (exports.verbose) {
                                     console.log("getSoundFragments "+i+" SAVE ERROR: "+err);
@@ -1499,10 +1537,11 @@
                                 errors.push("Could not save fragment "+i+": "+err);
                             }
                             // add the file name to the result
-                            fragments.push(fileName); // add a blank element
+                            fragments.push(filePath); // add a blank element
                             nextFragment(i+1);
                         });
                     }, false);
+                    
                     xhr.send();
                 } else { // there are no more triples
                     if (onResult) {
@@ -1513,7 +1552,128 @@
             nextFragment(0);
         }
         
-        // TODO getFragments(id, start, end, layerIds, mimeType = "text/praat-textgrid")
+        /**
+         * Get graph fragments in a specified format.
+         * @param {string[]} graphIds A list of graph IDs (transcript names).
+         * @param {float[]} startOffsets A list of start offsets, with one element for
+         * each element in <var>graphIds</var>. 
+         * @param {float[]} endOffsets A list of end offsets, with one element for each element in
+         * <var>graphIds</var>. 
+         * @param {string[]} layerIds A list of IDs of annotation layers to include in the
+         * fragment. 
+         * @param {string} mimeType The desired format, for example "text/praat-textgrid" for Praat
+         * TextGrids, "text/plain" for plain text, etc.
+         * @param {string} [dir] A directory in which the files should be stored, or null
+         * for a temporary folder.   If specified, and the directory doesn't exist, it will
+         * be created.  
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be:  A list of files. If <var>dir</var> is null,
+         * these files will be stored under the system's temporary directory, so once
+         * processing is finished, they should be deleted by the caller, or moved to a
+         * more permanent location. 
+         */
+        getFragments(graphIds, startOffsets, endOffsets, layerIds, mimeType, dir, onResult) {
+            if (graphIds.length != startOffsets.length || graphIds.length != endOffsets.length) {
+                onResult && onResult(null, [
+                    "graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
+                        +"), and endOffsets ("+endOffsets.length+") must be arrays of equal size."],
+                                     [], "getFragments");
+                return;
+            }
+
+            if (typeof dir === "function") {
+                // (graphIds, startOffsets, endOffsets, layerIds, mimeType, onResult)
+                onResult = dir;
+                dir = null;
+            }
+            if (exports.verbose) {
+                console.log("getFragments("+graphIds.length+" graphIds, "
+                            +startOffsets.length+" startOffsets, "
+                            +endOffsets.length+" endOffsets, "
+                            +JSON.stringify(layerIds)+", "+mimeType+", "+dir+")");
+            }
+            
+            if (dir == null) {
+                dir = os.tmpdir();
+            } else {
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+            }
+            
+            let fragments = [];
+            let errors = [];
+            
+            // get fragments individually to ensure elements in result map 1:1 to element
+            // in graphIds
+	    let url = this.baseUrl + "convertfragment?mimeType="+encodeURIComponent(mimeType);
+            for (let layerId of layerIds) url += "&layerId=" + layerId;
+            const lc = this;
+            const nextFragment = function(i) {
+                if (i < graphIds.length) { // next file
+	            const xhr = new XMLHttpRequest();
+                    
+	            let queryString = "&id="+encodeURIComponent(graphIds[i])
+                        +"&start="+encodeURIComponent(startOffsets[i])
+                        +"&end="+encodeURIComponent(endOffsets[i]);
+                    
+                    if (exports.verbose) {
+                        console.log(method + ": "+url + queryString + " as " + lc.username);
+                    }
+	            xhr.open("GET", url + queryString, true);
+	            if (lc.username) {
+	                xhr.setRequestHeader(
+                            "Authorization", "Basic " + btoa(lc.username + ":" + lc._password))
+ 	            }
+                    
+	            xhr.setRequestHeader("Accept", mimeType);
+                    // we want binary data, not text
+                    xhr.responseType = "arraybuffer";
+                    
+	            xhr.addEventListener("error", function(evt) {
+                        if (exports.verbose) {
+                            console.log("getFragments "+i+" ERROR: "+this.responseText);
+                        }
+                        errors.push("Could not get fragment "+i+": "+this.responseText);
+                        fragments.push(null); // add a blank element
+                        nextFragment(i+1);
+                    }, false);
+                    
+	            xhr.addEventListener("load", function(evt) {
+                        if (exports.verbose) {
+                            console.log("getSoundFragments "+i+" loaded.");
+                        }
+                        // save the result to a file
+                        let fileName = graphIds[i]+"__"+startOffsets[i]+"-"+endOffsets[i];
+                        let contentDisposition = this.getResponseHeader("content-disposition");
+                        if (contentDisposition != null) {
+                            // something like attachment; filename=blah.wav
+                            const equals = contentDisposition.indexOf("=");
+                            if (equals > 0) {
+                                fileName = contentDisposition.substring(equals + 1);
+                            }
+                        }
+                        const filePath = path.join(dir, fileName);
+                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                            if (err) {
+                                if (exports.verbose) {
+                                    console.log("getFragments "+i+" SAVE ERROR: "+err);
+                                }
+                                errors.push("Could not save fragment "+i+": "+err);
+                            }
+                            // add the file name to the result
+                            fragments.push(filePath); // add a blank element
+                            nextFragment(i+1);
+                        });
+                    }, false);
+                    
+                    xhr.send();
+                } else { // there are no more triples
+                    if (onResult) {
+                        onResult(fragments, errors.length?errors:null, [], "getSoundFragments");
+                    }
+                }
+            }
+            nextFragment(0);
+        }
         
     } // class Labbcat
 
