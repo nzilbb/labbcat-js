@@ -1535,6 +1535,13 @@
          * a more permanent location.  
          */
         getSoundFragments(graphIds, startOffsets, endOffsets, sampleRate, dir, onResult) {
+            if (!runningOnNode) {
+                onResult && onResult(
+                    null, ["getSoundFragments is not yet implemented for browsers"], [], // TODO
+                    "getSoundFragments");
+                return;
+            }
+            
             // ensure graphIds is a list of strings, not a list of matches
             if (typeof graphIds[0] != "string" && graphIds[0].Transcript) {
                 // convert the array of matches into an arrays of graphIds, startOffset,
@@ -1694,6 +1701,13 @@
          * more permanent location. 
          */
         getFragments(graphIds, startOffsets, endOffsets, layerIds, mimeType, dir, onResult) {
+            if (!runningOnNode) {
+                onResult && onResult(
+                    null, ["getFragments is not yet implemented for browsers"], [], // TODO
+                    "getFragments");
+                return;
+            }
+                
             // ensure graphIds is a list of strings, not a list of matches
             if (typeof graphIds[0] != "string" && graphIds[0].Transcript) {
                 // convert the array of matches into an arrays of graphIds, startOffset,
