@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
-// This script uploads all Transcriber (.trs) files it can find (and corresponsing media)
+// This script uploads all transcript files it can find (and corresponsing media)
 // to the LaBB-CAT server below:
+
+// file extension to look for
+var ext = "trs";
 
 var labbcatUrl = "http://localhost:8080/labbcat";
 var userName = "labbcat";
@@ -12,7 +15,7 @@ var transcriptType = "interview";
 console.log("Batch upload...");
 
 var fs = require("fs");
-var labbcat = require("./nzilbb.labbcat");
+var labbcat = require("@nzilbb/labbcat");
 
 var local = new labbcat.Labbcat(labbcatUrl, userName, password);
 
@@ -23,7 +26,7 @@ function recursivelyFindTranscriberFiles(pathPrefix, directory) {
 	var path = dirPath + "/" + files[f];
 	var file = fs.statSync(path)
 	if (file.isFile()) {
-	    if (/\.trs$/.test(files[f])) {
+	    if (new RegExp("\\."+ext+"$").test(files[f])) {
 		console.log("Found " + path);
 		transcriptFiles.push(path);
 	    }
@@ -55,7 +58,9 @@ function deleteTranscript(transcript) {
 }
 function uploadTranscript(transcript) {
     console.log("uploading " + transcript);
-    var possibleMedia = [ transcript.replace(/\.trs$/,".wav"), transcript.replace(/\.trs$/,".mp3")];
+    var possibleMedia = [
+        transcript.replace(new RegExp("\\."+ext+"$"),".wav"),
+        transcript.replace(new RegExp("\\."+ext+"$"),".mp3")];
     var media = [];
     for (m in possibleMedia) {
 	if (fs.existsSync(possibleMedia[m])) {
