@@ -1269,8 +1269,23 @@
          * <var>result</var> which will be: An object with two attributes:
          * <dl>
          *  <dt>name</dt><dd>The name of the search results collection</dd>
-         *  <dt>matches</dt><dd>A list of IDs that can be used to identify
-         *   utterances/tokens that were matched by {@link Labbcat#search}</dd> 
+         *  <dt>matches</dt>
+         *   <dd>A list of match objects, with the following attributes
+         *    <dl>
+         *      <dt>MatchId</dt> <dd>A string identifying the match, of the kind expected
+         *        by {@link Labbcat#getMatchAnnotations}</dd>
+         *      <dt>Transcript</dt> <dd>The name of the transcript</dd>
+         *      <dt>Participant</dt> <dd>The name of the participant</dd>
+         *      <dt>Corpus</dt> <dd>The name of corpus the transcript belongs to</dd>
+         *      <dt>Line</dt> <dd>The start offset of the utterance, usually in seconds</dd>
+         *      <dt>LineEnd</dt> <dd>The end offset of the uttereance, usually in seconds</dd>
+         *      <dt>BeforeMatch</dt> <dd>The context of the trascript text just before the
+         *       match</dd> 
+         *      <dt>Transcript</dt> <dd>The transcript text that matched</dd>
+         *      <dt>BeforeMatch</dt> <dd>The context of the transcript text just after
+         *       the match</dd> 
+         *    </dl>
+         *   </dd> 
          * </dl>
          */
         getMatches(threadId, wordsContext, onResult) {
@@ -1290,7 +1305,8 @@
         /**
          * Gets annotations on selected layers related to search results returned by a previous
          * call to {@link Labbcat#getMatches}.
-         * @param {string[]} matchIds A list of MatchIds. 
+         * @param {string[]|object[]} matchIds A list of MatchIds, or a list of match
+         * objects returned by {@link Labbcat#getMatches} 
          * @param {string[]} layerIds A list of layer IDs.
          * @param {int} [targetOffset=0] The distance from the original target of the match, e.g.
          * <ul>
@@ -1318,6 +1334,12 @@
                 // (matchIds, layerIds, targetOffset, onResult)
                 onResult = annotationsPerLayer;
                 annotationsPerLayer = null;
+            }
+
+            // check that an array of matches hasn't been passed.
+            if (typeof matchIds[0] != "string" && matchIds[0].MatchId) {
+                // convert the array of matches into an array of MatchIds
+                matchIds = matchIds.map(match => match.MatchId);
             }
             
             if (exports.verbose) {
@@ -1423,6 +1445,15 @@
         
         /**
          * Downloads WAV sound fragments.
+         * <p>For convenience, the first three arguments, <var>graphIds</var>, 
+         * <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
+         * array of match objects of the kind returned by {@link Labbcat#getMatches} -
+         * e.g.
+         * <pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
+         *   labbcat.getMatchAnnotations(result.matches, sampleRate, dir, (files, e, m) => {
+         *       ...
+         *   });
+         * });</pre>
          * @param {string[]} graphIds A list of graph IDs (transcript names).
          * @param {float[]} startOffsets A list of start offsets, with one element for each
          * element in <var>graphIds</var>. 
@@ -1439,6 +1470,22 @@
          * a more permanent location.  
          */
         getSoundFragments(graphIds, startOffsets, endOffsets, sampleRate, dir, onResult) {
+            // ensure graphIds is a list of strings, not a list of matches
+            if (typeof graphIds[0] != "string" && graphIds[0].Transcript) {
+                // convert the array of matches into an arrays of graphIds, startOffset,
+                // and endOffsets...
+
+                // shift remaining arguments to the right
+                onResult = sampleRate
+                dir = endOffsets
+                sampleRate = startOffsets
+
+                // create arrays
+                startOffsets = graphIds.map(match => match.Line);
+                endOffsets = graphIds.map(match => match.LineEnd);
+                graphIds = graphIds.map(match => match.Transcript);
+            }            
+
             if (graphIds.length != startOffsets.length || graphIds.length != endOffsets.length) {
                 onResult && onResult(null, [
                     "graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
@@ -1554,6 +1601,15 @@
         
         /**
          * Get graph fragments in a specified format.
+         * <p>For convenience, the first three arguments, <var>graphIds</var>, 
+         * <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
+         * array of match objects of the kind returned by {@link Labbcat#getMatches} -
+         * e.g.
+         * <pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
+         *   labbcat.getFragments(result.matches, layerIds, mimeType, dir, (files, e, m) => {
+         *       ...
+         *   });
+         * });</pre>
          * @param {string[]} graphIds A list of graph IDs (transcript names).
          * @param {float[]} startOffsets A list of start offsets, with one element for
          * each element in <var>graphIds</var>. 
@@ -1573,11 +1629,29 @@
          * more permanent location. 
          */
         getFragments(graphIds, startOffsets, endOffsets, layerIds, mimeType, dir, onResult) {
+            // ensure graphIds is a list of strings, not a list of matches
+            if (typeof graphIds[0] != "string" && graphIds[0].Transcript) {
+                // convert the array of matches into an arrays of graphIds, startOffset,
+                // and endOffsets...
+
+                // shift remaining arguments to the right
+                onResult = mimeType
+                dir = layerIds
+                mimeType = endOffsets
+                layerIds = startOffsets
+
+                // create arrays
+                startOffsets = graphIds.map(match => match.Line);
+                endOffsets = graphIds.map(match => match.LineEnd);
+                graphIds = graphIds.map(match => match.Transcript);
+            }
+            
             if (graphIds.length != startOffsets.length || graphIds.length != endOffsets.length) {
-                onResult && onResult(null, [
-                    "graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
-                        +"), and endOffsets ("+endOffsets.length+") must be arrays of equal size."],
-                                     [], "getFragments");
+                onResult && onResult(
+                    null,
+                    ["graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
+                     +"), and endOffsets ("+endOffsets.length+") must be arrays of equal size."],
+                    [], "getFragments");
                 return;
             }
 

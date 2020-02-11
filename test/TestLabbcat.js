@@ -22,7 +22,7 @@ var corpus = null;
 
 describe("#Labbcat", function() { // not an arrow function because we want to this.timeout...
     // waitForTask and getMatches can take a few seconds
-    this.timeout(30000);
+    this.timeout(45000);
     
     before((done)=>{
         corpus = new labbcat.Labbcat(baseUrl, username, password);
@@ -308,9 +308,30 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 assert.containsAllKeys(
                                     annotation, ["id", "label", "startId", "endId"],
                                     "Looks like an annotation");
-                                
-                                corpus.releaseTask(threadId);
-                                done();
+
+                                // ensure we can also pass in a list of matches
+                                corpus.getMatchAnnotations(
+                                    matches, layerIds, 0, 1, (annotations, errors, messages)=>{
+                                        assert.isNull(errors,
+                                                      "Using matches instead of MatchIds works "
+                                                      +JSON.stringify(errors))
+                                        assert.isNotNull(annotations)
+                                        assert.isArray(annotations, JSON.stringify(annotations));
+                                        
+                                        assert.equal(
+                                            matchIds.length, annotations.length,
+                                            "annotations array is same size as matches array");
+                                        assert.equal(1, annotations[0].length,
+                                                     "row arrays are the right size");
+                                        
+                                        let annotation = annotations[0][0];
+                                        assert.containsAllKeys(
+                                            annotation, ["id", "label", "startId", "endId"],
+                                            "Looks like an annotation");
+                                        
+                                        corpus.releaseTask(threadId);
+                                        done();
+                                    });
                             });
                     });
                 });
@@ -442,6 +463,8 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         corpus.getSoundFragments(
                             graphIds, startOffsets, endOffsets, 16000, "test",
                             (wavs, errors, messages)=>{
+                                assert.isNull(errors, "getSoundFragments all params: "
+                                              +JSON.stringify(errors))
                                 assert.equal(subset.length, wavs.length,
                                              "files array is same size as matches array");
                                 
@@ -462,6 +485,8 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 corpus.getSoundFragments(
                                     graphIds, startOffsets, endOffsets, 16000,
                                     (wavs, errors, messages)=>{
+                                        assert.isNull(errors, "getSoundFragments without dir: "
+                                                      +JSON.stringify(errors))
                                         assert.equal(subset.length, wavs.length,
                                                      "files array is same size as matches array");
                                         
@@ -482,6 +507,9 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                         corpus.getSoundFragments(
                                             graphIds, startOffsets, endOffsets,
                                             (wavs, errors, messages)=>{
+                                                assert.isNull(
+                                                    errors, "getSoundFragments no sampleRate: "
+                                                        +JSON.stringify(errors))
                                                 assert.equal(
                                                     subset.length, wavs.length,
                                                     "files array is same size as matches array");
@@ -501,7 +529,35 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                     fs.unlinkSync(wavs[m]);
                                                 }
                                                 
-                                                done();
+                                                // getSoundFragments with matches instead of
+                                                // graphIds, startOffsets, and endOffsets
+                                                corpus.getSoundFragments(
+                                                    subset, (wavs, errors, messages)=>{
+                                                        assert.isNull(
+                                                            errors, "getSoundFragments w matches: "
+                                                                +JSON.stringify(errors))
+                                                        assert.equal(
+                                                            subset.length, wavs.length,
+                                                            "files array is same size as matches");
+                                                        
+                                                        for (let m = 0; m < upTo; m++) {
+                                                            // console.log(wavs[m]);
+                                                            assert.isNotNull(
+                                                                wavs[m],
+                                                                "Non-null file: " + subset[m]);
+                                                            assert.isTrue(
+                                                                fs.existsSync(wavs[m]),
+                                                                "File exists: " + subset[m]);
+                                                            assert.isAbove(
+                                                                fs.statSync(wavs[m]).size, 0,
+                                                                "Non-zero sized file: "+subset[m]);
+                                                            
+                                                            // be tidy
+                                                            fs.unlinkSync(wavs[m]);
+                                                        }
+                                                        
+                                                        done();
+                                                    });
                                             });
                                     });
                             });
@@ -556,6 +612,8 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         corpus.getFragments(
                             graphIds, startOffsets, endOffsets, layerIds, "text/praat-textgrid",
                             "test", (textgrids, errors, messages)=>{
+                                assert.isNull(errors, "getFragments with dir: "
+                                              +JSON.stringify(errors))
                                 assert.equal(subset.length, textgrids.length,
                                              "files array is same size as matches array");
                                 
@@ -576,6 +634,8 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 corpus.getFragments(
                                     graphIds, startOffsets, endOffsets, layerIds,
                                     "text/praat-textgrid", (textgrids, errors, messages)=>{
+                                        assert.isNull(errors, "getFragments without dir: "
+                                                      +JSON.stringify(errors))
                                         assert.equal(subset.length, textgrids.length,
                                                      "files array is same size as matches array");
                                         
@@ -592,7 +652,34 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                             fs.unlinkSync(textgrids[m]);
                                         }
 
-                                        done();
+                                        // getFragments with matches instead of
+                                        // graphIds, startOffsets, and endOffsets
+                                        corpus.getFragments(
+                                            subset, layerIds, "text/praat-textgrid",
+                                            (textgrids, errors, messages)=>{
+                                                assert.isNull(errors, "getFragments with matches: "
+                                                              +JSON.stringify(errors))
+                                                assert.equal(
+                                                    subset.length, textgrids.length,
+                                                    "files array is same size as matches array");
+                                        
+                                                for (let m = 0; m < upTo; m++) {
+                                                    // console.log(textgrids[m]);
+                                                    assert.isNotNull(
+                                                        textgrids[m],
+                                                        "Non-null file: " + subset[m]);
+                                                    assert.isTrue(fs.existsSync(textgrids[m]),
+                                                                  "File exists: " + subset[m]);
+                                                    assert.isAbove(
+                                                        fs.statSync(textgrids[m]).size, 0,
+                                                        "Non-zero sized file: " + subset[m]);
+                                                    
+                                                    // be tidy
+                                                    fs.unlinkSync(textgrids[m]);
+                                                }
+                                                
+                                                done();
+                                            });
                                     });
                             });
                     });
