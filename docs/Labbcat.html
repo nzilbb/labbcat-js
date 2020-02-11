@@ -199,7 +199,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line785">line 785</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line850">line 850</a>
     </li></ul></dd>
     
 
@@ -230,17 +230,52 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// create LaBB-CAT client
-const lc = new labbcat.<a href="Labbcat.html">Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")</a>;
-// upload a transcript
-const transcript = "some-transcript.eaf";
-const media = "some-transcript.wav";
-lc.newTranscript(
-    transcript, media, null, "interview", "corpus", episode, 
-    (result, errors, messages, call, id)=>{
-        console.log("Finished uploading " + transcript);
-        for (var e in errors) console.log("ERROR " + errors[e]);
-    });</code></pre>
+    <pre class="prettyprint"><code>const labbcat = require("@nzilbb/labbcat");
+
+const corpus = new labbcat.Labbcat("https://sometld.com", "your username", "your password");
+
+// get the first participant in the corpus
+corpus.getParticipantIds((ids, errors, messages)=>{
+    const participantId = ids[0];
+    
+    // all their instances of "the" followed by a word starting with a vowel
+    const pattern = [
+        {"orthography" : "i"},
+        {"phonemes" : "[cCEFHiIPqQuUV0123456789~#\\$@].*"}];
+    
+    // start searching
+    corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+        const taskId = response.threadId
+                
+        // wait for the search to finish
+        corpus.waitForTask(taskId, 30, (task, errors, messages)=>{
+            
+            // get the matches
+            corpus.getMatches(taskId, (result, errors, messages)=>{
+                const matches = result.matches;
+                console.log("There were " + matches.length + " matches for " + participantId);
+                
+                // get TextGrids of the utterances
+                corpus.getFragments(
+                    matches, [ "orthography", "phonemes" ], "text/praat-textgrid",
+                    (textgrids, errors, messages)=>{
+                        
+                        for (let textgrid of textgrids) {
+                            console.log(textgrid);
+                        }
+                        
+                        // get the utterance recordings
+                        corpus.getSoundFragments(matches, (wavs, errors, messages)=>{
+                            
+                            for (let wav of wavs) {
+                                console.log(wav);
+                            }
+                        });
+                    });
+            });
+        });
+    });
+});</code></pre>
 
 
 
@@ -324,7 +359,7 @@ lc.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line165">line 165</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line195">line 195</a>
     </li></ul></dd>
     
 
@@ -391,7 +426,7 @@ lc.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line172">line 172</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line202">line 202</a>
     </li></ul></dd>
     
 
@@ -458,7 +493,7 @@ lc.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line182">line 182</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line212">line 212</a>
     </li></ul></dd>
     
 
@@ -605,7 +640,7 @@ lc.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1113">line 1113</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1178">line 1178</a>
     </li></ul></dd>
     
 
@@ -794,7 +829,7 @@ lc.newTranscript(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line473">line 473</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line503">line 503</a>
     </li></ul></dd>
     
 
@@ -971,7 +1006,7 @@ my('utterances').start.offset = 12.345</code></li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line521">line 521</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line551">line 551</a>
     </li></ul></dd>
     
 
@@ -1157,7 +1192,7 @@ labels('who')</code></li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line401">line 401</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line431">line 431</a>
     </li></ul></dd>
     
 
@@ -1336,7 +1371,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line334">line 334</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line364">line 364</a>
     </li></ul></dd>
     
 
@@ -1501,7 +1536,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line753">line 753</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line783">line 783</a>
     </li></ul></dd>
     
 
@@ -1661,7 +1696,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1045">line 1045</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1110">line 1110</a>
     </li></ul></dd>
     
 
@@ -1850,7 +1885,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line610">line 610</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line640">line 640</a>
     </li></ul></dd>
     
 
@@ -2132,7 +2167,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line490">line 490</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line520">line 520</a>
     </li></ul></dd>
     
 
@@ -2298,7 +2333,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line629">line 629</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line659">line 659</a>
     </li></ul></dd>
     
 
@@ -2441,7 +2476,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line290">line 290</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line320">line 320</a>
     </li></ul></dd>
     
 
@@ -2607,7 +2642,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line639">line 639</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line669">line 669</a>
     </li></ul></dd>
     
 
@@ -2961,7 +2996,7 @@ more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1631">line 1631</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1696">line 1696</a>
     </li></ul></dd>
     
 
@@ -3151,7 +3186,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line599">line 599</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line629">line 629</a>
     </li></ul></dd>
     
 
@@ -3294,7 +3329,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line567">line 567</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line597">line 597</a>
     </li></ul></dd>
     
 
@@ -3460,7 +3495,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line577">line 577</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line607">line 607</a>
     </li></ul></dd>
     
 
@@ -3626,7 +3661,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line587">line 587</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line617">line 617</a>
     </li></ul></dd>
     
 
@@ -3769,7 +3804,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line243">line 243</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line273">line 273</a>
     </li></ul></dd>
     
 
@@ -3935,7 +3970,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line281">line 281</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line311">line 311</a>
     </li></ul></dd>
     
 
@@ -4078,7 +4113,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line252">line 252</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line282">line 282</a>
     </li></ul></dd>
     
 
@@ -4221,7 +4256,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line261">line 261</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line291">line 291</a>
     </li></ul></dd>
     
 
@@ -4540,7 +4575,7 @@ index in <var>matchIds</var>.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1328">line 1328</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1393">line 1393</a>
     </li></ul></dd>
     
 
@@ -4795,7 +4830,7 @@ Match</q> and <q>After Match</q> columns in the results.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1291">line 1291</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1356">line 1356</a>
     </li></ul></dd>
     
 
@@ -5058,7 +5093,7 @@ return the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line548">line 548</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line578">line 578</a>
     </li></ul></dd>
     
 
@@ -5368,7 +5403,7 @@ expressions, which may be appended by " ASC" or " DESC", or null for graph ID or
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line443">line 443</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line473">line 473</a>
     </li></ul></dd>
     
 
@@ -5632,7 +5667,7 @@ first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line362">line 362</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line392">line 392</a>
     </li></ul></dd>
     
 
@@ -5945,7 +5980,7 @@ graph, or null if the given media doesn't exist.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line656">line 656</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line686">line 686</a>
     </li></ul></dd>
     
 
@@ -6088,7 +6123,7 @@ graph, or null if the given media doesn't exist.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line619">line 619</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line649">line 649</a>
     </li></ul></dd>
     
 
@@ -6251,7 +6286,7 @@ or null if the participant was not found.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line311">line 311</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line341">line 341</a>
     </li></ul></dd>
     
 
@@ -6394,7 +6429,7 @@ or null if the participant was not found.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line299">line 299</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line329">line 329</a>
     </li></ul></dd>
     
 
@@ -6538,7 +6573,7 @@ relate to each other.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line271">line 271</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line301">line 301</a>
     </li></ul></dd>
     
 
@@ -6861,7 +6896,7 @@ a more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1472">line 1472</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1537">line 1537</a>
     </li></ul></dd>
     
 
@@ -6999,7 +7034,7 @@ result, which is an map of task IDs to statuses.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1055">line 1055</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1120">line 1120</a>
     </li></ul></dd>
     
 
@@ -7309,7 +7344,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line806">line 806</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line871">line 871</a>
     </li></ul></dd>
     
 
@@ -7469,7 +7504,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1100">line 1100</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1165">line 1165</a>
     </li></ul></dd>
     
 
@@ -7657,7 +7692,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line745">line 745</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line775">line 775</a>
     </li></ul></dd>
     
 
@@ -7819,7 +7854,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line717">line 717</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line747">line 747</a>
     </li></ul></dd>
     
 
@@ -8030,7 +8065,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line727">line 727</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line757">line 757</a>
     </li></ul></dd>
     
 
@@ -8218,7 +8253,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line736">line 736</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line766">line 766</a>
     </li></ul></dd>
     
 
@@ -8316,7 +8351,7 @@ const pattern2 = {
             "layers" : {
                 "phonemes" : {
                     "not" : true,
-                    "pattern" : "[cCEFHiIPqQuUV0123456789~#\\$@]."}
+                    "pattern" : "[cCEFHiIPqQuUV0123456789~#\\$@].*"}
                 "frequency" {
                     "max" : "2"
                 }
@@ -8337,7 +8372,7 @@ const pattrn4 = [{
 }, {
     phonemes : {
         not : true,
-        pattern : "[cCEFHiIPqQuUV0123456789~#\\$@]." },
+        pattern : "[cCEFHiIPqQuUV0123456789~#\\$@].*" },
     frequency : {
         max = "2" }
 }];
@@ -8505,7 +8540,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1214">line 1214</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1279">line 1279</a>
     </li></ul></dd>
     
 
@@ -8665,7 +8700,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1065">line 1065</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1130">line 1130</a>
     </li></ul></dd>
     
 
@@ -8849,7 +8884,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line954">line 954</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1019">line 1019</a>
     </li></ul></dd>
     
 
@@ -9035,7 +9070,7 @@ will be false if the task finished.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1078">line 1078</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1143">line 1143</a>
     </li></ul></dd>
     
 
@@ -9087,7 +9122,7 @@ will be false if the task finished.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 11 2020 13:02:29 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 11 2020 15:42:40 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
