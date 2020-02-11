@@ -686,5 +686,87 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                 });
             });
         });
+    });
+
+    it("works with the example code", (done)=>{
+        
+        // get the first participant in the corpus
+        corpus.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some participant IDs exist");
+            const participantId = ids[0];
+            
+            // all their instances of "the" followed by a word starting with a vowel
+            const pattern = [
+                {"orthography" : "i"},
+                {"phonemes" : "[cCEFHiIPqQuUV0123456789~#\\$@].*"}];
+
+            // start searching
+            corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
+                assert.isNotNull(response)
+                assert.isObject(response)
+                const taskId = response.threadId
+                
+                // wait for the search to finish
+                corpus.waitForTask(taskId, 30, (task, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    
+                    // if the task is still running, it's taking too long, so cancel it
+                    if (task.running) corpus.cancelTask(taskId);
+                    assert.isFalse(task.running, "Search finished in a timely manner");
+
+                    // get the matches
+                    corpus.getMatches(taskId, (result, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(result)
+                        assert.isNotNull(result.name)
+                        const matches = result.matches;
+                        assert.isAtLeast(
+                            matches.length, 0,
+                            "No matches were returned, cannot test getSoundFragments");
+
+                        console.log("There were " + matches.length + " matches for " + participantId);
+                        
+                        corpus.releaseTask(taskId);
+
+                        // get TextGrids of the utterances
+                        corpus.getFragments(
+                            matches, [ "orthography", "phonemes" ], "text/praat-textgrid",
+                            (textgrids, errors, messages)=>{
+                                assert.isNull(errors, "getFragments with dir: "
+                                              +JSON.stringify(errors))
+                                assert.equal(matches.length, textgrids.length,
+                                             "files array is same size as matches array");
+                                
+                                for (let textgrid of textgrids) {
+                                    console.log(textgrid);
+                                    // be tidy
+                                    fs.unlinkSync(textgrid);
+                                }
+                                
+                                // get the utterance recordings
+                                corpus.getSoundFragments(
+                                    matches, (wavs, errors, messages)=>{
+                                        assert.isNull(errors, JSON.stringify(errors))
+                                        assert.equal(
+                                            matches.length, wavs.length,
+                                            "files array is same size as matches");
+                                        
+                                        for (let wav of wavs) {
+                                            console.log(wav);
+                                            // be tidy
+                                            fs.unlinkSync(wav);
+                                        }
+                                        done();
+                                    });
+                            });
+                    });
+                });
+            });
+        });
    });
+    
 });
+
+

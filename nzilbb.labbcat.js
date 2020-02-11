@@ -15,20 +15,50 @@
  * A complete list of functions is available [here]{@link Labbcat}.
  *
  * @example
- * var lc = new labbcat.Labbcat(baseUrl, username, password);
- * // load corpora
- * lc.getCorpusIds(function(result, errors, messages, call, id) {
- *     if (errors) {
- *        alert("Could not list corpora: " + errors[0]);
- *     } else {
- *       var corpora = document.getElementById("corpus");
- *       for (var i in result) {
- *         var option = document.createElement("option");
- *         option.appendChild(document.createTextNode(result[i]));
- *         corpora.appendChild(option);
- *       }
- *     }
- *   });
+ * const corpus = new labbcat.Labbcat("https://sometld.com", "your username", "your password");
+ * 
+ * // get the first participant in the corpus
+ * corpus.getParticipantIds((ids, errors, messages)=>{
+ *     const participantId = ids[0];
+ *     
+ *     // all their instances of "the" followed by a word starting with a vowel
+ *     const pattern = [
+ *         {"orthography" : "i"},
+ *         {"phonemes" : "[cCEFHiIPqQuUV0123456789~#\\$@].*"}];
+ *     
+ *     // start searching
+ *     corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+ *         const taskId = response.threadId
+ *                 
+ *         // wait for the search to finish
+ *         corpus.waitForTask(taskId, 30, (task, errors, messages)=>{
+ *             
+ *             // get the matches
+ *             corpus.getMatches(taskId, (result, errors, messages)=>{
+ *                 const matches = result.matches;
+ *                 console.log("There were " + matches.length + " matches for " + participantId);
+ *                 
+ *                 // get TextGrids of the utterances
+ *                 corpus.getFragments(
+ *                     matches, [ "orthography", "phonemes" ], "text/praat-textgrid",
+ *                     (textgrids, errors, messages)=>{
+ *                         
+ *                         for (let textgrid of textgrids) {
+ *                             console.log(textgrid);
+ *                         }
+ *                         
+ *                         // get the utterance recordings
+ *                         corpus.getSoundFragments(matches, (wavs, errors, messages)=>{
+ *                             
+ *                             for (let wav of wavs) {
+ *                                 console.log(wav);
+ *                             }
+ *                         });
+ *                     });
+ *             });
+ *         });
+ *     });
+ * });
  *
  * @author Robert Fromont robert.fromont@canterbury.ac.nz
  * @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL v3.0
@@ -760,17 +790,52 @@
     /**
      * Labbcat client, for accessing LaBB-CAT server functions programmatically.
      * @example
-     * // create LaBB-CAT client
-     * const lc = new labbcat.[Labbcat("https://labbcat.canterbury.ac.nz", "demo", "demo")]{@link Labbcat};
-     * // upload a transcript
-     * const transcript = "some-transcript.eaf";
-     * const media = "some-transcript.wav";
-     * lc.newTranscript(
-     *     transcript, media, null, "interview", "corpus", episode, 
-     *     (result, errors, messages, call, id)=>{
-     *         console.log("Finished uploading " + transcript);
-     *         for (var e in errors) console.log("ERROR " + errors[e]);
+     * const labbcat = require("@nzilbb/labbcat");
+     * 
+     * const corpus = new labbcat.Labbcat("https://sometld.com", "your username", "your password");
+     * 
+     * // get the first participant in the corpus
+     * corpus.getParticipantIds((ids, errors, messages)=>{
+     *     const participantId = ids[0];
+     *     
+     *     // all their instances of "the" followed by a word starting with a vowel
+     *     const pattern = [
+     *         {"orthography" : "i"},
+     *         {"phonemes" : "[cCEFHiIPqQuUV0123456789~#\\$@].*"}];
+     *     
+     *     // start searching
+     *     corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+     *         const taskId = response.threadId
+     *                 
+     *         // wait for the search to finish
+     *         corpus.waitForTask(taskId, 30, (task, errors, messages)=>{
+     *             
+     *             // get the matches
+     *             corpus.getMatches(taskId, (result, errors, messages)=>{
+     *                 const matches = result.matches;
+     *                 console.log("There were " + matches.length + " matches for " + participantId);
+     *                 
+     *                 // get TextGrids of the utterances
+     *                 corpus.getFragments(
+     *                     matches, [ "orthography", "phonemes" ], "text/praat-textgrid",
+     *                     (textgrids, errors, messages)=>{
+     *                         
+     *                         for (let textgrid of textgrids) {
+     *                             console.log(textgrid);
+     *                         }
+     *                         
+     *                         // get the utterance recordings
+     *                         corpus.getSoundFragments(matches, (wavs, errors, messages)=>{
+     *                             
+     *                             for (let wav of wavs) {
+     *                                 console.log(wav);
+     *                             }
+     *                         });
+     *                     });
+     *             });
+     *         });
      *     });
+     * });
      *
      * @extends GraphStore
      * @author Robert Fromont robert@fromont.net.nz
@@ -1173,7 +1238,7 @@
          *             "layers" : {
          *                 "phonemes" : {
          *                     "not" : true,
-         *                     "pattern" : "[cCEFHiIPqQuUV0123456789~#\\$@]."}
+         *                     "pattern" : "[cCEFHiIPqQuUV0123456789~#\\$@].*"}
          *                 "frequency" {
          *                     "max" : "2"
          *                 }
@@ -1194,7 +1259,7 @@
          * }, {
          *     phonemes : {
          *         not : true,
-         *         pattern : "[cCEFHiIPqQuUV0123456789~#\\$@]." },
+         *         pattern : "[cCEFHiIPqQuUV0123456789~#\\$@].*" },
          *     frequency : {
          *         max = "2" }
          * }];
