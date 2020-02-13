@@ -3,14 +3,13 @@
 // This script uploads all transcript files it can find (and corresponsing media),
 // deleting pre-existing versions first, to the LaBB-CAT server below:
 
-// file extension to look for
-var ext = "eaf";
-
-var labbcatUrl = "http://localhost:8080/labbcat";
-var userName = "labbcat";
-var password = "labbcat";
-var corpus = "corpus";
-var transcriptType = "interview";
+// CHANGE THE FOLLOWING VARIABLES TO SUIT YOUR CIRCUMSTANCES
+var ext = "eaf";                                  // transcript file extension to look for
+var labbcatUrl = "http://localhost:8080/labbcat"; // LaBB-CAT "home" URL
+var userName = "labbcat";                         // LaBB-CAT username
+var password = "labbcat";                         // LaBB-CAT password
+var corpus = "corpus";                            // corpus to upload into
+var transcriptType = "interview";                 // transcript type to use
 
 console.log("Batch upload...");
 
