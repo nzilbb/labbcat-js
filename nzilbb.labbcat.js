@@ -251,12 +251,17 @@
 	        } // next parameter
 	    }
             queryString = queryString.replace(/^&/,"?");
-	    if (!url) url = this.storeUrl;
-
-            if (exports.verbose) {
-                console.log(method + ": "+url + call + queryString + " as " + this.username);
+	    if (!url) {
+                if (exports.verbose) {
+                    console.log(method + ": "+this.storeUrl + call + queryString + " as " + this.username);
+                }
+	        xhr.open(method, this.storeUrl + call + queryString, true);
+            } else { // explicit URL, so don't append call
+                if (exports.verbose) {
+                    console.log(method + ": "+url + queryString + " as " + this.username);
+                }
+	        xhr.open(method, url + queryString, true);
             }
-	    xhr.open(method, url + call + queryString, true);
 	    if (this.username) {
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
@@ -1119,7 +1124,7 @@
          */
         getTasks(onResult) {
             if (exports.verbose) console.log("getTasks()");
-            this.createRequest("threads", null, onResult, this.baseUrl).send();
+            this.createRequest("getTasks", null, onResult, this.baseUrl + "threads").send();
         }
         
         /**
@@ -1128,7 +1133,7 @@
          * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         taskStatus(id, onResult) {
-            this.createRequest("thread", { id : id, threadId : id }, onResult, this.baseUrl).send();
+            this.createRequest("taskStatus", { id : id, threadId : id }, onResult, this.baseUrl+"thread").send();
         }
 
         /**
@@ -1164,10 +1169,10 @@
          */
         releaseTask(id, onResult) {
             if (exports.verbose) console.log("releaseTask("+threadId+")");
-            this.createRequest("threads", {
+            this.createRequest("releaseTask", {
                 threadId : id,
                 command : "release"
-            }, onResult, this.baseUrl).send();
+            }, onResult, this.baseUrl+"threads").send();
         }
         
         /**
@@ -1177,10 +1182,10 @@
          */
         cancelTask(threadId, onResult) {
             if (exports.verbose) console.log("cancelTask("+threadId+")");
-            this.createRequest("threads", {
+            this.createRequest("cancelTask", {
                 threadId : threadId,
                 command : "cancel"
-            }, onResult, this.baseUrl).send();
+            }, onResult, this.baseUrl+"threads").send();
         }
         
         /**
@@ -1316,7 +1321,7 @@
             if (mainParticipant) parameters.only_main_speaker = true;
             if (participantIds) parameters.participant_id = participantIds;
 
-            this.createRequest("search", parameters, onResult, this.baseUrl).send();
+            this.createRequest("search", parameters, onResult, this.baseUrl+"search").send();
         }
         
         /**
@@ -1380,12 +1385,12 @@
             }
             wordsContext = wordsContext || 0;
             
-            this.createRequest("resultsStream", {
+            this.createRequest("getMatches", {
                 threadId : threadId,
                 words_context : wordsContext,
                 pageLength : pageLength,
                 pageNumber : pageNumber
-            }, onResult, this.baseUrl).send();
+            }, onResult, this.baseUrl+"resultsStream").send();
         }
         
         /**
