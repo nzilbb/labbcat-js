@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-// This script uploads all transcript files it can find (and corresponsing media)
-// to the LaBB-CAT server below:
+// This script uploads all transcript files it can find (and corresponsing media),
+// deleting pre-existing versions first, to the LaBB-CAT server below:
 
 // file extension to look for
-var ext = "trs";
+var ext = "eaf";
 
 var labbcatUrl = "http://localhost:8080/labbcat";
 var userName = "labbcat";
@@ -15,6 +15,7 @@ var transcriptType = "interview";
 console.log("Batch upload...");
 
 var fs = require("fs");
+var path = require('path');
 var labbcat = require("@nzilbb/labbcat");
 
 var local = new labbcat.Labbcat(labbcatUrl, userName, password);
@@ -47,11 +48,12 @@ function uploadNextTranscript() {
 
 function deleteTranscript(transcript) {
     console.log(transcript + " ...");
-    local.deleteTranscript(
-	transcript,
+    var transcriptName = path.basename(transcript);
+    local.deleteGraph(
+        transcriptName,
 	function(result, errors, messages, call, id) {
-	    console.log("Deleted " + transcript);
-	    for (var e in errors) console.log("ERROR " + errors[e]);
+	    console.log("Deleted " + transcriptName);
+	    for (var e in errors) console.log("DELETE " + errors[e]);
 	    for (var m in messages) console.log("MESSAGE " + messages[m]);
 	    uploadTranscript(transcript);
 	});    
