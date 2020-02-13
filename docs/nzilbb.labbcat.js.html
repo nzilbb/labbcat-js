@@ -279,12 +279,17 @@
 	        } // next parameter
 	    }
             queryString = queryString.replace(/^&amp;/,"?");
-	    if (!url) url = this.storeUrl;
-
-            if (exports.verbose) {
-                console.log(method + ": "+url + call + queryString + " as " + this.username);
+	    if (!url) {
+                if (exports.verbose) {
+                    console.log(method + ": "+this.storeUrl + call + queryString + " as " + this.username);
+                }
+	        xhr.open(method, this.storeUrl + call + queryString, true);
+            } else { // explicit URL, so don't append call
+                if (exports.verbose) {
+                    console.log(method + ": "+url + queryString + " as " + this.username);
+                }
+	        xhr.open(method, url + queryString, true);
             }
-	    xhr.open(method, url + call + queryString, true);
 	    if (this.username) {
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
@@ -1134,10 +1139,10 @@
          * Delete a transcript.
          * @param {string} id ID of the transcript.
          * @param {resultCallback} onResult Invoked when the request has completed.
+         * @deprecate Use deleteGraph instead.
          */
         deleteTranscript(id, onResult) {
-            if (exports.verbose) console.log("deleteTranscript(" + id + ")");
-            this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
+            this.deleteGraph(id, onResult);
         }
         
         /**
@@ -1147,7 +1152,7 @@
          */
         getTasks(onResult) {
             if (exports.verbose) console.log("getTasks()");
-            this.createRequest("threads", null, onResult, this.baseUrl).send();
+            this.createRequest("getTasks", null, onResult, this.baseUrl + "threads").send();
         }
         
         /**
@@ -1156,7 +1161,7 @@
          * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
         taskStatus(id, onResult) {
-            this.createRequest("thread", { id : id, threadId : id }, onResult, this.baseUrl).send();
+            this.createRequest("taskStatus", { id : id, threadId : id }, onResult, this.baseUrl+"thread").send();
         }
 
         /**
@@ -1192,10 +1197,10 @@
          */
         releaseTask(id, onResult) {
             if (exports.verbose) console.log("releaseTask("+threadId+")");
-            this.createRequest("threads", {
+            this.createRequest("releaseTask", {
                 threadId : id,
                 command : "release"
-            }, onResult, this.baseUrl).send();
+            }, onResult, this.baseUrl+"threads").send();
         }
         
         /**
@@ -1205,10 +1210,10 @@
          */
         cancelTask(threadId, onResult) {
             if (exports.verbose) console.log("cancelTask("+threadId+")");
-            this.createRequest("threads", {
+            this.createRequest("cancelTask", {
                 threadId : threadId,
                 command : "cancel"
-            }, onResult, this.baseUrl).send();
+            }, onResult, this.baseUrl+"threads").send();
         }
         
         /**
@@ -1344,7 +1349,7 @@
             if (mainParticipant) parameters.only_main_speaker = true;
             if (participantIds) parameters.participant_id = participantIds;
 
-            this.createRequest("search", parameters, onResult, this.baseUrl).send();
+            this.createRequest("search", parameters, onResult, this.baseUrl+"search").send();
         }
         
         /**
@@ -1358,6 +1363,10 @@
          * @param {string} threadId A task ID returned by {@link Labbcat#search}.
          * @param {int} [wordsContext=0] Number of words context to include in the &lt;q>Before
          * Match&lt;/q> and &lt;q>After Match&lt;/q> columns in the results.
+         * @param {int} [pageLength] The maximum number of matches to return, or null to
+         * return all. 
+         * @param {int} [pageNumber] The zero-based page number to return, or null to
+         * return the first page.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * &lt;var>result&lt;/var> which will be: An object with two attributes:
          * &lt;dl>
@@ -1381,18 +1390,35 @@
          *   &lt;/dd> 
          * &lt;/dl>
          */
-        getMatches(threadId, wordsContext, onResult) {
+        getMatches(threadId, wordsContext, pageLength, pageNumber, onResult) {
             if (typeof wordsContext === "function") { // (threadId, onResult)
                 onResult = wordsContext;
                 wordsContext = null;
             }
-            if (exports.verbose) console.log("getMatches("+threadId+", "+wordsContext+")");
+            else if (typeof pageLength === "function") { // (threadId, wordsContext, onResult)
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+            }
+            else if (typeof pageNumber === "function") {
+                // (threadId, pageLength, pageNumber, onResult)
+                onResult = pageNumber;
+                pageNumber = pageLength;
+                pageLength = wordsContext;
+                wordsContext = null;
+            }
+            if (exports.verbose) {
+                console.log("getMatches("+threadId+", "+wordsContext
+                            +", "+pageLength+", "+pageNumber+")");
+            }
             wordsContext = wordsContext || 0;
             
-            this.createRequest("resultsStream", {
+            this.createRequest("getMatches", {
                 threadId : threadId,
-                "words_context" : wordsContext
-            }, onResult, this.baseUrl).send();
+                words_context : wordsContext,
+                pageLength : pageLength,
+                pageNumber : pageNumber
+            }, onResult, this.baseUrl+"resultsStream").send();
         }
         
         /**
@@ -1563,6 +1589,13 @@
          * a more permanent location.  
          */
         getSoundFragments(graphIds, startOffsets, endOffsets, sampleRate, dir, onResult) {
+            if (!runningOnNode) {
+                onResult &amp;&amp; onResult(
+                    null, ["getSoundFragments is not yet implemented for browsers"], [], // TODO
+                    "getSoundFragments");
+                return;
+            }
+            
             // ensure graphIds is a list of strings, not a list of matches
             if (typeof graphIds[0] != "string" &amp;&amp; graphIds[0].Transcript) {
                 // convert the array of matches into an arrays of graphIds, startOffset,
@@ -1722,6 +1755,13 @@
          * more permanent location. 
          */
         getFragments(graphIds, startOffsets, endOffsets, layerIds, mimeType, dir, onResult) {
+            if (!runningOnNode) {
+                onResult &amp;&amp; onResult(
+                    null, ["getFragments is not yet implemented for browsers"], [], // TODO
+                    "getFragments");
+                return;
+            }
+                
             // ensure graphIds is a list of strings, not a list of matches
             if (typeof graphIds[0] != "string" &amp;&amp; graphIds[0].Transcript) {
                 // convert the array of matches into an arrays of graphIds, startOffset,
@@ -1990,7 +2030,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Feb 11 2020 15:42:40 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Feb 13 2020 12:27:43 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
