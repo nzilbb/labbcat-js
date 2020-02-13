@@ -1111,7 +1111,7 @@
          * Delete a transcript.
          * @param {string} id ID of the transcript.
          * @param {resultCallback} onResult Invoked when the request has completed.
-         * @deprecate Use deleteGraph instead.
+         * @deprecated Use deleteGraph instead.
          */
         deleteTranscript(id, onResult) {
             this.deleteGraph(id, onResult);
