@@ -1330,6 +1330,10 @@
          * @param {string} threadId A task ID returned by {@link Labbcat#search}.
          * @param {int} [wordsContext=0] Number of words context to include in the <q>Before
          * Match</q> and <q>After Match</q> columns in the results.
+         * @param {int} [pageLength] The maximum number of matches to return, or null to
+         * return all. 
+         * @param {int} [pageNumber] The zero-based page number to return, or null to
+         * return the first page.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: An object with two attributes:
          * <dl>
@@ -1353,17 +1357,34 @@
          *   </dd> 
          * </dl>
          */
-        getMatches(threadId, wordsContext, onResult) {
+        getMatches(threadId, wordsContext, pageLength, pageNumber, onResult) {
             if (typeof wordsContext === "function") { // (threadId, onResult)
                 onResult = wordsContext;
                 wordsContext = null;
             }
-            if (exports.verbose) console.log("getMatches("+threadId+", "+wordsContext+")");
+            else if (typeof pageLength === "function") { // (threadId, wordsContext, onResult)
+                onResult = pageLength;
+                pageLength = null;
+                pageNumber = null;
+            }
+            else if (typeof pageNumber === "function") {
+                // (threadId, pageLength, pageNumber, onResult)
+                onResult = pageNumber;
+                pageNumber = pageLength;
+                pageLength = wordsContext;
+                wordsContext = null;
+            }
+            if (exports.verbose) {
+                console.log("getMatches("+threadId+", "+wordsContext
+                            +", "+pageLength+", "+pageNumber+")");
+            }
             wordsContext = wordsContext || 0;
             
             this.createRequest("resultsStream", {
                 threadId : threadId,
-                "words_context" : wordsContext
+                words_context : wordsContext,
+                pageLength : pageLength,
+                pageNumber : pageNumber
             }, onResult, this.baseUrl).send();
         }
         

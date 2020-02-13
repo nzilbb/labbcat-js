@@ -290,49 +290,61 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         assert.isAtLeast(matches.length, 1,
                                          "getMatches: No matches were returned,"
                                          +" cannot test getMatchAnnotations");
+                        const pageLength = Math.min(5, matches.length);
                         
-                        const layerIds = [ "orthography" ];
-                        const matchIds = matches.map(match => match.MatchId);
-                        corpus.getMatchAnnotations(
-                            matchIds, layerIds, 0, 1, (annotations, errors, messages)=>{
-                                assert.isNull(errors, JSON.stringify(errors))
-                                assert.isNotNull(annotations)
-                                assert.isArray(annotations, JSON.stringify(annotations));
-                                
-                                assert.equal(matchIds.length, annotations.length,
-                                             "annotations array is same size as matches array");
-                                assert.equal(1, annotations[0].length,
-                                             "row arrays are the right size");
-
-                                let annotation = annotations[0][0];
-                                assert.containsAllKeys(
-                                    annotation, ["id", "label", "startId", "endId"],
-                                    "Looks like an annotation");
-
-                                // ensure we can also pass in a list of matches
-                                corpus.getMatchAnnotations(
-                                    matches, layerIds, 0, 1, (annotations, errors, messages)=>{
-                                        assert.isNull(errors,
-                                                      "Using matches instead of MatchIds works "
-                                                      +JSON.stringify(errors))
-                                        assert.isNotNull(annotations)
-                                        assert.isArray(annotations, JSON.stringify(annotations));
-                                        
-                                        assert.equal(
-                                            matchIds.length, annotations.length,
-                                            "annotations array is same size as matches array");
-                                        assert.equal(1, annotations[0].length,
-                                                     "row arrays are the right size");
-                                        
-                                        let annotation = annotations[0][0];
-                                        assert.containsAllKeys(
-                                            annotation, ["id", "label", "startId", "endId"],
-                                            "Looks like an annotation");
-                                        
-                                        corpus.releaseTask(threadId);
-                                        done();
-                                    });
-                            });
+                        corpus.getMatches(threadId, 2, pageLength, 0, (result, errors, messages)=>{
+                            assert.isNull(errors, "Pagination works: " + JSON.stringify(errors))
+                            assert.isNotNull(result)
+                            assert.isNotNull(result.name)
+                            const matches = result.matches;
+                            assert.isArray(result.matches)
+                            assert.equal(matches.length, pageLength, "page length correct");
+                            
+                            const layerIds = [ "orthography" ];
+                            const matchIds = matches.map(match => match.MatchId);
+                            corpus.getMatchAnnotations(
+                                matchIds, layerIds, 0, 1, (annotations, errors, messages)=>{
+                                    assert.isNull(errors, JSON.stringify(errors))
+                                    assert.isNotNull(annotations)
+                                    assert.isArray(annotations, JSON.stringify(annotations));
+                                    
+                                    assert.equal(matchIds.length, annotations.length,
+                                                 "annotations array is same size as matches");
+                                    assert.equal(1, annotations[0].length,
+                                                 "row arrays are the right size");
+                                    
+                                    let annotation = annotations[0][0];
+                                    assert.containsAllKeys(
+                                        annotation, ["id", "label", "startId", "endId"],
+                                        "Looks like an annotation");
+                                    
+                                    // ensure we can also pass in a list of matches
+                                    corpus.getMatchAnnotations(
+                                        matches, layerIds, 0, 1, (annotations, errors, messages)=>{
+                                            assert.isNull(
+                                                errors,
+                                                "Using matches instead of MatchIds works "
+                                                    +JSON.stringify(errors))
+                                            assert.isNotNull(annotations)
+                                            assert.isArray(annotations,
+                                                           JSON.stringify(annotations));
+                                            
+                                            assert.equal(
+                                                matchIds.length, annotations.length,
+                                                "annotations array is same size as matches array");
+                                            assert.equal(1, annotations[0].length,
+                                                         "row arrays are the right size");
+                                            
+                                            let annotation = annotations[0][0];
+                                            assert.containsAllKeys(
+                                                annotation, ["id", "label", "startId", "endId"],
+                                                "Looks like an annotation");
+                                            
+                                            corpus.releaseTask(threadId);
+                                            done();
+                                        });
+                                });
+                        });
                     });
                 });
             });
@@ -441,7 +453,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                     if (task.running) corpus.cancelTask(threadId);
                     assert.isFalse(task.running, "Search finished in a timely manner");
                     
-                    corpus.getMatches(threadId, (result, errors, messages)=>{
+                    corpus.getMatches(threadId, 5, 0, (result, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(result)
                         assert.isNotNull(result.name)
@@ -453,11 +465,10 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         corpus.releaseTask(threadId);
                         
                         const upTo = Math.min(5, matches.length);
-                        const subset = matches.slice(0, upTo);
                         // convert MatchIds to arrays of individual Ids
-                        const graphIds = subset.map(match => match.Transcript);
-                        const startOffsets = subset.map(match => match.Line);
-                        const endOffsets = subset.map(match => match.LineEnd);
+                        const graphIds = matches.map(match => match.Transcript);
+                        const startOffsets = matches.map(match => match.Line);
+                        const endOffsets = matches.map(match => match.LineEnd);
 
                         // getSoundFragments with all parameters
                         corpus.getSoundFragments(
@@ -465,17 +476,17 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                             (wavs, errors, messages)=>{
                                 assert.isNull(errors, "getSoundFragments all params: "
                                               +JSON.stringify(errors))
-                                assert.equal(subset.length, wavs.length,
+                                assert.equal(matches.length, wavs.length,
                                              "files array is same size as matches array");
                                 
                                 for (let m = 0; m < upTo; m++) {
                                     // console.log(wavs[m]);
                                     assert.isNotNull(wavs[m],
-                                                     "Non-null file: " + subset[m]);
+                                                     "Non-null file: " + matches[m]);
                                     assert.isTrue(fs.existsSync(wavs[m]),
-                                                  "File exists: " + subset[m]);
+                                                  "File exists: " + matches[m]);
                                     assert.isAbove(fs.statSync(wavs[m]).size, 0,
-                                                   "Non-zero sized file: " + subset[m]);
+                                                   "Non-zero sized file: " + matches[m]);
                                     
                                     // be tidy
                                     fs.unlinkSync(wavs[m]);
@@ -487,17 +498,17 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                     (wavs, errors, messages)=>{
                                         assert.isNull(errors, "getSoundFragments without dir: "
                                                       +JSON.stringify(errors))
-                                        assert.equal(subset.length, wavs.length,
+                                        assert.equal(matches.length, wavs.length,
                                                      "files array is same size as matches array");
                                         
                                         for (let m = 0; m < upTo; m++) {
                                             // console.log(wavs[m]);
                                             assert.isNotNull(wavs[m],
-                                                             "Non-null file: " + subset[m]);
+                                                             "Non-null file: " + matches[m]);
                                             assert.isTrue(fs.existsSync(wavs[m]),
-                                                          "File exists: " + subset[m]);
+                                                          "File exists: " + matches[m]);
                                             assert.isAbove(fs.statSync(wavs[m]).size, 0,
-                                                   "Non-zero sized file: " + subset[m]);
+                                                   "Non-zero sized file: " + matches[m]);
                                             
                                             // be tidy
                                             fs.unlinkSync(wavs[m]);
@@ -511,19 +522,19 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                     errors, "getSoundFragments no sampleRate: "
                                                         +JSON.stringify(errors))
                                                 assert.equal(
-                                                    subset.length, wavs.length,
+                                                    matches.length, wavs.length,
                                                     "files array is same size as matches array");
                                                 
                                                 for (let m = 0; m < upTo; m++) {
                                                     // console.log(wavs[m]);
                                                     assert.isNotNull(
                                                         wavs[m],
-                                                        "Non-null file: " + subset[m]);
+                                                        "Non-null file: " + matches[m]);
                                                     assert.isTrue(fs.existsSync(wavs[m]),
-                                                                  "File exists: " + subset[m]);
+                                                                  "File exists: " + matches[m]);
                                                     assert.isAbove(
                                                         fs.statSync(wavs[m]).size, 0,
-                                                        "Non-zero sized file: " + subset[m]);
+                                                        "Non-zero sized file: " + matches[m]);
                                                     
                                                     // be tidy
                                                     fs.unlinkSync(wavs[m]);
@@ -532,25 +543,25 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                 // getSoundFragments with matches instead of
                                                 // graphIds, startOffsets, and endOffsets
                                                 corpus.getSoundFragments(
-                                                    subset, (wavs, errors, messages)=>{
+                                                    matches, (wavs, errors, messages)=>{
                                                         assert.isNull(
                                                             errors, "getSoundFragments w matches: "
                                                                 +JSON.stringify(errors))
                                                         assert.equal(
-                                                            subset.length, wavs.length,
+                                                            matches.length, wavs.length,
                                                             "files array is same size as matches");
                                                         
                                                         for (let m = 0; m < upTo; m++) {
                                                             // console.log(wavs[m]);
                                                             assert.isNotNull(
                                                                 wavs[m],
-                                                                "Non-null file: " + subset[m]);
+                                                                "Non-null file: " + matches[m]);
                                                             assert.isTrue(
                                                                 fs.existsSync(wavs[m]),
-                                                                "File exists: " + subset[m]);
+                                                                "File exists: " + matches[m]);
                                                             assert.isAbove(
                                                                 fs.statSync(wavs[m]).size, 0,
-                                                                "Non-zero sized file: "+subset[m]);
+                                                                "Non-zero sized file: "+matches[m]);
                                                             
                                                             // be tidy
                                                             fs.unlinkSync(wavs[m]);
