@@ -1111,10 +1111,10 @@
          * Delete a transcript.
          * @param {string} id ID of the transcript.
          * @param {resultCallback} onResult Invoked when the request has completed.
+         * @deprecate Use deleteGraph instead.
          */
         deleteTranscript(id, onResult) {
-            if (exports.verbose) console.log("deleteTranscript(" + id + ")");
-            this.createRequest("deleteTranscript", { id : id, transcript_id : id, btnConfirmDelete : true, chkDb : true }, onResult, this.baseUrl + "edit/transcript/delete").send();
+            this.deleteGraph(id, onResult);
         }
         
         /**
