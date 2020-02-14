@@ -1641,7 +1641,7 @@
                     if (sampleRate) queryString += "&sampleRate="+sampleRate;
                     
                     if (exports.verbose) {
-                        console.log(method + ": "+url + queryString + " as " + lc.username);
+                        console.log("GET: "+url + queryString + " as " + lc.username);
                     }
 	            xhr.open("GET", url + queryString, true);
 	            if (lc.username) {
@@ -1685,6 +1685,7 @@
                                 errors.push("Could not save fragment "+i+": "+err);
                             }
                             // add the file name to the result
+                            if (exports.verbose) console.log("wrote file " + filePath);
                             fragments.push(filePath); // add a blank element
                             nextFragment(i+1);
                         });
@@ -1798,7 +1799,7 @@
                         +"&end="+encodeURIComponent(endOffsets[i]);
                     
                     if (exports.verbose) {
-                        console.log(method + ": "+url + queryString + " as " + lc.username);
+                        console.log("GET: "+url + queryString + " as " + lc.username);
                     }
 	            xhr.open("GET", url + queryString, true);
 	            if (lc.username) {
