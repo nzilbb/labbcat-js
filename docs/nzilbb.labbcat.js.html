@@ -378,18 +378,18 @@
         /**
          * Counts the number of participants that match a particular pattern.
          * @param {string} expression An expression that determines which participants match.
-         * &lt;p> The expression language is currently not well defined, but expressions such as the
+         * &lt;p> The expression language is loosely based on JavaScript; expressions such as the
          * following can be used: 
          * &lt;ul>
-         *  &lt;li>&lt;code>id MATCHES 'Ada.+'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'CC' IN labels('corpus')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'en' IN labels('participant_languages')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'en' IN labels('transcript_language')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>/Ada.+/.test(id)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('corpus').includes('CC')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('participant_languages').includes('en')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('transcript_language').includes('en')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>list('transcript_rating').length &amp;gt; 2&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>list('participant_rating').length = 0&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'labbcat' NOT IN annotators('transcript_rating')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant_gender').label = 'NA'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!annotators('transcript_rating').includes('labbcat')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('participant_gender').label == 'NA'&lt;/code>&lt;/li>
          * &lt;/ul>
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be: The number of matching participants.
@@ -403,18 +403,18 @@
         /**
          * Gets a list of IDs of participants that match a particular pattern.
          * @param {string} expression An expression that determines which participants match.
-         * &lt;p> The expression language is currently not well defined, but expressions such as the
+         * &lt;p> The expression language is loosely based on JavaScript; expressions such as the
          * following can be used: 
          * &lt;ul>
-         *  &lt;li>&lt;code>id MATCHES 'Ada.+'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'CC' IN labels('corpus')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'en' IN labels('participant_languages')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'en' IN labels('transcript_language')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>/Ada.+/.test(id)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('corpus').includes('CC')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('participant_languages').includes('en')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('transcript_language').includes('en')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>list('transcript_rating').length &amp;gt; 2&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>list('participant_rating').length = 0&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'labbcat' NOT IN annotators('transcript_rating')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant_gender').label = 'NA'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!annotators('transcript_rating').includes('labbcat')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('participant_gender').label == 'NA'&lt;/code>&lt;/li>
          * &lt;/ul>
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
          * @param {int} [pageNumber] The zero-based page number to return, or null to return the
@@ -438,25 +438,25 @@
         /**
          * Counts the number of graphs that match a particular pattern.
          * @param {string} expression An expression that determines which graphs match.
-         * &lt;p> The expression language is currently not well defined, but expressions such as
+         * &lt;p> The expression language is loosely based on JavaScript; expressions such as
          * the following can be used: 
          * &lt;ul>
-         *  &lt;li>&lt;code>id MATCHES 'Ada.+'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'Robert' IN labels('who')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('corpus').label IN ('CC', 'IA', 'MU')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('episode').label = 'Ada Aitcheson'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('transcript_scribe').label = 'Robert'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant_languages').label = 'en'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('noise').label = 'bell'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'en' IN labels('transcript_languages')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'en' IN labels('participant_languages')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'bell' IN labels('noise')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript_languages').length &amp;gt; 1&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('participant_languages').length &amp;gt; 1&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript').length &amp;gt; 100&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'Robert' IN annotators('transcript_rating')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-         * labels('who')&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>/Ada.+/.test(id)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('who').includes('Robert')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>('CC', 'IA', 'MU').includes(my('corpus').label)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('episode').label == 'Ada Aitcheson'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('transcript_scribe').label == 'Robert'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('participant_languages').label == 'en'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('noise').label == 'bell'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('transcript_languages').includes('en')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('participant_languages').includes('en')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('noise').includes('bell')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript_languages').length gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('participant_languages').length gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript').length gt; 100&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>annotators('transcript_rating').includes('Robert')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC' &amp;amp;&amp;amp;
+         * labels('who').includes('Robert')&lt;/code>&lt;/li> 
          * &lt;/ul>
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be: The number of matching graphs.
@@ -474,25 +474,25 @@
          * &lt;p>The order of the list can be specified.  If ommitted, the graphs are listed in ID
          * order.&lt;/p> 
          * @param {string} expression An expression that determines which graphs match.
-         * &lt;p> The expression language is currently not well defined, but expressions such as
+         * &lt;p> The expression language is loosely based on JavaScript; expressions such as
          * the following can be used:
          * &lt;ul>
-         *  &lt;li>&lt;code>id MATCHES 'Ada.+'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'Robert' IN labels('who')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('corpus').label IN ('CC', 'IA', 'MU')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('episode').label = 'Ada Aitcheson'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('transcript_scribe').label = 'Robert'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant_languages').label = 'en'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('noise').label = 'bell'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'en' IN labels('transcript_languages')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'en' IN labels('participant_languages')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'bell' IN labels('noise')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript_languages').length &amp;gt; 1&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('participant_languages').length &amp;gt; 1&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript').length &amp;gt; 100&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>'Robert' IN annotators('transcript_rating')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-         * labels('who')&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>/Ada.+/.test(id)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('who').includes('Robert')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>('CC', 'IA', 'MU').includes(my('corpus').label)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('episode').label == 'Ada Aitcheson'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('transcript_scribe').label == 'Robert'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('participant_languages').label == 'en'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('noise').label == 'bell'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('transcript_languages').includes('en')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('participant_languages').includes('en')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('noise').includes('bell')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript_languages').length gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('participant_languages').length gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>list('transcript').length gt; 100&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>annotators('transcript_rating').includes('Robert')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC' &amp;amp;&amp;amp;
+         * labels('who').includes('Robert')&lt;/code>&lt;/li> 
          * &lt;/ul>
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
          * @param {int} [pageNumber] The zero-based page number to return, or null to return
@@ -567,15 +567,17 @@
         /**
          * Counts the number of annotations that match a particular pattern.
          * @param {string} expression An expression that determines which participants match.
-         * &lt;p> The expression language is currently not well defined, but expressions such as
+         * &lt;p> The expression language is loosely based on JavaScript; expressions such as
          * the following can be used:
          * &lt;ul>
-         *  &lt;li>&lt;code>id = 'ew_0_456'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>label NOT MATCHES 'th[aeiou].*'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
-         * my('utterances').start.offset = 12.345&lt;/code>&lt;/li> 
-         *  &lt;li>&lt;code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
-         * &amp;gt; 10.5&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>id == 'ew_0_456'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!/th[aeiou].&amp;#47;/.test(label)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('who').label == 'Robert' &amp;amp;&amp;amp; my('utterances').start.offset ==
+         * 12.345&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>graph.id == 'AdaAicheson-01.trs' &amp;amp;&amp;amp; layer.id == 'orthography'
+         * &amp;amp;&amp;amp; start.offset &amp;gt; 10.5&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>previous.id == 'ew_0_456'&lt;/code>&lt;/li>
+         * &lt;/ul>
          * &lt;/ul>
          * &lt;p>&lt;em>NB&lt;/em> all expressions must match by either id or layer.id.
          * @param {resultCallback} onResult Invoked when the request has returned a
@@ -590,15 +592,16 @@
         /**
          * Gets a list of annotations that match a particular pattern.
          * @param {string} expression An expression that determines which graphs match.
-         * &lt;p> The expression language is currently not well defined, but expressions such as the
+         * &lt;p> The expression language is loosely based on JavaScript; expressions such as the
          * following can be used: 
          * &lt;ul>
-         *  &lt;li>&lt;code>id = 'ew_0_456'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>label NOT MATCHES 'th[aeiou].*'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
-         * &amp;gt; 10.5&lt;/code>&lt;/li> 
-         *  &lt;li>&lt;code>previous.id = 'ew_0_456'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>id == 'ew_0_456'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!/th[aeiou].&amp;#47;/.test(label)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>my('who').label == 'Robert' &amp;amp;&amp;amp; my('utterances').start.offset ==
+         * 12.345&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>graph.id == 'AdaAicheson-01.trs' &amp;amp;&amp;amp; layer.id == 'orthography'
+         * &amp;amp;&amp;amp; start.offset &amp;gt; 10.5&lt;/code>&lt;/li> 
+         *  &lt;li>&lt;code>previous.id == 'ew_0_456'&lt;/code>&lt;/li>
          * &lt;/ul>
          * &lt;p>&lt;em>NB&lt;/em> all expressions must match by either id or layer.id.
          * @param {int} [pageLength] The maximum number of annotations to return, or null
@@ -1666,7 +1669,7 @@
                     if (sampleRate) queryString += "&amp;sampleRate="+sampleRate;
                     
                     if (exports.verbose) {
-                        console.log(method + ": "+url + queryString + " as " + lc.username);
+                        console.log("GET: "+url + queryString + " as " + lc.username);
                     }
 	            xhr.open("GET", url + queryString, true);
 	            if (lc.username) {
@@ -1710,6 +1713,7 @@
                                 errors.push("Could not save fragment "+i+": "+err);
                             }
                             // add the file name to the result
+                            if (exports.verbose) console.log("wrote file " + filePath);
                             fragments.push(filePath); // add a blank element
                             nextFragment(i+1);
                         });
@@ -1823,7 +1827,7 @@
                         +"&amp;end="+encodeURIComponent(endOffsets[i]);
                     
                     if (exports.verbose) {
-                        console.log(method + ": "+url + queryString + " as " + lc.username);
+                        console.log("GET: "+url + queryString + " as " + lc.username);
                     }
 	            xhr.open("GET", url + queryString, true);
 	            if (lc.username) {
@@ -2030,7 +2034,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Feb 13 2020 12:30:07 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Feb 14 2020 18:55:41 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

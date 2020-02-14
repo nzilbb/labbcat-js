@@ -199,7 +199,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line855">line 855</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line858">line 858</a>
     </li></ul></dd>
     
 
@@ -640,7 +640,7 @@ corpus.getParticipantIds((ids, errors, messages)=>{
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1183">line 1183</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1186">line 1186</a>
     </li></ul></dd>
     
 
@@ -926,15 +926,17 @@ corpus.getParticipantIds((ids, errors, messages)=>{
             
 
             <td class="description last">An expression that determines which participants match.
-<p> The expression language is currently not well defined, but expressions such as
+<p> The expression language is loosely based on JavaScript; expressions such as
 the following can be used:
 <ul>
- <li><code>id = 'ew_0_456'</code></li>
- <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
- <li><code>layer.id = 'orthography' AND my('who').label = 'Robert' AND
-my('utterances').start.offset = 12.345</code></li> 
- <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
-&gt; 10.5</code></li> 
+ <li><code>id == 'ew_0_456'</code></li>
+ <li><code>!/th[aeiou].&#47;/.test(label)</code></li>
+ <li><code>my('who').label == 'Robert' &amp;&amp; my('utterances').start.offset ==
+12.345</code></li> 
+ <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography'
+&amp;&amp; start.offset &gt; 10.5</code></li> 
+ <li><code>previous.id == 'ew_0_456'</code></li>
+</ul>
 </ul>
 <p><em>NB</em> all expressions must match by either id or layer.id.</td>
         </tr>
@@ -1006,7 +1008,7 @@ my('utterances').start.offset = 12.345</code></li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line556">line 556</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line558">line 558</a>
     </li></ul></dd>
     
 
@@ -1103,25 +1105,25 @@ my('utterances').start.offset = 12.345</code></li>
             
 
             <td class="description last">An expression that determines which graphs match.
-<p> The expression language is currently not well defined, but expressions such as
+<p> The expression language is loosely based on JavaScript; expressions such as
 the following can be used: 
 <ul>
- <li><code>id MATCHES 'Ada.+'</code></li>
- <li><code>'Robert' IN labels('who')</code></li>
- <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
- <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
- <li><code>my('transcript_scribe').label = 'Robert'</code></li>
- <li><code>my('participant_languages').label = 'en'</code></li>
- <li><code>my('noise').label = 'bell'</code></li>
- <li><code>'en' IN labels('transcript_languages')</code></li>
- <li><code>'en' IN labels('participant_languages')</code></li>
- <li><code>'bell' IN labels('noise')</code></li>
- <li><code>list('transcript_languages').length &gt; 1</code></li>
- <li><code>list('participant_languages').length &gt; 1</code></li>
- <li><code>list('transcript').length &gt; 100</code></li>
- <li><code>'Robert' IN annotators('transcript_rating')</code></li>
- <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-labels('who')</code></li> 
+ <li><code>/Ada.+/.test(id)</code></li>
+ <li><code>labels('who').includes('Robert')</code></li>
+ <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+ <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+ <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+ <li><code>my('participant_languages').label == 'en'</code></li>
+ <li><code>my('noise').label == 'bell'</code></li>
+ <li><code>labels('transcript_languages').includes('en')</code></li>
+ <li><code>labels('participant_languages').includes('en')</code></li>
+ <li><code>labels('noise').includes('bell')</code></li>
+ <li><code>list('transcript_languages').length gt; 1</code></li>
+ <li><code>list('participant_languages').length gt; 1</code></li>
+ <li><code>list('transcript').length gt; 100</code></li>
+ <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+ <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+labels('who').includes('Robert')</code></li> 
 </ul></td>
         </tr>
 
@@ -1289,18 +1291,18 @@ labels('who')</code></li>
             
 
             <td class="description last">An expression that determines which participants match.
-<p> The expression language is currently not well defined, but expressions such as the
+<p> The expression language is loosely based on JavaScript; expressions such as the
 following can be used: 
 <ul>
- <li><code>id MATCHES 'Ada.+'</code></li>
- <li><code>'CC' IN labels('corpus')</code></li>
- <li><code>'en' IN labels('participant_languages')</code></li>
- <li><code>'en' IN labels('transcript_language')</code></li>
- <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+ <li><code>/Ada.+/.test(id)</code></li>
+ <li><code>labels('corpus').includes('CC')</code></li>
+ <li><code>labels('participant_languages').includes('en')</code></li>
+ <li><code>labels('transcript_language').includes('en')</code></li>
+ <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
  <li><code>list('transcript_rating').length &gt; 2</code></li>
  <li><code>list('participant_rating').length = 0</code></li>
- <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
- <li><code>my('participant_gender').label = 'NA'</code></li>
+ <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
+ <li><code>my('participant_gender').label == 'NA'</code></li>
 </ul></td>
         </tr>
 
@@ -1536,7 +1538,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line788">line 788</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line791">line 791</a>
     </li></ul></dd>
     
 
@@ -1698,7 +1700,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1116">line 1116</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1119">line 1119</a>
     </li></ul></dd>
     
 
@@ -1887,7 +1889,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line645">line 645</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line648">line 648</a>
     </li></ul></dd>
     
 
@@ -2335,7 +2337,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line664">line 664</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line667">line 667</a>
     </li></ul></dd>
     
 
@@ -2644,7 +2646,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line674">line 674</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line677">line 677</a>
     </li></ul></dd>
     
 
@@ -2998,7 +3000,7 @@ more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1729">line 1729</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1733">line 1733</a>
     </li></ul></dd>
     
 
@@ -3188,7 +3190,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line634">line 634</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line637">line 637</a>
     </li></ul></dd>
     
 
@@ -3331,7 +3333,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line602">line 602</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line605">line 605</a>
     </li></ul></dd>
     
 
@@ -3497,7 +3499,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line612">line 612</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line615">line 615</a>
     </li></ul></dd>
     
 
@@ -3663,7 +3665,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line622">line 622</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line625">line 625</a>
     </li></ul></dd>
     
 
@@ -4577,7 +4579,7 @@ index in <var>matchIds</var>.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1419">line 1419</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1422">line 1422</a>
     </li></ul></dd>
     
 
@@ -4908,7 +4910,7 @@ return the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1365">line 1365</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1368">line 1368</a>
     </li></ul></dd>
     
 
@@ -5015,15 +5017,16 @@ return the first page.</td>
             
 
             <td class="description last">An expression that determines which graphs match.
-<p> The expression language is currently not well defined, but expressions such as the
+<p> The expression language is loosely based on JavaScript; expressions such as the
 following can be used: 
 <ul>
- <li><code>id = 'ew_0_456'</code></li>
- <li><code>label NOT MATCHES 'th[aeiou].*'</code></li>
- <li><code>my('who').label = 'Robert' AND my('utterances').start.offset = 12.345</code></li>
- <li><code>graph.id = 'AdaAicheson-01.trs' AND layer.id = 'orthography' AND start.offset
-&gt; 10.5</code></li> 
- <li><code>previous.id = 'ew_0_456'</code></li>
+ <li><code>id == 'ew_0_456'</code></li>
+ <li><code>!/th[aeiou].&#47;/.test(label)</code></li>
+ <li><code>my('who').label == 'Robert' &amp;&amp; my('utterances').start.offset ==
+12.345</code></li> 
+ <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography'
+&amp;&amp; start.offset &gt; 10.5</code></li> 
+ <li><code>previous.id == 'ew_0_456'</code></li>
 </ul>
 <p><em>NB</em> all expressions must match by either id or layer.id.</td>
         </tr>
@@ -5171,7 +5174,7 @@ return the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line583">line 583</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line586">line 586</a>
     </li></ul></dd>
     
 
@@ -5282,25 +5285,25 @@ order.</p>
             
 
             <td class="description last">An expression that determines which graphs match.
-<p> The expression language is currently not well defined, but expressions such as
+<p> The expression language is loosely based on JavaScript; expressions such as
 the following can be used:
 <ul>
- <li><code>id MATCHES 'Ada.+'</code></li>
- <li><code>'Robert' IN labels('who')</code></li>
- <li><code>my('corpus').label IN ('CC', 'IA', 'MU')</code></li>
- <li><code>my('episode').label = 'Ada Aitcheson'</code></li>
- <li><code>my('transcript_scribe').label = 'Robert'</code></li>
- <li><code>my('participant_languages').label = 'en'</code></li>
- <li><code>my('noise').label = 'bell'</code></li>
- <li><code>'en' IN labels('transcript_languages')</code></li>
- <li><code>'en' IN labels('participant_languages')</code></li>
- <li><code>'bell' IN labels('noise')</code></li>
- <li><code>list('transcript_languages').length &gt; 1</code></li>
- <li><code>list('participant_languages').length &gt; 1</code></li>
- <li><code>list('transcript').length &gt; 100</code></li>
- <li><code>'Robert' IN annotators('transcript_rating')</code></li>
- <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC' AND 'Robert' IN
-labels('who')</code></li> 
+ <li><code>/Ada.+/.test(id)</code></li>
+ <li><code>labels('who').includes('Robert')</code></li>
+ <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+ <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+ <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+ <li><code>my('participant_languages').label == 'en'</code></li>
+ <li><code>my('noise').label == 'bell'</code></li>
+ <li><code>labels('transcript_languages').includes('en')</code></li>
+ <li><code>labels('participant_languages').includes('en')</code></li>
+ <li><code>labels('noise').includes('bell')</code></li>
+ <li><code>list('transcript_languages').length gt; 1</code></li>
+ <li><code>list('participant_languages').length gt; 1</code></li>
+ <li><code>list('transcript').length gt; 100</code></li>
+ <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+ <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+labels('who').includes('Robert')</code></li> 
 </ul></td>
         </tr>
 
@@ -5588,18 +5591,18 @@ expressions, which may be appended by " ASC" or " DESC", or null for graph ID or
             
 
             <td class="description last">An expression that determines which participants match.
-<p> The expression language is currently not well defined, but expressions such as the
+<p> The expression language is loosely based on JavaScript; expressions such as the
 following can be used: 
 <ul>
- <li><code>id MATCHES 'Ada.+'</code></li>
- <li><code>'CC' IN labels('corpus')</code></li>
- <li><code>'en' IN labels('participant_languages')</code></li>
- <li><code>'en' IN labels('transcript_language')</code></li>
- <li><code>id NOT MATCHES 'Ada.+' AND my('corpus').label = 'CC'</code></li>
+ <li><code>/Ada.+/.test(id)</code></li>
+ <li><code>labels('corpus').includes('CC')</code></li>
+ <li><code>labels('participant_languages').includes('en')</code></li>
+ <li><code>labels('transcript_language').includes('en')</code></li>
+ <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC'</code></li>
  <li><code>list('transcript_rating').length &gt; 2</code></li>
  <li><code>list('participant_rating').length = 0</code></li>
- <li><code>'labbcat' NOT IN annotators('transcript_rating')</code></li>
- <li><code>my('participant_gender').label = 'NA'</code></li>
+ <li><code>!annotators('transcript_rating').includes('labbcat')</code></li>
+ <li><code>my('participant_gender').label == 'NA'</code></li>
 </ul></td>
         </tr>
 
@@ -6058,7 +6061,7 @@ graph, or null if the given media doesn't exist.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line691">line 691</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line694">line 694</a>
     </li></ul></dd>
     
 
@@ -6201,7 +6204,7 @@ graph, or null if the given media doesn't exist.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line654">line 654</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line657">line 657</a>
     </li></ul></dd>
     
 
@@ -6974,7 +6977,7 @@ a more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1563">line 1563</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1566">line 1566</a>
     </li></ul></dd>
     
 
@@ -7112,7 +7115,7 @@ result, which is an map of task IDs to statuses.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1125">line 1125</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1128">line 1128</a>
     </li></ul></dd>
     
 
@@ -7422,7 +7425,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line876">line 876</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line879">line 879</a>
     </li></ul></dd>
     
 
@@ -7582,7 +7585,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1170">line 1170</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1173">line 1173</a>
     </li></ul></dd>
     
 
@@ -7770,7 +7773,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line780">line 780</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line783">line 783</a>
     </li></ul></dd>
     
 
@@ -7932,7 +7935,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line752">line 752</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line755">line 755</a>
     </li></ul></dd>
     
 
@@ -8143,7 +8146,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line762">line 762</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line765">line 765</a>
     </li></ul></dd>
     
 
@@ -8331,7 +8334,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line771">line 771</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line774">line 774</a>
     </li></ul></dd>
     
 
@@ -8618,7 +8621,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1284">line 1284</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1287">line 1287</a>
     </li></ul></dd>
     
 
@@ -8778,7 +8781,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1135">line 1135</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1138">line 1138</a>
     </li></ul></dd>
     
 
@@ -8962,7 +8965,7 @@ task status can be updated using <a href="Labbcat.html#taskStatus">Labbcat#taskS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1024">line 1024</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1027">line 1027</a>
     </li></ul></dd>
     
 
@@ -9148,7 +9151,7 @@ will be false if the task finished.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1148">line 1148</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1151">line 1151</a>
     </li></ul></dd>
     
 
@@ -9200,7 +9203,7 @@ will be false if the task finished.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Feb 13 2020 12:30:07 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Feb 14 2020 18:55:41 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
