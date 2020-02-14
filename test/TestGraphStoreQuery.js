@@ -105,7 +105,7 @@ describe("#GraphStoreQuery", function() {
     });
 
     it("implements countMatchingParticipantIds", (done)=>{
-        store.countMatchingParticipantIds("id MATCHES '.+'", (count, errors, messages)=>{
+        store.countMatchingParticipantIds("/.+/.test(id)", (count, errors, messages)=>{
             assert.isNull(errors);
             assert.isNumber(count);
             assert.isAtLeast(count, 1, "There are some matches");
@@ -114,7 +114,7 @@ describe("#GraphStoreQuery", function() {
     });
     
     it("implements getMatchingParticipantIds", (done)=>{
-        store.getMatchingParticipantIds("id MATCHES '.+'", (ids, errors, messages)=>{
+        store.getMatchingParticipantIds("/.+/.test(id)", (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isArray(ids);
             // for (let id of ids) console.log("participant " + id);
@@ -123,7 +123,7 @@ describe("#GraphStoreQuery", function() {
                 console.log("Too few participants to test pagination");
                 done();
             } else {
-                store.getMatchingParticipantIds("id MATCHES '.+'", 2, 0, (ids, errors, messages)=>{
+                store.getMatchingParticipantIds("/.+/.test(id)", 2, 0, (ids, errors, messages)=>{
                     assert.isNull(errors);
                     assert.isArray(ids);
                     assert.equal(ids.length, 2, "Two IDs are returned");
@@ -162,7 +162,7 @@ describe("#GraphStoreQuery", function() {
     });
 
     it("implements countMatchingGraphIds", (done)=>{
-        store.countMatchingGraphIds("id MATCHES '.+'", (count, errors, messages)=>{
+        store.countMatchingGraphIds("/.+/.test(id)", (count, errors, messages)=>{
             assert.isNull(errors);
             assert.isNumber(count);
             assert.isAtLeast(count, 1, "There are some matches");
@@ -171,7 +171,7 @@ describe("#GraphStoreQuery", function() {
     });
     
     it("implements getMatchingGraphIds", (done)=>{
-        store.getMatchingGraphIds("id MATCHES '.+'", (ids, errors, messages)=>{
+        store.getMatchingGraphIds("/.+/.test(id)", (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isArray(ids);
             // for (let id of ids) console.log("participant " + id);
@@ -180,7 +180,7 @@ describe("#GraphStoreQuery", function() {
                 console.log("Too few graphs to test pagination");
                 done();
             } else {
-                store.getMatchingGraphIds("id MATCHES '.+'", 2, 0, (ids, errors, messages)=>{
+                store.getMatchingGraphIds("/.+/.test(id)", 2, 0, (ids, errors, messages)=>{
                     assert.isNull(errors);
                     assert.isArray(ids);
                     assert.equal(ids.length, 2, "Two IDs are returned");
@@ -191,7 +191,7 @@ describe("#GraphStoreQuery", function() {
     });
     
     it("implements countAnnotations", (done)=>{
-        store.getMatchingGraphIds("id MATCHES '.+'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isAtLeast(ids.length, 1, "There's at least one graph");
             store.countAnnotations(ids[0], "orthography", (count, errors, messages)=>{
@@ -204,7 +204,7 @@ describe("#GraphStoreQuery", function() {
    });
 
     it("implements getAnnotations", (done)=>{
-        store.getMatchingGraphIds("id MATCHES '.+'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isAtLeast(ids.length, 1, "There's at least one graph");
             let graphId = ids[0];
@@ -229,7 +229,7 @@ describe("#GraphStoreQuery", function() {
     
     it("implements getAnchors", (done)=>{
         // get a graph to work with
-        store.getMatchingGraphIds("id MATCHES '.+'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some graph IDs are returned");
             const graphId = ids[0];
@@ -258,9 +258,9 @@ describe("#GraphStoreQuery", function() {
     });
    
     it("implements getMedia", (done)=>{
-        store.getMatchingGraphIds("id MATCHES 'Agnes.+\\.trs'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingGraphIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isNotEmpty(ids, "Some graph IDs are returned - maybe check the MATCHES pattern?");
+            assert.isNotEmpty(ids, "Some graph IDs are returned - maybe check the test regex?");
             let graphId = ids[0];
             store.getMedia(graphId, "", "audio/wav", (url, errors, messages)=>{
                 assert.isNull(errors);
@@ -272,9 +272,9 @@ describe("#GraphStoreQuery", function() {
     });
 
     it("implements getMediaFragment", (done)=>{
-        store.getMatchingGraphIds("id MATCHES 'Agnes.+\\.trs'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingGraphIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isNotEmpty(ids, "Some graph IDs are returned - maybe check the MATCHES pattern?");
+            assert.isNotEmpty(ids, "Some graph IDs are returned - maybe check the test regex?");
             const graphId = ids[0];
             store.getMedia(graphId, "", "audio/wav", 1.0, 2.0, (url, errors, messages)=>{
                 assert.isNull(errors);
@@ -315,7 +315,7 @@ describe("#GraphStoreQuery", function() {
 
     it("implements countMatchingAnnotations", (done)=>{
         store.countMatchingAnnotations(
-            "layer.id = 'orthography' AND label MATCHES 'and'", (count, errors, messages)=>{
+            "layer.id == 'orthography' && label == 'and'", (count, errors, messages)=>{
                 assert.isNull(errors);
                 assert.isNumber(count);
                 assert.isAtLeast(count, 1, "There are some matches");
@@ -325,7 +325,7 @@ describe("#GraphStoreQuery", function() {
     
     it("implements getMatchingAnnotations", (done)=>{
       store.getMatchingAnnotations(
-          "layer.id = 'orthography' AND label MATCHES 'and'", 2, 0,
+          "layer.id == 'orthography' && label == 'and'", 2, 0,
           (annotations, errors, messages) =>{
               assert.isNull(errors);
               assert.isArray(annotations);
@@ -352,7 +352,7 @@ describe("#GraphStoreQuery", function() {
    
     it("implements getAvailableMedia", (done)=>{
         // get a graph to work with
-        store.getMatchingGraphIds("id MATCHES '.+'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some graph IDs are returned");
             const graphId = ids[0];
@@ -370,7 +370,7 @@ describe("#GraphStoreQuery", function() {
    
     it("implements getEpisodeDocuments", (done)=>{
         // get a graph to work with
-        store.getMatchingGraphIds("id MATCHES '.+'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some graph IDs are returned");
             const graphId = ids[0];
