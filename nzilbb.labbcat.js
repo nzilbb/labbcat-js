@@ -1193,6 +1193,9 @@
         
         /**
          * Searches for tokens that match the given pattern.
+         * <p> Although <var>mainParticipant</var>, <var>aligned</var> and
+         * <var>matchesPerTranscript</var> are all optional, if one of them is specified,
+         * then all must be specified.
          * <p> The <var>pattern</var> should match the structure of the search matrix in the
          * browser interface of LaBB-CAT. This is a JSON object with one attribute called
          * <q>columns</q>, which is an array of JSON objects.
@@ -1274,17 +1277,53 @@
          * </pre>
          * @param {object} pattern An object representing the pattern to search for, which
          * mirrors the Search Matrix in the browser interface.
-         * @param {string[]} participantIds An optional list of participant IDs to search
+         * @param {string[]} [participantIds] An optional list of participant IDs to search
          * the utterances of. If not null, all utterances in the corpus will be searched.
-         * @param mainParticipant true to search only main-participant utterances, false to
-         * search all utterances. 
+         * @param {string[]} [transcriptTypes] An optional list of transcript types to limit
+         * the results to. If null, all transcript types will be searched. 
+         * @param {boolean} [mainParticipant] true to search only main-participant
+         * utterances, false to search all utterances. 
+         * @param {boolean} [aligned] true to include only words that are aligned (i.e. have
+         * anchor confidence &ge; 50, false to search include un-aligned words as well. 
+         * @param {int} [matchesPerTranscript] Optional maximum number of matches per
+         * transcript to return. <tt>null</tt> means all matches.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: An object with one attribtue, "threadId",
          * which identifies the resulting task, which can be passed to 
          * {@link Labbcat#getMatches}, {@link Labbcat#taskStatus}, 
          * {@link Labbcat#waitForTask}, etc.
          */
-        search(pattern, participantIds, mainParticipant, onResult) {
+        search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, onResult) {
+            if (typeof participantIds === "function") { // (pattern, onResult)
+                onResult = participantIds;
+                participantIds = null;
+                transcriptTypes = null;
+                mainParticipant = false;
+                aligned = false;
+                matchesPerTranscript = null;
+            } else if (typeof transcriptTypes === "function") {
+                // (pattern, participantIds, onResult)
+                onResult = transcriptTypes;
+                transcriptTypes = null;
+                mainParticipant = false;
+                aligned = false;
+                matchesPerTranscript = null;
+            } else if (typeof transcriptTypes === "boolean") {
+                // (pattern, participantIds, mainParticipant, aligned,
+                // matchesPerTranscript, onResult) 
+                onResult = matchesPerTranscript;
+                matchesPerTranscript = aligned;
+                aligned = mainParticipant;
+                mainParticipant = transcriptTypes;
+                transcriptTypes = null;
+            }
+            if (typeof aligned === "function") {
+                // (pattern, participantIds, mainParticipant, onResult)
+                // i.e. the original signature of this function
+                onResult = aligned;
+                aligned = false;
+                matchesPerTranscript = null;
+            }
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
                             +", "+JSON.stringify(mainParticipant)+", "+mainParticipant+")");
@@ -1322,7 +1361,10 @@
                 words_context : 0
             }
             if (mainParticipant) parameters.only_main_speaker = true;
+            if (aligned) parameters.only_aligned = true;
+            if (matchesPerTranscript) parameters.matches_per_transcript = matchesPerTranscript;
             if (participantIds) parameters.participant_id = participantIds;
+            if (transcriptTypes) parameters.transcript_type = transcriptTypes;
 
             this.createRequest("search", parameters, onResult, this.baseUrl+"search").send();
         }
