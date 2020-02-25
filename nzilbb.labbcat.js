@@ -1277,15 +1277,15 @@
          * </pre>
          * @param {object} pattern An object representing the pattern to search for, which
          * mirrors the Search Matrix in the browser interface.
-         * @param {string[]} [participantIds] An optional list of participant IDs to search
+         * @param {string[]} [participantIds=null] An optional list of participant IDs to search
          * the utterances of. If not null, all utterances in the corpus will be searched.
-         * @param {string[]} [transcriptTypes] An optional list of transcript types to limit
+         * @param {string[]} [transcriptTypes=null] An optional list of transcript types to limit
          * the results to. If null, all transcript types will be searched. 
-         * @param {boolean} [mainParticipant] true to search only main-participant
+         * @param {boolean} [mainParticipant=true] true to search only main-participant
          * utterances, false to search all utterances. 
-         * @param {boolean} [aligned] true to include only words that are aligned (i.e. have
+         * @param {boolean} [aligned=false] true to include only words that are aligned (i.e. have
          * anchor confidence &ge; 50, false to search include un-aligned words as well. 
-         * @param {int} [matchesPerTranscript] Optional maximum number of matches per
+         * @param {int} [matchesPerTranscript=null] Optional maximum number of matches per
          * transcript to return. <tt>null</tt> means all matches.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: An object with one attribtue, "threadId",
@@ -1298,14 +1298,14 @@
                 onResult = participantIds;
                 participantIds = null;
                 transcriptTypes = null;
-                mainParticipant = false;
+                mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
             } else if (typeof transcriptTypes === "function") {
                 // (pattern, participantIds, onResult)
                 onResult = transcriptTypes;
                 transcriptTypes = null;
-                mainParticipant = false;
+                mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
             } else if (typeof transcriptTypes === "boolean") {
@@ -1326,7 +1326,11 @@
             }
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
-                            +", "+JSON.stringify(mainParticipant)+", "+mainParticipant+")");
+                            +", "+JSON.stringify(participantIds)
+                            +", "+JSON.stringify(transcriptTypes)
+                            +", "+mainParticipant+")"
+                            +", "+aligned+")"
+                            +", "+matchesPerTranscript+")");
             }
 
             // first normalize the pattern...
