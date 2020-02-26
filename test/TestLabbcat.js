@@ -40,7 +40,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
         labbcat.verbose = false;
         done();
     });
-    
+
     it("inherits methods (getId at least)", (done)=>{
         corpus.getId((result, errors, messages, call)=>{
             assert.isNull(errors, JSON.stringify(errors))
@@ -464,14 +464,12 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         
                         corpus.releaseTask(threadId);
                         
-                        const upTo = Math.min(5, matches.length);
                         // convert MatchIds to arrays of individual Ids
                         const graphIds = matches.map(match => match.Transcript);
                         const startOffsets = matches.map(match => match.Line);
                         const endOffsets = matches.map(match => match.LineEnd);
 
                         // getSoundFragments with all parameters
-                        labbcat.verbose = true;
                         corpus.getSoundFragments(
                             graphIds, startOffsets, endOffsets, 16000, "test",
                             (wavs, errors, messages)=>{
@@ -480,7 +478,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 assert.equal(matches.length, wavs.length,
                                              "files array is same size as matches array");
                                 
-                                for (let m = 0; m < upTo; m++) {
+                                for (let m = 0; m < matches.length; m++) {
                                     // console.log(wavs[m]);
                                     assert.isNotNull(wavs[m],
                                                      "Non-null file: " + matches[m]);
@@ -489,9 +487,11 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                   + " : " + JSON.stringify(matches[m]));
                                     assert.isAbove(fs.statSync(wavs[m]).size, 0,
                                                    "Non-zero sized file: " + matches[m]);
-                                    
-                                    // be tidy
-                                    fs.unlinkSync(wavs[m]);
+                                } // next file
+                                // some fragments might be repeated, so we delete the
+                                // files only after all checks are complete
+                                for (let m = 0; m < matches.length; m++) {
+                                    try { fs.unlinkSync(wavs[m]); } catch(x) {}
                                 }
 
                                 // getSoundFragments without dir
@@ -503,7 +503,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                         assert.equal(matches.length, wavs.length,
                                                      "files array is same size as matches array");
                                         
-                                        for (let m = 0; m < upTo; m++) {
+                                        for (let m = 0; m < matches.length; m++) {
                                             // console.log(wavs[m]);
                                             assert.isNotNull(wavs[m],
                                                              "Non-null file: " + matches[m]);
@@ -511,9 +511,11 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                           "File exists: " + matches[m]);
                                             assert.isAbove(fs.statSync(wavs[m]).size, 0,
                                                    "Non-zero sized file: " + matches[m]);
-                                            
-                                            // be tidy
-                                            fs.unlinkSync(wavs[m]);
+                                        } // next file
+                                        // some fragments might be repeated, so we delete the
+                                        // files only after all checks are complete
+                                        for (let m = 0; m < matches.length; m++) {
+                                            try { fs.unlinkSync(wavs[m]); } catch(x) {}
                                         }
                                         
                                         // getSoundFragments without sampleRate
@@ -527,7 +529,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                     matches.length, wavs.length,
                                                     "files array is same size as matches array");
                                                 
-                                                for (let m = 0; m < upTo; m++) {
+                                                for (let m = 0; m < matches.length; m++) {
                                                     // console.log(wavs[m]);
                                                     assert.isNotNull(
                                                         wavs[m],
@@ -537,9 +539,12 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                     assert.isAbove(
                                                         fs.statSync(wavs[m]).size, 0,
                                                         "Non-zero sized file: " + matches[m]);
-                                                    
-                                                    // be tidy
-                                                    fs.unlinkSync(wavs[m]);
+                                                } // next file
+                                                // some fragments might be repeated, so we
+                                                // delete the files only after all checks
+                                                // are complete
+                                                for (let m = 0; m < matches.length; m++) {
+                                                    try { fs.unlinkSync(wavs[m]); } catch(x) {}
                                                 }
                                                 
                                                 // getSoundFragments with matches instead of
@@ -553,7 +558,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                             matches.length, wavs.length,
                                                             "files array is same size as matches");
                                                         
-                                                        for (let m = 0; m < upTo; m++) {
+                                                        for (let m = 0; m < matches.length; m++) {
                                                             // console.log(wavs[m]);
                                                             assert.isNotNull(
                                                                 wavs[m],
@@ -564,9 +569,12 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                             assert.isAbove(
                                                                 fs.statSync(wavs[m]).size, 0,
                                                                 "Non-zero sized file: "+matches[m]);
-                                                            
-                                                            // be tidy
-                                                            fs.unlinkSync(wavs[m]);
+                                                        } // next file
+                                                        // some fragments might be repeated,
+                                                        // so we delete the files only
+                                                        // after all checks are complete 
+                                                        for (let m = 0; m < matches.length; m++) {
+                                                            try { fs.unlinkSync(wavs[m]); } catch(x) {}
                                                         }
                                                         
                                                         done();
@@ -579,7 +587,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
             });
         });
     });
-    
+
     it("implements getFragments", (done)=>{
         // get a participant ID to use
         corpus.getParticipantIds((ids, errors, messages)=>{
@@ -638,9 +646,11 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                   "File exists: " + subset[m]);
                                     assert.isAbove(fs.statSync(textgrids[m]).size, 0,
                                                    "Non-zero sized file: " + subset[m]);
-                                    
-                                    // be tidy
-                                    fs.unlinkSync(textgrids[m]);
+                                } // next file
+                                // some fragments might be repeated, so we delete the
+                                // files only after all checks are complete
+                                for (let m = 0; m < upTo; m++) {
+                                    try { fs.unlinkSync(wavs[m]); } catch(x) {}
                                 }
                                 
                                 // getFragments without dir
@@ -660,9 +670,11 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                           "File exists: " + subset[m]);
                                             assert.isAbove(fs.statSync(textgrids[m]).size, 0,
                                                            "Non-zero sized file: " + subset[m]);
-                                            
-                                            // be tidy
-                                            fs.unlinkSync(textgrids[m]);
+                                        } // next file
+                                        // some fragments might be repeated, so we delete the
+                                        // files only after all checks are complete
+                                        for (let m = 0; m < upTo; m++) {
+                                            try { fs.unlinkSync(wavs[m]); } catch(x) {}
                                         }
 
                                         // getFragments with matches instead of
@@ -686,9 +698,12 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                     assert.isAbove(
                                                         fs.statSync(textgrids[m]).size, 0,
                                                         "Non-zero sized file: " + subset[m]);
-                                                    
-                                                    // be tidy
-                                                    fs.unlinkSync(textgrids[m]);
+                                                } // next file
+                                                // some fragments might be repeated, so we
+                                                // delete the files only after all checks
+                                                // are complete 
+                                                for (let m = 0; m < upTo; m++) {
+                                                    try { fs.unlinkSync(wavs[m]); } catch(x) {}
                                                 }
                                                 
                                                 done();
@@ -779,7 +794,6 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
             });
         });
    });
-    
 });
 
 
