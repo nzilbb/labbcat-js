@@ -6,7 +6,7 @@
  * <p>They assume the existence of a valid LaBB-CAT instance (configured by
  * <var>labbcatUrl</var>) which responds correctly to requests, but do not generally test
  * that the server behaves correctly , nor assume specific corpus content. For the tests
- * to work, the first graph listed in LaBB-CAT must have some words and some media, and
+ * to work, the first transcript listed in LaBB-CAT must have some words and some media, and
  * the first participant listed must have some transcripts. 
  */
 
@@ -45,10 +45,10 @@ describe("#GraphStore", ()=>{
         });
     });
     
-    it("implements deleteGraph", (done)=>{
-        store.deleteGraph("nonexistent graph ID", (result, errors, messages) =>{
-            assert.isNotNull(errors, "deleteGraph should fail for nonexistant graph ID");
-            assert.include(errors[0], "Graph not found");
+    it("implements deleteTranscript", (done)=>{
+        store.deleteTranscript("nonexistent transcript ID", (result, errors, messages) =>{
+            assert.isNotNull(errors, "deleteTranscript should fail for nonexistant transcript ID");
+            assert.include(errors[0], "not found");
             done();
         });
     });

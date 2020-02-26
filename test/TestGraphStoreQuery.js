@@ -94,8 +94,8 @@ describe("#GraphStoreQuery", function() {
         });
     });
 
-    it("implements getGraphIds", (done)=>{
-        store.getGraphIds((ids, errors, messages)=>{
+    it("implements getTranscriptIds", (done)=>{
+        store.getTranscriptIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isArray(ids);
             // for (let id of ids) console.log("graph " + id);
@@ -133,11 +133,11 @@ describe("#GraphStoreQuery", function() {
         });
     });
     
-    it("implements getGraphIdsInCorpus", (done)=>{
+    it("implements getTranscriptIdsInCorpus", (done)=>{
         store.getCorpusIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isAtLeast(ids.length, 1, "There's at least one corpus");
-            store.getGraphIdsInCorpus(ids[0], (ids, errors, messages)=>{
+            store.getTranscriptIdsInCorpus(ids[0], (ids, errors, messages)=>{
                 assert.isNull(errors);
                 assert.isArray(ids);
                 // for (let id of ids) console.log("graph " + id);
@@ -147,11 +147,11 @@ describe("#GraphStoreQuery", function() {
         });
     });
 
-    it("implements getGraphIdsWithParticipant", (done)=>{
+    it("implements getTranscriptIdsWithParticipant", (done)=>{
         store.getParticipantIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isAtLeast(ids.length, 1, "There's at least one participant");
-            store.getGraphIdsWithParticipant(ids[0], (ids, errors, messages)=>{
+            store.getTranscriptIdsWithParticipant(ids[0], (ids, errors, messages)=>{
                 assert.isNull(errors);
                 assert.isArray(ids);
                 // for (let id of ids) console.log("graph " + id);
@@ -161,8 +161,8 @@ describe("#GraphStoreQuery", function() {
         });
     });
 
-    it("implements countMatchingGraphIds", (done)=>{
-        store.countMatchingGraphIds("/.+/.test(id)", (count, errors, messages)=>{
+    it("implements countMatchingTranscriptIds", (done)=>{
+        store.countMatchingTranscriptIds("/.+/.test(id)", (count, errors, messages)=>{
             assert.isNull(errors);
             assert.isNumber(count);
             assert.isAtLeast(count, 1, "There are some matches");
@@ -170,17 +170,17 @@ describe("#GraphStoreQuery", function() {
         });
     });
     
-    it("implements getMatchingGraphIds", (done)=>{
-        store.getMatchingGraphIds("/.+/.test(id)", (ids, errors, messages)=>{
+    it("implements getMatchingTranscriptIds", (done)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isArray(ids);
             // for (let id of ids) console.log("participant " + id);
             assert.isNotEmpty(ids, "Some IDs are returned");
             if (ids.length < 2) {
-                console.log("Too few graphs to test pagination");
+                console.log("Too few transcripts to test pagination");
                 done();
             } else {
-                store.getMatchingGraphIds("/.+/.test(id)", 2, 0, (ids, errors, messages)=>{
+                store.getMatchingTranscriptIds("/.+/.test(id)", 2, 0, (ids, errors, messages)=>{
                     assert.isNull(errors);
                     assert.isArray(ids);
                     assert.equal(ids.length, 2, "Two IDs are returned");
@@ -191,9 +191,9 @@ describe("#GraphStoreQuery", function() {
     });
     
     it("implements countAnnotations", (done)=>{
-        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isAtLeast(ids.length, 1, "There's at least one graph");
+            assert.isAtLeast(ids.length, 1, "There's at least one transcript");
             store.countAnnotations(ids[0], "orthography", (count, errors, messages)=>{
                 assert.isNull(errors);
                 assert.isNumber(count);
@@ -204,9 +204,9 @@ describe("#GraphStoreQuery", function() {
    });
 
     it("implements getAnnotations", (done)=>{
-        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isAtLeast(ids.length, 1, "There's at least one graph");
+            assert.isAtLeast(ids.length, 1, "There's at least one transcript");
             let graphId = ids[0];
             
             store.countAnnotations(graphId, "orthography", (count, errors, messages)=>{
@@ -229,9 +229,9 @@ describe("#GraphStoreQuery", function() {
     
     it("implements getAnchors", (done)=>{
         // get a graph to work with
-        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isNotEmpty(ids, "Some graph IDs are returned");
+            assert.isNotEmpty(ids, "Some transcript IDs are returned");
             const graphId = ids[0];
             
             // get some annotations so we have valid anchor IDs
@@ -258,9 +258,9 @@ describe("#GraphStoreQuery", function() {
     });
    
     it("implements getMedia", (done)=>{
-        store.getMatchingGraphIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isNotEmpty(ids, "Some graph IDs are returned - maybe check the test regex?");
+            assert.isNotEmpty(ids, "Some transcript IDs are returned - maybe check the test regex?");
             let graphId = ids[0];
             store.getMedia(graphId, "", "audio/wav", (url, errors, messages)=>{
                 assert.isNull(errors);
@@ -272,9 +272,9 @@ describe("#GraphStoreQuery", function() {
     });
 
     it("implements getMediaFragment", (done)=>{
-        store.getMatchingGraphIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isNotEmpty(ids, "Some graph IDs are returned - maybe check the test regex?");
+            assert.isNotEmpty(ids, "Some transcript IDs are returned - maybe check the test regex?");
             const graphId = ids[0];
             store.getMedia(graphId, "", "audio/wav", 1.0, 2.0, (url, errors, messages)=>{
                 assert.isNull(errors);
@@ -352,9 +352,9 @@ describe("#GraphStoreQuery", function() {
    
     it("implements getAvailableMedia", (done)=>{
         // get a graph to work with
-        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isNotEmpty(ids, "Some graph IDs are returned");
+            assert.isNotEmpty(ids, "Some transcript IDs are returned");
             const graphId = ids[0];
             
             store.getAvailableMedia(graphId, (files, errors, messages)=>{
@@ -370,9 +370,9 @@ describe("#GraphStoreQuery", function() {
    
     it("implements getEpisodeDocuments", (done)=>{
         // get a graph to work with
-        store.getMatchingGraphIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
-            assert.isNotEmpty(ids, "Some graph IDs are returned");
+            assert.isNotEmpty(ids, "Some transcript IDs are returned");
             const graphId = ids[0];
             
             store.getEpisodeDocuments(graphId, (files, errors, messages)=>{

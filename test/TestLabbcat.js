@@ -110,12 +110,12 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
         });
    });
     
-    it("implements newTranscript, updateTranscript, and deleteGraph", (done)=>{
+    it("implements newTranscript, updateTranscript, and deleteTranscript", (done)=>{
         const transcriptName = "labbcat-js.test.txt";
         const transcriptPath = "test/" + transcriptName;
         
         // ensure the transcript doesn't exist to start with        
-        corpus.deleteGraph(transcriptName);
+        corpus.deleteTranscript(transcriptName);
         
         corpus.getCorpusIds((ids, errors, messages)=>{
             assert.isNull(errors, JSON.stringify(errors))
@@ -143,7 +143,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                             corpus.releaseTask(threadId);
                         
                             // ensure the transcript exists
-                            corpus.countMatchingGraphIds(
+                            corpus.countMatchingTranscriptIds(
                                 "id = '"+transcriptName+"'", (count, errors, messages)=>{
                                     assert.isNull(errors, JSON.stringify(errors))
                                     assert.isNumber(count);
@@ -165,7 +165,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                             corpus.releaseTask(threadId);
                         
                                             // ensure the transcript exists
-                                            corpus.countMatchingGraphIds(
+                                            corpus.countMatchingTranscriptIds(
                                                 "id = '"+transcriptName+"'", (count, errors, messages)=>{
                                                     assert.isNull(errors, JSON.stringify(errors))
                                                     assert.isNumber(count);
@@ -174,7 +174,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                         "Transcript is still in the store");
                                                     
                                                     // delete it
-                                                    corpus.deleteGraph(
+                                                    corpus.deleteTranscript(
                                                         transcriptName, (result, errors, messages)=>{
                                                             assert.isNull(
                                                                 errors, JSON.stringify(errors))
@@ -471,6 +471,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         const endOffsets = matches.map(match => match.LineEnd);
 
                         // getSoundFragments with all parameters
+                        labbcat.verbose = true;
                         corpus.getSoundFragments(
                             graphIds, startOffsets, endOffsets, 16000, "test",
                             (wavs, errors, messages)=>{
@@ -484,7 +485,8 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                     assert.isNotNull(wavs[m],
                                                      "Non-null file: " + matches[m]);
                                     assert.isTrue(fs.existsSync(wavs[m]),
-                                                  "File exists: " + matches[m]);
+                                                  "File exists: " + wavs[m]
+                                                  + " : " + JSON.stringify(matches[m]));
                                     assert.isAbove(fs.statSync(wavs[m]).size, 0,
                                                    "Non-zero sized file: " + matches[m]);
                                     

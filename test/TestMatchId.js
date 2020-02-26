@@ -19,7 +19,7 @@ describe("#MatchId", ()=>{
         const matchId = new labbcat.MatchId(
             "g_3;em_11_23;n_19985-n_20003;p_4;#=ew_0_12611;prefix=001-;[0]=ew_0_12611");
 
-        assert.equal(matchId.graphId, "g_3", "parses graphId");
+        assert.equal(matchId.transcriptId, "g_3", "parses transcriptId");
         assert.equal(matchId.utteranceId, "em_11_23", "parses utteranceId");
         assert.equal(matchId.startAnchorId, "n_19985", "parses startAnchorId");
         assert.equal(matchId.endAnchorId, "n_20003", "parses endAnchorId");
@@ -36,7 +36,7 @@ describe("#MatchId", ()=>{
         const matchId = new labbcat.MatchId(
             "AgnesShacklock-01.trs;60.897-67.922;prefix=001-");
 
-        assert.equal(matchId.graphId, "AgnesShacklock-01.trs", "parses graphId");
+        assert.equal(matchId.transcriptId, "AgnesShacklock-01.trs", "parses transcriptId");
         assert.isNull(matchId.utteranceId, "no utteranceId");
         assert.isNull(matchId.startAnchorId, "no startAnchorId");
         assert.isNull(matchId.endAnchorId, "no endAnchorId");

@@ -166,7 +166,7 @@
      *     for (l in result) console.log("layer: " + layers[l]); 
      *   });
      * store.getCorpusIds((corpora, errors, messages, call)=>{ 
-     *     store.getGraphIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
+     *     store.getTranscriptIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
      *         console.log("transcripts in: " + id); 
      *         for (i in ids) console.log(ids[i]);
      *       });
@@ -408,8 +408,8 @@
         }
 
         /**
-         * Counts the number of graphs that match a particular pattern.
-         * @param {string} expression An expression that determines which graphs match.
+         * Counts the number of transcripts that match a particular pattern.
+         * @param {string} expression An expression that determines which transcripts match.
          * <p> The expression language is loosely based on JavaScript; expressions such as
          * the following can be used: 
          * <ul>
@@ -431,21 +431,21 @@
          * labels('who').includes('Robert')</code></li> 
          * </ul>
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be: The number of matching graphs.
+         * <var>result</var> which will be: The number of matching transcripts.
          */
-        countMatchingGraphIds(expression, onResult) {
-	    this.createRequest("countMatchingGraphIds", {
+        countMatchingTranscriptIds(expression, onResult) {
+	    this.createRequest("countMatchingTranscriptIds", {
                 expression : expression
             }, onResult).send();
         }    
 
         /**
-         * <p>Gets a list of IDs of graphs that match a particular pattern.
+         * <p>Gets a list of IDs of transcripts that match a particular pattern.
          * <p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
          * can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
-         * <p>The order of the list can be specified.  If ommitted, the graphs are listed in ID
-         * order.</p> 
-         * @param {string} expression An expression that determines which graphs match.
+         * <p>The order of the list can be specified.  If ommitted, the transcripts are
+         * listed in ID order.</p> 
+         * @param {string} expression An expression that determines which transcripts match.
          * <p> The expression language is loosely based on JavaScript; expressions such as
          * the following can be used:
          * <ul>
@@ -471,11 +471,11 @@
          * the first page. 
          * @param {string} [order] The ordering for the list of IDs, a string containing a
          * comma-separated list of 
-         * expressions, which may be appended by " ASC" or " DESC", or null for graph ID order. 
+         * expressions, which may be appended by " ASC" or " DESC", or null for transcript ID order. 
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be: A list of graph IDs.
+         * <var>result</var> which will be: A list of transcript IDs.
          */
-        getMatchingGraphIds(expression, pageLength, pageNumber, order, onResult) {
+        getMatchingTranscriptIds(expression, pageLength, pageNumber, order, onResult) {
             if (typeof pageLength === "function") { // (expression, onResult)
                 onResult = pageLength;
                 pageLength = null;
@@ -490,7 +490,7 @@
                 onResult = order;
                 order = null;
             }
-	    this.createRequest("getMatchingGraphIds", {
+	    this.createRequest("getMatchingTranscriptIds", {
                 expression : expression,
                 pageLength : pageLength,
                 pageNumber : pageNumber,
@@ -499,8 +499,8 @@
         }
         
         /**
-         * Gets the number of annotations on the given layer of the given graph.
-         * @param {string} id The ID of the graph.
+         * Gets the number of annotations on the given layer of the given transcript.
+         * @param {string} id The ID of the transcript.
          * @param {layerId} The ID of the layer.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: A (possibly empty) array of annotations.
@@ -513,8 +513,8 @@
         }
         
         /**
-         * Gets the annotations on the given layer of the given graph.
-         * @param {string} id The ID of the graph.
+         * Gets the annotations on the given layer of the given transcript.
+         * @param {string} id The ID of the transcript.
          * @param {string} layerId The ID of the layer.
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
          * @param {int} [pageNumber] The zero-based page number to return, or null to return 
@@ -563,7 +563,7 @@
         
         /**
          * Gets a list of annotations that match a particular pattern.
-         * @param {string} expression An expression that determines which graphs match.
+         * @param {string} expression An expression that determines which transcripts match.
          * <p> The expression language is loosely based on JavaScript; expressions such as the
          * following can be used: 
          * <ul>
@@ -598,52 +598,52 @@
         }
         
         /**
-         * Gets a list of graph IDs.
+         * Gets a list of transcript IDs.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  {string[]} A list of graph IDs.
+         * <var>result</var> which will be:  {string[]} A list of transcript IDs.
          */
-        getGraphIds(onResult) {
-	    this.createRequest("getGraphIds", null, onResult).send();
+        getTranscriptIds(onResult) {
+	    this.createRequest("getTranscriptIds", null, onResult).send();
         }
         
         /**
-         * Gets a list of graph IDs in the given corpus.
+         * Gets a list of transcript IDs in the given corpus.
          * @param {string} id A corpus ID.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  {string[]} A list of graph IDs.
+         * <var>result</var> which will be:  {string[]} A list of transcript IDs.
          */
-        getGraphIdsInCorpus(id, onResult) {
-	    this.createRequest("getGraphIdsInCorpus", { id : id }, onResult).send();
+        getTranscriptIdsInCorpus(id, onResult) {
+	    this.createRequest("getTranscriptIdsInCorpus", { id : id }, onResult).send();
         }
         
         /**
-         * Gets a list of IDs of graphs that include the given participant.
+         * Gets a list of IDs of transcripts that include the given participant.
          * @param {string} id A participant ID.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  {string[]} A list of graph IDs.
+         * <var>result</var> which will be:  {string[]} A list of transcript IDs.
          */
-        getGraphIdsWithParticipant(id, onResult) {
-	    this.createRequest("getGraphIdsWithParticipant", { id : id }, onResult).send();
+        getTranscriptIdsWithParticipant(id, onResult) {
+	    this.createRequest("getTranscriptIdsWithParticipant", { id : id }, onResult).send();
         }
         
         /**
-         * Gets a graph given its ID, containing only the given layers.
-         * @param {string} id The given graph ID.
+         * Gets a transcript given its ID, containing only the given layers.
+         * @param {string} id The given transcript ID.
          * @param {string[]} layerId The IDs of the layers to load, or null for all
-         * layers. If only graph data is required, set this to ["graph"]. 
+         * layers. If only transcript data is required, set this to ["graph"]. 
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  The identified graph.
+         * <var>result</var> which will be:  The identified transcript.
          */
-        getGraph (id, layerId, onResult) {
-	    this.createRequest("getGraph", { id : id, layerId : layerId }, onResult).send();
+        getTranscript (id, layerId, onResult) {
+	    this.createRequest("getTranscript", { id : id, layerId : layerId }, onResult).send();
         }
         
         /**
-         * Gets the given anchors in the given graph.
-         * @param {string} id The given graph ID.
+         * Gets the given anchors in the given transcript.
+         * @param {string} id The given transcript ID.
          * @param {string[]} anchorIds The IDs of the anchors to load.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  The identified graph.
+         * <var>result</var> which will be:  The identified transcript.
          */
         getAnchors (id, anchorIds, onResult) {
 	    this.createRequest("getAnchors", { id : id, anchorIds : anchorIds }, onResult).send();
@@ -659,28 +659,28 @@
         }
         
         /**
-         * List the media available for the given graph.
-         * @param {string} id The graph ID.
+         * List the media available for the given transcript.
+         * @param {string} id The transcript ID.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  List of media files available for the given graph.
+         * <var>result</var> which will be:  List of media files available for the given transcript.
          */
         getAvailableMedia(id, onResult) {
 	    this.createRequest("getAvailableMedia", { id : id }, onResult).send();
         }
         
         /**
-         * Get a list of documents associated with the episode of the given graph.
-         * @param {string} id The graph ID.
+         * Get a list of documents associated with the episode of the given transcript.
+         * @param {string} id The transcript ID.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be:  List of media files available for the given graph.
+         * <var>result</var> which will be:  List of media files available for the given transcript.
          */
         getEpisodeDocuments(id, onResult) {
 	    this.createRequest("getEpisodeDocuments", { id : id }, onResult).send();
         }
         
         /**
-         * Gets a given media track for a given graph.
-         * @param {string} id The graph ID.
+         * Gets a given media track for a given transcript.
+         * @param {string} id The transcript ID.
          * @param {string} trackSuffix The track suffix of the media.
          * @param {string} mimeType The MIME type of the media.
          * @param {float} [startOffset] The start offset of the media sample, or null for
@@ -689,7 +689,7 @@
          * end of the whole recording. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: {string} A URL to the given media for the given
-         * graph, or null if the given media doesn't exist.
+         * transcript, or null if the given media doesn't exist.
          */
         getMedia(id, trackSuffix, mimeType, startOffset, endOffset, onResult) {
             if (typeof startOffset === "function") { // (id, trackSuffix, mimeType, onResult)
@@ -720,16 +720,16 @@
      * // get a corpus
      * store.getCorpusIds((corpora, errors, messages, call)=>{ 
      *     console.log("transcripts in: " + corpora[0]); 
-     *     store.getGraphIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
+     *     store.getTranscriptIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
      *         console.log("Deleting all transcripts in " + id));
      *         for (i in ids) {
-     *           store.deleteGraph(ids[i], (ids, errors, messages, call, id)=>{ 
+     *           store.deleteTranscript(ids[i], (ids, errors, messages, call, id)=>{ 
      *               console.log("deleted " + id);
      *             });
      *         }
      *       });
      *   });
-     * store.deleteGraph(documents[0]);
+     * store.deleteTranscript(documents[0]);
      * @extends GraphStoreQuery
      * @author Robert Fromont robert@fromont.net.nz
      */
@@ -746,8 +746,9 @@
         }
 
         /**
-         * Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
-         * @param graph The graph to save.
+         * Saves the given transcript. The graph can be partial e.g. include only some of
+         * the layers that the stored version of the transcript contains.
+         * @param graph The transcript to save.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: true if changes were saved, false if there
          * were no changes to save.
@@ -756,8 +757,8 @@
         }
     
         /**
-         * Saves the given media for the given graph
-         * @param {string} id The graph ID
+         * Saves the given media for the given transcript
+         * @param {string} id The transcript ID
          * @param {string} trackSuffix The track suffix of the media.
          * @param {string} mediaUrl A URL to the media content.
          * @param {resultCallback} onResult Invoked when the request has returned a result.
@@ -766,8 +767,8 @@
         }
         
         /**
-         * Saves the given source file (transcript) for the given graph.
-         * @param {string} id The graph ID
+         * Saves the given source file (transcript) for the given transcript.
+         * @param {string} id The transcript ID
          * @param {string} url A URL to the transcript.
          * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
@@ -775,8 +776,8 @@
         }
 
         /**
-         * Saves the given document for the episode of the given graph.
-         * @param {string} id The graph ID
+         * Saves the given document for the episode of the given transcript.
+         * @param {string} id The transcript ID
          * @param {string} url A URL to the document.
          * @param {resultCallback} onResult Invoked when the request has returned a result.
          */
@@ -784,12 +785,12 @@
         }
         
         /**
-         * Deletes the given graph, and all assciated media, from the graph store..
-         * @param {string} id The graph ID
+         * Deletes the given transcript, and all assciated media, from the graph store.
+         * @param {string} id The transcript ID
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
-        deleteGraph(id, onResult) {
-	    this.createRequest("deleteGraph", {id : id}, onResult, null, "POST").send();
+        deleteTranscript(id, onResult) {
+	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST").send();
         }
     }
     
@@ -872,7 +873,7 @@
          * @param {string} corpus The corpus for the transcript.
          * @param {string} episode The episode the transcript belongs to.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * result, which is an map of graph IDs (transcript names) to task threadIds. The
+         * result, which is an map of transcript IDs (transcript names) to task threadIds. The
          * task status can be updated using {@link Labbcat#taskStatus} 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
@@ -1020,7 +1021,7 @@
          * @param {file|string} transcript The transcript to upload. In a browser, this
          * must be a file object, and in Node, it must be the full path to the file. 
          * @param {resultCallback} onResult Invoked when the request has returned a result, 
-         * which is an map of graph IDs (transcript names) to task threadIds. The 
+         * which is an map of transcript IDs (transcript names) to task threadIds. The 
          * task status can be updated using {@link Labbcat#taskStatus}
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
@@ -1110,16 +1111,6 @@
             }
         }
 
-        /**
-         * Delete a transcript.
-         * @param {string} id ID of the transcript.
-         * @param {resultCallback} onResult Invoked when the request has completed.
-         * @deprecated Use deleteGraph instead.
-         */
-        deleteTranscript(id, onResult) {
-            this.deleteGraph(id, onResult);
-        }
-        
         /**
          * Gets list of tasks.
          * @param {resultCallback} onResult Invoked when the request has returned a
@@ -1585,7 +1576,7 @@
         
         /**
          * Downloads WAV sound fragments.
-         * <p>For convenience, the first three arguments, <var>graphIds</var>, 
+         * <p>For convenience, the first three arguments, <var>transcriptIds</var>, 
          * <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
          * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
          * which case the start/end times are the utterance boundaries - e.g.
@@ -1594,11 +1585,11 @@
          *       ...
          *   });
          * });</pre>
-         * @param {string[]} graphIds A list of graph IDs (transcript names).
+         * @param {string[]} transcriptIds A list of transcript IDs (transcript names).
          * @param {float[]} startOffsets A list of start offsets, with one element for each
-         * element in <var>graphIds</var>. 
+         * element in <var>transcriptIds</var>. 
          * @param {float[]} endOffsets A list of end offsets, with one element for each element in
-         * <var>graphIds</var>. 
+         * <var>transcriptIds</var>. 
          * @param {int} [sampleRate] The desired sample rate, or null for no preference.
          * @param {string} [dir] A directory in which the files should be stored, or null
          * for a temporary folder.  If specified, and the directory doesn't exist, it will
@@ -1609,7 +1600,7 @@
          * once processing is finished, they should be deleted by the caller, or moved to
          * a more permanent location.  
          */
-        getSoundFragments(graphIds, startOffsets, endOffsets, sampleRate, dir, onResult) {
+        getSoundFragments(transcriptIds, startOffsets, endOffsets, sampleRate, dir, onResult) {
             if (!runningOnNode) {
                 onResult && onResult(
                     null, ["getSoundFragments is not yet implemented for browsers"], [], // TODO
@@ -1617,9 +1608,9 @@
                 return;
             }
             
-            // ensure graphIds is a list of strings, not a list of matches
-            if (typeof graphIds[0] != "string" && graphIds[0].Transcript) {
-                // convert the array of matches into an arrays of graphIds, startOffset,
+            // ensure transcriptIds is a list of strings, not a list of matches
+            if (typeof transcriptIds[0] != "string" && transcriptIds[0].Transcript) {
+                // convert the array of matches into an arrays of transcriptIds, startOffset,
                 // and endOffsets...
 
                 // shift remaining arguments to the right
@@ -1628,37 +1619,37 @@
                 sampleRate = startOffsets
 
                 // create arrays
-                startOffsets = graphIds.map(match => match.Line);
-                endOffsets = graphIds.map(match => match.LineEnd);
-                graphIds = graphIds.map(match => match.Transcript);
+                startOffsets = transcriptIds.map(match => match.Line);
+                endOffsets = transcriptIds.map(match => match.LineEnd);
+                transcriptIds = transcriptIds.map(match => match.Transcript);
             }            
 
-            if (graphIds.length != startOffsets.length || graphIds.length != endOffsets.length) {
+            if (transcriptIds.length != startOffsets.length || transcriptIds.length != endOffsets.length) {
                 onResult && onResult(null, [
-                    "graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
+                    "transcriptIds ("+transcriptIds.length +"), startOffsets ("+startOffsets.length
                         +"), and endOffsets ("+endOffsets.length+") must be arrays of equal size."],
                                      [], "getSoundFragments");
                 return;
             }
 
             if (typeof sampleRate === "function") {
-                // (graphIds, startOffsets, endOffsets, onResult)
+                // (transcriptIds, startOffsets, endOffsets, onResult)
                 onResult = sampleRate;
                 sampleRate = null;
                 dir = null;
             } else if (typeof dir === "function") {
                 onResult = dir;
                 if (typeof sampleRate === "string") {
-                    // (graphIds, startOffsets, endOffsets, dir, onResult)
+                    // (transcriptIds, startOffsets, endOffsets, dir, onResult)
                     dir = sampleRate;
                     sampleRate = null;
                 } else {
-                    // (graphIds, startOffsets, endOffsets, sampleRate, onResult)
+                    // (transcriptIds, startOffsets, endOffsets, sampleRate, onResult)
                     dir = null;
                 }
             }
             if (exports.verbose) {
-                console.log("getSoundFragments("+graphIds.length+" graphIds, "
+                console.log("getSoundFragments("+transcriptIds.length+" transcriptIds, "
                             +startOffsets.length+" startOffsets, "
                             +endOffsets.length+" endOffsets, "
                             +sampleRate+", "+dir+")");
@@ -1674,14 +1665,14 @@
             let errors = [];
             
             // get fragments individually to ensure elements in result map 1:1 to element
-            // in graphIds
+            // in transcriptIds
 	    const url = this.baseUrl + "soundfragment";
             const lc = this;
             const nextFragment = function(i) {
-                if (i < graphIds.length) { // next file
+                if (i < transcriptIds.length) { // next file
 	            const xhr = new XMLHttpRequest();
                     
-	            let queryString = "?id="+encodeURIComponent(graphIds[i])
+	            let queryString = "?id="+encodeURIComponent(transcriptIds[i])
                         +"&start="+encodeURIComponent(startOffsets[i])
                         +"&end="+encodeURIComponent(endOffsets[i]);
                     if (sampleRate) queryString += "&sampleRate="+sampleRate;
@@ -1713,7 +1704,7 @@
                             console.log("getSoundFragments "+i+" loaded.");
                         }
                         // save the result to a file
-                        let fileName = graphIds[i]+"__"+startOffsets[i]+"-"+endOffsets[i]+".wav";
+                        let fileName = transcriptIds[i]+"__"+startOffsets[i]+"-"+endOffsets[i]+".wav";
                         let contentDisposition = this.getResponseHeader("content-disposition");
                         if (contentDisposition != null) {
                             // something like attachment; filename=blah.wav
@@ -1748,8 +1739,8 @@
         }
         
         /**
-         * Get graph fragments in a specified format.
-         * <p>For convenience, the first three arguments, <var>graphIds</var>, 
+         * Get transcript fragments in a specified format.
+         * <p>For convenience, the first three arguments, <var>transcriptIds</var>, 
          * <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
          * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
          * which case the start/end times are the utterance boundaries - e.g.
@@ -1758,11 +1749,11 @@
          *       ...
          *   });
          * });</pre>
-         * @param {string[]} graphIds A list of graph IDs (transcript names).
+         * @param {string[]} transcriptIds A list of transcript IDs (transcript names).
          * @param {float[]} startOffsets A list of start offsets, with one element for
-         * each element in <var>graphIds</var>. 
+         * each element in <var>transcriptIds</var>. 
          * @param {float[]} endOffsets A list of end offsets, with one element for each element in
-         * <var>graphIds</var>. 
+         * <var>transcriptIds</var>. 
          * @param {string[]} layerIds A list of IDs of annotation layers to include in the
          * fragment. 
          * @param {string} mimeType The desired format, for example "text/praat-textgrid" for Praat
@@ -1776,7 +1767,7 @@
          * processing is finished, they should be deleted by the caller, or moved to a
          * more permanent location. 
          */
-        getFragments(graphIds, startOffsets, endOffsets, layerIds, mimeType, dir, onResult) {
+        getFragments(transcriptIds, startOffsets, endOffsets, layerIds, mimeType, dir, onResult) {
             if (!runningOnNode) {
                 onResult && onResult(
                     null, ["getFragments is not yet implemented for browsers"], [], // TODO
@@ -1784,9 +1775,9 @@
                 return;
             }
                 
-            // ensure graphIds is a list of strings, not a list of matches
-            if (typeof graphIds[0] != "string" && graphIds[0].Transcript) {
-                // convert the array of matches into an arrays of graphIds, startOffset,
+            // ensure transcriptIds is a list of strings, not a list of matches
+            if (typeof transcriptIds[0] != "string" && transcriptIds[0].Transcript) {
+                // convert the array of matches into an arrays of transcriptIds, startOffset,
                 // and endOffsets...
 
                 // shift remaining arguments to the right
@@ -1796,27 +1787,27 @@
                 layerIds = startOffsets
 
                 // create arrays
-                startOffsets = graphIds.map(match => match.Line);
-                endOffsets = graphIds.map(match => match.LineEnd);
-                graphIds = graphIds.map(match => match.Transcript);
+                startOffsets = transcriptIds.map(match => match.Line);
+                endOffsets = transcriptIds.map(match => match.LineEnd);
+                transcriptIds = transcriptIds.map(match => match.Transcript);
             }
             
-            if (graphIds.length != startOffsets.length || graphIds.length != endOffsets.length) {
+            if (transcriptIds.length != startOffsets.length || transcriptIds.length != endOffsets.length) {
                 onResult && onResult(
                     null,
-                    ["graphIds ("+graphIds.length +"), startOffsets ("+startOffsets.length
+                    ["transcriptIds ("+transcriptIds.length +"), startOffsets ("+startOffsets.length
                      +"), and endOffsets ("+endOffsets.length+") must be arrays of equal size."],
                     [], "getFragments");
                 return;
             }
 
             if (typeof dir === "function") {
-                // (graphIds, startOffsets, endOffsets, layerIds, mimeType, onResult)
+                // (transcriptIds, startOffsets, endOffsets, layerIds, mimeType, onResult)
                 onResult = dir;
                 dir = null;
             }
             if (exports.verbose) {
-                console.log("getFragments("+graphIds.length+" graphIds, "
+                console.log("getFragments("+transcriptIds.length+" transcriptIds, "
                             +startOffsets.length+" startOffsets, "
                             +endOffsets.length+" endOffsets, "
                             +JSON.stringify(layerIds)+", "+mimeType+", "+dir+")");
@@ -1832,15 +1823,15 @@
             let errors = [];
             
             // get fragments individually to ensure elements in result map 1:1 to element
-            // in graphIds
+            // in transcriptIds
 	    let url = this.baseUrl + "convertfragment?mimeType="+encodeURIComponent(mimeType);
             for (let layerId of layerIds) url += "&layerId=" + layerId;
             const lc = this;
             const nextFragment = function(i) {
-                if (i < graphIds.length) { // next file
+                if (i < transcriptIds.length) { // next file
 	            const xhr = new XMLHttpRequest();
                     
-	            let queryString = "&id="+encodeURIComponent(graphIds[i])
+	            let queryString = "&id="+encodeURIComponent(transcriptIds[i])
                         +"&start="+encodeURIComponent(startOffsets[i])
                         +"&end="+encodeURIComponent(endOffsets[i]);
                     
@@ -1871,7 +1862,7 @@
                             console.log("getSoundFragments "+i+" loaded.");
                         }
                         // save the result to a file
-                        let fileName = graphIds[i]+"__"+startOffsets[i]+"-"+endOffsets[i];
+                        let fileName = transcriptIds[i]+"__"+startOffsets[i]+"-"+endOffsets[i];
                         let contentDisposition = this.getResponseHeader("content-disposition");
                         if (contentDisposition != null) {
                             // something like attachment; filename=blah.wav
@@ -1950,7 +1941,7 @@
          * String constructor.
          */
         constructor(matchId) {
-            this._graphId = null;
+            this._transcriptId = null;
             this._startAnchorId = null;
             this._endAnchorId = null;
             this._startOffset = null;
@@ -1961,7 +1952,7 @@
             this._prefix = null;
             if (matchId) {
                 const parts = matchId.split(";");
-                this._graphId = parts[0];
+                this._transcriptId = parts[0];
                 let intervalPart = null;
                 for (let part of parts) {
                     if (part == parts[0]) continue;
@@ -1992,9 +1983,9 @@
             } // string was given
         }
         /**
-         * The graph identifier.
+         * The transcript identifier.
          */
-        get graphId() { return this._graphId; }
+        get transcriptId() { return this._transcriptId; }
         /**
          * ID of the start anchor.
          */
