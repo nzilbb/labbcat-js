@@ -237,16 +237,16 @@ const store = new GraphStore("https://labbcat.canterbury.ac.nz", "demo", "demo")
 // get a corpus
 store.getCorpusIds((corpora, errors, messages, call)=>{ 
     console.log("transcripts in: " + corpora[0]); 
-    store.getGraphIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
+    store.getTranscriptIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
         console.log("Deleting all transcripts in " + id));
         for (i in ids) {
-          store.deleteGraph(ids[i], (ids, errors, messages, call, id)=>{ 
+          store.deleteTranscript(ids[i], (ids, errors, messages, call, id)=>{ 
               console.log("deleted " + id);
             });
         }
       });
   });
-store.deleteGraph(documents[0]);</code></pre>
+store.deleteTranscript(documents[0]);</code></pre>
 
 
 
@@ -500,7 +500,7 @@ store.deleteGraph(documents[0]);</code></pre>
 
 
 <div class="description">
-    Gets the number of annotations on the given layer of the given graph.
+    Gets the number of annotations on the given layer of the given transcript.
 </div>
 
 
@@ -552,7 +552,7 @@ store.deleteGraph(documents[0]);</code></pre>
 
             
 
-            <td class="description last">The ID of the graph.</td>
+            <td class="description last">The ID of the transcript.</td>
         </tr>
 
     
@@ -860,192 +860,6 @@ the following can be used:
     
 
     
-    <h4 class="name" id="countMatchingGraphIds"><span class="type-signature"></span>countMatchingGraphIds<span class="signature">(expression, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Counts the number of graphs that match a particular pattern.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>expression</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">An expression that determines which graphs match.
-<p> The expression language is loosely based on JavaScript; expressions such as
-the following can be used: 
-<ul>
- <li><code>/Ada.+/.test(id)</code></li>
- <li><code>labels('who').includes('Robert')</code></li>
- <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
- <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
- <li><code>my('transcript_scribe').label == 'Robert'</code></li>
- <li><code>my('participant_languages').label == 'en'</code></li>
- <li><code>my('noise').label == 'bell'</code></li>
- <li><code>labels('transcript_languages').includes('en')</code></li>
- <li><code>labels('participant_languages').includes('en')</code></li>
- <li><code>labels('noise').includes('bell')</code></li>
- <li><code>list('transcript_languages').length gt; 1</code></li>
- <li><code>list('participant_languages').length gt; 1</code></li>
- <li><code>list('transcript').length gt; 100</code></li>
- <li><code>annotators('transcript_rating').includes('Robert')</code></li>
- <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
-labels('who').includes('Robert')</code></li> 
-</ul></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be: The number of matching graphs.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="GraphStoreQuery.html#countMatchingGraphIds">GraphStoreQuery#countMatchingGraphIds</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line436">line 436</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id="countMatchingParticipantIds"><span class="type-signature"></span>countMatchingParticipantIds<span class="signature">(expression, onResult)</span><span class="type-signature"></span></h4>
     
 
@@ -1225,7 +1039,7 @@ following can be used:
     
 
     
-    <h4 class="name" id="deleteGraph"><span class="type-signature"></span>deleteGraph<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="countMatchingTranscriptIds"><span class="type-signature"></span>countMatchingTranscriptIds<span class="signature">(expression, onResult)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1233,7 +1047,193 @@ following can be used:
 
 
 <div class="description">
-    Deletes the given graph, and all assciated media, from the graph store..
+    Counts the number of transcripts that match a particular pattern.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>expression</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An expression that determines which transcripts match.
+<p> The expression language is loosely based on JavaScript; expressions such as
+the following can be used: 
+<ul>
+ <li><code>/Ada.+/.test(id)</code></li>
+ <li><code>labels('who').includes('Robert')</code></li>
+ <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+ <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+ <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+ <li><code>my('participant_languages').label == 'en'</code></li>
+ <li><code>my('noise').label == 'bell'</code></li>
+ <li><code>labels('transcript_languages').includes('en')</code></li>
+ <li><code>labels('participant_languages').includes('en')</code></li>
+ <li><code>labels('noise').includes('bell')</code></li>
+ <li><code>list('transcript_languages').length gt; 1</code></li>
+ <li><code>list('participant_languages').length gt; 1</code></li>
+ <li><code>list('transcript').length gt; 100</code></li>
+ <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+ <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+labels('who').includes('Robert')</code></li> 
+</ul></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: The number of matching transcripts.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="GraphStoreQuery.html#countMatchingTranscriptIds">GraphStoreQuery#countMatchingTranscriptIds</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line436">line 436</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="deleteTranscript"><span class="type-signature"></span>deleteTranscript<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Deletes the given transcript, and all assciated media, from the graph store.
 </div>
 
 
@@ -1285,7 +1285,7 @@ following can be used:
 
             
 
-            <td class="description last">The graph ID</td>
+            <td class="description last">The transcript ID</td>
         </tr>
 
     
@@ -1349,7 +1349,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line791">line 791</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line792">line 792</a>
     </li></ul></dd>
     
 
@@ -1393,7 +1393,7 @@ following can be used:
 
 
 <div class="description">
-    Gets the given anchors in the given graph.
+    Gets the given anchors in the given transcript.
 </div>
 
 
@@ -1445,7 +1445,7 @@ following can be used:
 
             
 
-            <td class="description last">The given graph ID.</td>
+            <td class="description last">The given transcript ID.</td>
         </tr>
 
     
@@ -1492,7 +1492,7 @@ following can be used:
             
 
             <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be:  The identified graph.</td>
+<var>result</var> which will be:  The identified transcript.</td>
         </tr>
 
     
@@ -1582,7 +1582,7 @@ following can be used:
 
 
 <div class="description">
-    Gets the annotations on the given layer of the given graph.
+    Gets the annotations on the given layer of the given transcript.
 </div>
 
 
@@ -1644,7 +1644,7 @@ following can be used:
 
             
 
-            <td class="description last">The ID of the graph.</td>
+            <td class="description last">The ID of the transcript.</td>
         </tr>
 
     
@@ -1864,7 +1864,7 @@ the first page.</td>
 
 
 <div class="description">
-    List the media available for the given graph.
+    List the media available for the given transcript.
 </div>
 
 
@@ -1916,7 +1916,7 @@ the first page.</td>
 
             
 
-            <td class="description last">The graph ID.</td>
+            <td class="description last">The transcript ID.</td>
         </tr>
 
     
@@ -1940,7 +1940,7 @@ the first page.</td>
             
 
             <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be:  List of media files available for the given graph.</td>
+<var>result</var> which will be:  List of media files available for the given transcript.</td>
         </tr>
 
     
@@ -2173,7 +2173,7 @@ the first page.</td>
 
 
 <div class="description">
-    Get a list of documents associated with the episode of the given graph.
+    Get a list of documents associated with the episode of the given transcript.
 </div>
 
 
@@ -2225,7 +2225,7 @@ the first page.</td>
 
             
 
-            <td class="description last">The graph ID.</td>
+            <td class="description last">The transcript ID.</td>
         </tr>
 
     
@@ -2249,7 +2249,7 @@ the first page.</td>
             
 
             <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be:  List of media files available for the given graph.</td>
+<var>result</var> which will be:  List of media files available for the given transcript.</td>
         </tr>
 
     
@@ -2296,671 +2296,6 @@ the first page.</td>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line677">line 677</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getGraph"><span class="type-signature"></span>getGraph<span class="signature">(id, layerId, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Gets a graph given its ID, containing only the given layers.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The given graph ID.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>layerId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;string></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The IDs of the layers to load, or null for all
-layers. If only graph data is required, set this to ["graph"].</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be:  The identified graph.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="GraphStoreQuery.html#getGraph">GraphStoreQuery#getGraph</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line637">line 637</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getGraphIds"><span class="type-signature"></span>getGraphIds<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Gets a list of graph IDs.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be:  {string[]} A list of graph IDs.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="GraphStoreQuery.html#getGraphIds">GraphStoreQuery#getGraphIds</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line605">line 605</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getGraphIdsInCorpus"><span class="type-signature"></span>getGraphIdsInCorpus<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Gets a list of graph IDs in the given corpus.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">A corpus ID.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be:  {string[]} A list of graph IDs.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="GraphStoreQuery.html#getGraphIdsInCorpus">GraphStoreQuery#getGraphIdsInCorpus</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line615">line 615</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getGraphIdsWithParticipant"><span class="type-signature"></span>getGraphIdsWithParticipant<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Gets a list of IDs of graphs that include the given participant.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">A participant ID.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be:  {string[]} A list of graph IDs.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="GraphStoreQuery.html#getGraphIdsWithParticipant">GraphStoreQuery#getGraphIdsWithParticipant</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line625">line 625</a>
     </li></ul></dd>
     
 
@@ -3661,7 +2996,7 @@ layers. If only graph data is required, set this to ["graph"].</td>
 
             
 
-            <td class="description last">An expression that determines which graphs match.
+            <td class="description last">An expression that determines which transcripts match.
 <p> The expression language is loosely based on JavaScript; expressions such as the
 following can be used: 
 <ul>
@@ -3820,316 +3155,6 @@ return the first page.</td>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line586">line 586</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getMatchingGraphIds"><span class="type-signature"></span>getMatchingGraphIds<span class="signature">(expression, pageLength<span class="signature-attributes">opt</span>, pageNumber<span class="signature-attributes">opt</span>, order<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Gets a list of IDs of graphs that match a particular pattern.
-<p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
-can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
-<p>The order of the list can be specified.  If ommitted, the graphs are listed in ID
-order.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>expression</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">An expression that determines which graphs match.
-<p> The expression language is loosely based on JavaScript; expressions such as
-the following can be used:
-<ul>
- <li><code>/Ada.+/.test(id)</code></li>
- <li><code>labels('who').includes('Robert')</code></li>
- <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
- <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
- <li><code>my('transcript_scribe').label == 'Robert'</code></li>
- <li><code>my('participant_languages').label == 'en'</code></li>
- <li><code>my('noise').label == 'bell'</code></li>
- <li><code>labels('transcript_languages').includes('en')</code></li>
- <li><code>labels('participant_languages').includes('en')</code></li>
- <li><code>labels('noise').includes('bell')</code></li>
- <li><code>list('transcript_languages').length gt; 1</code></li>
- <li><code>list('participant_languages').length gt; 1</code></li>
- <li><code>list('transcript').length gt; 100</code></li>
- <li><code>annotators('transcript_rating').includes('Robert')</code></li>
- <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
-labels('who').includes('Robert')</code></li> 
-</ul></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageLength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The maximum number of IDs to return, or null to return all.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageNumber</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The zero-based page number to return, or null to return
-the first page.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>order</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The ordering for the list of IDs, a string containing a
-comma-separated list of 
-expressions, which may be appended by " ASC" or " DESC", or null for graph ID order.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a
-<var>result</var> which will be: A list of graph IDs.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="GraphStoreQuery.html#getMatchingGraphIds">GraphStoreQuery#getMatchingGraphIds</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line478">line 478</a>
     </li></ul></dd>
     
 
@@ -4429,6 +3454,316 @@ first page.</td>
     
 
     
+    <h4 class="name" id="getMatchingTranscriptIds"><span class="type-signature"></span>getMatchingTranscriptIds<span class="signature">(expression, pageLength<span class="signature-attributes">opt</span>, pageNumber<span class="signature-attributes">opt</span>, order<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Gets a list of IDs of transcripts that match a particular pattern.
+<p>The results can be exhaustive, by omitting pageLength and pageNumber, or they
+can be a subset (a 'page') of results, by given pageLength and pageNumber values.</p>
+<p>The order of the list can be specified.  If ommitted, the transcripts are
+listed in ID order.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>expression</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">An expression that determines which transcripts match.
+<p> The expression language is loosely based on JavaScript; expressions such as
+the following can be used:
+<ul>
+ <li><code>/Ada.+/.test(id)</code></li>
+ <li><code>labels('who').includes('Robert')</code></li>
+ <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
+ <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
+ <li><code>my('transcript_scribe').label == 'Robert'</code></li>
+ <li><code>my('participant_languages').label == 'en'</code></li>
+ <li><code>my('noise').label == 'bell'</code></li>
+ <li><code>labels('transcript_languages').includes('en')</code></li>
+ <li><code>labels('participant_languages').includes('en')</code></li>
+ <li><code>labels('noise').includes('bell')</code></li>
+ <li><code>list('transcript_languages').length gt; 1</code></li>
+ <li><code>list('participant_languages').length gt; 1</code></li>
+ <li><code>list('transcript').length gt; 100</code></li>
+ <li><code>annotators('transcript_rating').includes('Robert')</code></li>
+ <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
+labels('who').includes('Robert')</code></li> 
+</ul></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The maximum number of IDs to return, or null to return all.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based page number to return, or null to return
+the first page.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>order</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The ordering for the list of IDs, a string containing a
+comma-separated list of 
+expressions, which may be appended by " ASC" or " DESC", or null for transcript ID order.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: A list of transcript IDs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="GraphStoreQuery.html#getMatchingTranscriptIds">GraphStoreQuery#getMatchingTranscriptIds</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line478">line 478</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="getMedia"><span class="type-signature"></span>getMedia<span class="signature">(id, trackSuffix, mimeType, startOffset<span class="signature-attributes">opt</span>, endOffset[, onResult)</span><span class="type-signature"></span></h4>
     
 
@@ -4437,7 +3772,7 @@ first page.</td>
 
 
 <div class="description">
-    Gets a given media track for a given graph.
+    Gets a given media track for a given transcript.
 </div>
 
 
@@ -4499,7 +3834,7 @@ first page.</td>
 
             
 
-            <td class="description last">The graph ID.</td>
+            <td class="description last">The transcript ID.</td>
         </tr>
 
     
@@ -4660,7 +3995,7 @@ end of the whole recording.</td>
 
             <td class="description last">Invoked when the request has returned a
 <var>result</var> which will be: {string} A URL to the given media for the given
-graph, or null if the given media doesn't exist.</td>
+transcript, or null if the given media doesn't exist.</td>
         </tr>
 
     
@@ -5335,7 +4670,7 @@ relate to each other.</td>
     
 
     
-    <h4 class="name" id="saveEpisodeDocument"><span class="type-signature"></span>saveEpisodeDocument<span class="signature">(id, url, onResult)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getTranscript"><span class="type-signature"></span>getTranscript<span class="signature">(id, layerId, onResult)</span><span class="type-signature"></span></h4>
     
 
     
@@ -5343,7 +4678,7 @@ relate to each other.</td>
 
 
 <div class="description">
-    Saves the given document for the episode of the given graph.
+    Gets a transcript given its ID, containing only the given layers.
 </div>
 
 
@@ -5395,7 +4730,672 @@ relate to each other.</td>
 
             
 
-            <td class="description last">The graph ID</td>
+            <td class="description last">The given transcript ID.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>layerId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The IDs of the layers to load, or null for all
+layers. If only transcript data is required, set this to ["graph"].</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be:  The identified transcript.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="GraphStoreQuery.html#getTranscript">GraphStoreQuery#getTranscript</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line637">line 637</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getTranscriptIds"><span class="type-signature"></span>getTranscriptIds<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets a list of transcript IDs.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be:  {string[]} A list of transcript IDs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="GraphStoreQuery.html#getTranscriptIds">GraphStoreQuery#getTranscriptIds</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line605">line 605</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getTranscriptIdsInCorpus"><span class="type-signature"></span>getTranscriptIdsInCorpus<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets a list of transcript IDs in the given corpus.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A corpus ID.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be:  {string[]} A list of transcript IDs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="GraphStoreQuery.html#getTranscriptIdsInCorpus">GraphStoreQuery#getTranscriptIdsInCorpus</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line615">line 615</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getTranscriptIdsWithParticipant"><span class="type-signature"></span>getTranscriptIdsWithParticipant<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets a list of IDs of transcripts that include the given participant.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A participant ID.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be:  {string[]} A list of transcript IDs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="GraphStoreQuery.html#getTranscriptIdsWithParticipant">GraphStoreQuery#getTranscriptIdsWithParticipant</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line625">line 625</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="saveEpisodeDocument"><span class="type-signature"></span>saveEpisodeDocument<span class="signature">(id, url, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Saves the given document for the episode of the given transcript.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The transcript ID</td>
         </tr>
 
     
@@ -5482,7 +5482,7 @@ relate to each other.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line783">line 783</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line784">line 784</a>
     </li></ul></dd>
     
 
@@ -5526,7 +5526,8 @@ relate to each other.</td>
 
 
 <div class="description">
-    Saves the given graph. The graph can be partial e.g. include only some of the layers that the stored version of the graph contains.
+    Saves the given transcript. The graph can be partial e.g. include only some of
+the layers that the stored version of the transcript contains.
 </div>
 
 
@@ -5573,7 +5574,7 @@ relate to each other.</td>
 
             
 
-            <td class="description last">The graph to save.</td>
+            <td class="description last">The transcript to save.</td>
         </tr>
 
     
@@ -5639,7 +5640,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line755">line 755</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line756">line 756</a>
     </li></ul></dd>
     
 
@@ -5683,7 +5684,7 @@ were no changes to save.</td>
 
 
 <div class="description">
-    Saves the given media for the given graph
+    Saves the given media for the given transcript
 </div>
 
 
@@ -5735,7 +5736,7 @@ were no changes to save.</td>
 
             
 
-            <td class="description last">The graph ID</td>
+            <td class="description last">The transcript ID</td>
         </tr>
 
     
@@ -5845,7 +5846,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line765">line 765</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line766">line 766</a>
     </li></ul></dd>
     
 
@@ -5889,7 +5890,7 @@ were no changes to save.</td>
 
 
 <div class="description">
-    Saves the given source file (transcript) for the given graph.
+    Saves the given source file (transcript) for the given transcript.
 </div>
 
 
@@ -5941,7 +5942,7 @@ were no changes to save.</td>
 
             
 
-            <td class="description last">The graph ID</td>
+            <td class="description last">The transcript ID</td>
         </tr>
 
     
@@ -6028,7 +6029,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line774">line 774</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line775">line 775</a>
     </li></ul></dd>
     
 
@@ -6080,7 +6081,7 @@ were no changes to save.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Feb 14 2020 18:55:41 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Feb 26 2020 11:52:41 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
