@@ -19,7 +19,7 @@ var labbcat = require("@nzilbb/labbcat");
 
 var local = new labbcat.Labbcat(labbcatUrl, userName, password);
 
-function recursivelyFindTranscriberFiles(pathPrefix, directory) {
+function recursivelyFindTranscriptFiles(pathPrefix, directory) {
     var dirPath = (pathPrefix?pathPrefix+"/":"")+directory;
     var files = fs.readdirSync(dirPath);
     for (f in files) {
@@ -31,7 +31,7 @@ function recursivelyFindTranscriberFiles(pathPrefix, directory) {
 		transcriptFiles.push(path);
 	    }
 	} else if (file.isDirectory()) {
-	    recursivelyFindTranscriberFiles(dirPath, files[f])
+	    recursivelyFindTranscriptFiles(dirPath, files[f])
 	}
     }
 }
@@ -91,6 +91,6 @@ function uploadTranscript(transcript) {
 var transcriptFiles = [];
 
 console.log("Looking for transcripts...");
-recursivelyFindTranscriberFiles(null,".");
+recursivelyFindTranscriptFiles(null,".");
 console.log("Uploading...");
 uploadNextTranscript();
