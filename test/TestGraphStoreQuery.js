@@ -13,7 +13,7 @@
 const assert = require('chai').assert;
 const labbcat = require('../nzilbb.labbcat');
 
-// YOU MUST ENSURE THE FOLLOWING SETTINGS ARE VALID FOR YOU TEST LABBCAT SERVER:
+// YOU MUST ENSURE THE FOLLOWING SETTINGS ARE VALID FOR YOU TEST LABB-CAT SERVER:
 const baseUrl = "http://localhost:8080/labbcat/";
 const username = "labbcat";
 const password = "labbcat";
