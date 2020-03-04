@@ -130,11 +130,9 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                 assert(fs.existsSync(transcriptPath), "Test transcript exists");
                 corpus.newTranscript(
                     transcriptPath, null, null, transcriptType, corpusId, "test",
-                    (tasks, errors, messages)=>{
+                    (threadId, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors));
-                        assert.isNotNull(tasks);
-                        assert.include(Object.keys(tasks), transcriptName);
-                        const threadId = tasks[transcriptName];
+                        assert.isNotNull(threadId);
                         
                         corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
                             assert.isNull(errors, JSON.stringify(errors));
@@ -150,11 +148,9 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                     assert.equal(count, 1, "Transcript is in the store");
                                     
                                     // re-upload it
-                                    corpus.updateTranscript(transcriptPath, (tasks, errors, messages)=>{
+                                    corpus.updateTranscript(transcriptPath, (threadId, errors, messages)=>{
                                         assert.isNull(errors, JSON.stringify(errors))
-                                        assert.isNotNull(tasks);
-                                        assert.include(Object.keys(tasks), transcriptName);
-                                        const threadId = tasks[transcriptName];
+                                        assert.isNotNull(threadId);
                                         
                                         corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
                                             assert.isNull(errors, JSON.stringify(errors));
@@ -650,7 +646,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 // some fragments might be repeated, so we delete the
                                 // files only after all checks are complete
                                 for (let m = 0; m < upTo; m++) {
-                                    try { fs.unlinkSync(wavs[m]); } catch(x) {}
+                                    try { fs.unlinkSync(textgrids[m]); } catch(x) {}
                                 }
                                 
                                 // getFragments without dir
@@ -674,7 +670,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                         // some fragments might be repeated, so we delete the
                                         // files only after all checks are complete
                                         for (let m = 0; m < upTo; m++) {
-                                            try { fs.unlinkSync(wavs[m]); } catch(x) {}
+                                            try { fs.unlinkSync(textgrids[m]); } catch(x) {}
                                         }
 
                                         // getFragments with matches instead of
@@ -703,7 +699,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                 // delete the files only after all checks
                                                 // are complete 
                                                 for (let m = 0; m < upTo; m++) {
-                                                    try { fs.unlinkSync(wavs[m]); } catch(x) {}
+                                                    try { fs.unlinkSync(textgrids[m]); } catch(x) {}
                                                 }
                                                 
                                                 done();

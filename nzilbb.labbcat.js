@@ -118,7 +118,15 @@
         try {
 	    var response = JSON.parse(this.responseText);
             if (response.model != null) {
-                if (response.model.result) result = response.model.result;
+                if (response.model.result) {
+                    result = response.model.result;
+                    if (evt.target.call == "newTranscript"
+                        || evt.target.call == "updateTranscript") {
+                        // for these calls, the result is an object with one key, whose
+                        // value is the threadId - so just return that
+                        result = result[evt.target.id];
+                    }
+                }
 	        if (!result && result != 0) result = response.model;
             }
             if (exports.verbose) console.log("result: " + JSON.stringify(result));
@@ -155,6 +163,7 @@
      * Read-only querying of LaBB-CAT corpora, based on the  
      * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStoreQuery.html">nzilbb.ag.IGraphStoreQuery</a>
      * interface.
+     * <p>This interface provides only <em>read-only</em> operations.
      * @example
      * // create annotation store client
      * const store = new GraphStoreQuery("https://labbcat.canterbury.ac.nz", "demo", "demo");
@@ -713,7 +722,9 @@
     /**
      * Read/write interaction with LaBB-CAT corpora, based on the  
      * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a>.
-     * interface
+     * interface.
+     * <p>This class inherits the <em>read-only</em> operations of GraphStoreQuery
+     * and adds some <em>write</em> operations for updating data.
      * @example
      * // create annotation store client
      * const store = new GraphStore("https://labbcat.canterbury.ac.nz", "demo", "demo");
@@ -798,6 +809,9 @@
     
     /**
      * Labbcat client, for accessing LaBB-CAT server functions programmatically.
+     * <p>This class inherits the <em>read-write</em> operations of 
+     * {@link GraphStoreAdministration}
+     * and adds some extra operations, including transcript upload and task management. 
      * @example
      * const labbcat = require("@nzilbb/labbcat");
      * 
@@ -873,7 +887,7 @@
          * @param {string} corpus The corpus for the transcript.
          * @param {string} episode The episode the transcript belongs to.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * result, which is an map of transcript IDs (transcript names) to task threadIds. The
+         * result, which is the task ID of the resulting annotation generation task. The
          * task status can be updated using {@link Labbcat#taskStatus} 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
@@ -938,7 +952,7 @@
 		        for (var f in media) {
 		            var mediaName = media[f].replace(/.*\//g, "");
 		            try {
-			        fd.append("uploadmedia"+mediaSuffix+"1", 
+			        fd.append("uploadmedia"+mediaSuffix+(f+1), 
 				          fs.createReadStream(media[f]).on('error', function(){
 				              onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
 				          }), mediaName);
@@ -1004,7 +1018,10 @@
                                     errors = ["" +exception+ ": " + labbcat.responseText];
                                     messages = [];
 			        }
-			        onResult(result, errors, messages, "newTranscript", transcriptName);
+                                // for this call, the result is an object with one key, whose
+                                // value is the threadId - so just return that
+			        onResult(result[transcriptName], errors, messages, "newTranscript",
+                                         transcriptName);
 		            });
 		        } else {
 		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "newTranscript", transcriptName);
@@ -1021,7 +1038,7 @@
          * @param {file|string} transcript The transcript to upload. In a browser, this
          * must be a file object, and in Node, it must be the full path to the file. 
          * @param {resultCallback} onResult Invoked when the request has returned a result, 
-         * which is an map of transcript IDs (transcript names) to task threadIds. The 
+         * which is the task ID of the resulting annotation generation task. The 
          * task status can be updated using {@link Labbcat#taskStatus}
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
@@ -1101,7 +1118,11 @@
                                 errors = ["" +exception+ ": " + labbcat.responseText];
                                 messages = [];
 		            }
-			    onResult(result, errors, messages, "updateTranscript", transcriptName)		        });
+                            // for this call, the result is an object with one key, whose
+                            // value is the threadId - so just return that
+			    onResult(result[transcriptName], errors, messages, "updateTranscript",
+                                     transcriptName);
+                        });
 	            } else {
 		        onResult(null, ["" +err+ ": " + this.responseText], [], "updateTranscript", transcriptName);
 	            }
@@ -1501,7 +1522,7 @@
             if (!runningOnNode) {	
 	        // create HTTP request
 	        var xhr = new XMLHttpRequest();
-	        xhr.call = "newTranscript";
+	        xhr.call = "getMatchAnnotations";
 	        xhr.id = transcript.name;
 	        xhr.onResult = onResult;
 	        xhr.addEventListener("load", callComplete, false);
