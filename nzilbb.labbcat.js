@@ -1,5 +1,27 @@
 /**
- * @file nzilbb.labbcat module for communicating with a LaBB-CAT web application.
+ * @file nzilbb.labbcat module for communicating with <a href="https://labbcat.canterbury.ac.nz/">LaBB-CAT</a> web application servers.
+ * 
+ * <h2>What is LaBB-CAT?</h2>
+ *
+ * <p>LaBB-CAT is a web-based linguistic annotation store that stores audio or video
+ * recordings, text transcripts, and other annotations.</p>
+ *
+ * <p>Annotations of various types can be automatically generated or manually added.</p>
+ *
+ * <p>LaBB-CAT servers are usually password-protected linguistic corpora, and can be
+ * accessed manually via a web browser, or programmatically using a client library like
+ * this one.</p>
+ * 
+ * <h2>What is this library?</h2>
+ * 
+ * <p>The library copies from  
+ *   <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStoreQuery.html">nzilbb.ag.IGraphStoreQuery</a>
+ *   and related Java interfaces, for standardized API calls.</p>
+ *
+ * <p><em>nzilbb.labbcat</em> is available as an <em>npm</em> package
+ *   <a href="https://www.npmjs.com/package/@nzilbb/labbcat">here.</a></p>
+ * 
+ * <p><em>nzilbb.labbcat.js</em> can also be used as a browser-importable script.</p>
  * 
  * <p>This API is has the following object model:
  * <dl>

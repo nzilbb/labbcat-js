@@ -1,8 +1,18 @@
 # labbcat-js
 
-Client library for communicating with LaBB-CAT servers.
+Client library for communicating with [LaBB-CAT](https://labbcat.canterbury.ac.nz/)
+servers using JavaScript.
 
-This is both a node module and a browser-importable script (nzilbb.labbcat.js) that
+LaBB-CAT is a web-based linguistic annotation store that stores audio or video
+recordings, text transcripts, and other annotations.
+
+Annotations of various types can be automatically generated or manually added.
+
+LaBB-CAT servers are usually password-protected linguistic corpora, and can be
+accessed manually via a web browser, or programmatically using a client library like
+this one.
+
+This library is both a node module and a browser-importable script (nzilbb.labbcat.js) that
 provides functionality for querying and extracting data from LaBB-CAT corpora, directly
 from JavaScript.
 
