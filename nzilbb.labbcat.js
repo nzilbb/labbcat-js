@@ -445,7 +445,7 @@
          * the following can be used: 
          * <ul>
          *  <li><code>/Ada.+/.test(id)</code></li>
-         *  <li><code>labels('who').includes('Robert')</code></li>
+         *  <li><code>labels('participant').includes('Robert')</code></li>
          *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
          *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
          *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
@@ -459,7 +459,7 @@
          *  <li><code>list('transcript').length gt; 100</code></li>
          *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
          *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
-         * labels('who').includes('Robert')</code></li> 
+         * labels('participant').includes('Robert')</code></li> 
          * </ul>
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: The number of matching transcripts.
@@ -481,7 +481,7 @@
          * the following can be used:
          * <ul>
          *  <li><code>/Ada.+/.test(id)</code></li>
-         *  <li><code>labels('who').includes('Robert')</code></li>
+         *  <li><code>labels('participant').includes('Robert')</code></li>
          *  <li><code>('CC', 'IA', 'MU').includes(my('corpus').label)</code></li>
          *  <li><code>my('episode').label == 'Ada Aitcheson'</code></li>
          *  <li><code>my('transcript_scribe').label == 'Robert'</code></li>
@@ -495,7 +495,7 @@
          *  <li><code>list('transcript').length gt; 100</code></li>
          *  <li><code>annotators('transcript_rating').includes('Robert')</code></li>
          *  <li><code>!/Ada.+/.test(id) &amp;&amp; my('corpus').label == 'CC' &amp;&amp;
-         * labels('who').includes('Robert')</code></li> 
+         * labels('participant').includes('Robert')</code></li> 
          * </ul>
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
          * @param {int} [pageNumber] The zero-based page number to return, or null to return
@@ -575,7 +575,7 @@
          * <ul>
          *  <li><code>id == 'ew_0_456'</code></li>
          *  <li><code>!/th[aeiou].&#47;/.test(label)</code></li>
-         *  <li><code>my('who').label == 'Robert' &amp;&amp; my('utterances').start.offset ==
+         *  <li><code>my('participant').label == 'Robert' &amp;&amp; my('utterances').start.offset ==
          * 12.345</code></li> 
          *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography'
          * &amp;&amp; start.offset &gt; 10.5</code></li> 
@@ -600,7 +600,7 @@
          * <ul>
          *  <li><code>id == 'ew_0_456'</code></li>
          *  <li><code>!/th[aeiou].&#47;/.test(label)</code></li>
-         *  <li><code>my('who').label == 'Robert' &amp;&amp; my('utterances').start.offset ==
+         *  <li><code>my('participant').label == 'Robert' &amp;&amp; my('utterances').start.offset ==
          * 12.345</code></li> 
          *  <li><code>graph.id == 'AdaAicheson-01.trs' &amp;&amp; layer.id == 'orthography'
          * &amp;&amp; start.offset &gt; 10.5</code></li> 
