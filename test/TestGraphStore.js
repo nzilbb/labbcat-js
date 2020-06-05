@@ -38,6 +38,8 @@ describe("#GraphStore", ()=>{
     });
 
     it("inherits methods (getId at least)", (done)=>{
+        assert.equal(baseUrl + "api/store/", store.storeUrl);
+        assert.equal(baseUrl + "api/edit/store/", store.storeEditUrl);
         store.getId((result, errors, messages, call)=>{
             assert.isNull(errors);
             assert.equal(baseUrl, result);

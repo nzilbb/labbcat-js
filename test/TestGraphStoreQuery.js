@@ -37,6 +37,7 @@ describe("#GraphStoreQuery", function() {
     });
     
     it("implements getId", (done)=>{
+        assert.equal(baseUrl + "api/store/", store.storeUrl);
         store.getId((id, errors, messages)=>{
             assert.isNull(errors);
             assert.equal(id, baseUrl);

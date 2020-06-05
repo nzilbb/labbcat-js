@@ -251,9 +251,10 @@
         // @param {resultCallback} onResult Invoked when the request has returned a result.
         // @param {string} [url=this.storeUrl] The URL
         // @param {string} [method=GET] The HTTP method e.g. "POST"
+        // @param {string} [storeUrl=null] The URL for the graph store.
         // @return {XMLHttpRequest} An open request.
         //
-        createRequest(call, parameters, onResult, url, method) {
+        createRequest(call, parameters, onResult, url, method, storeUrl) {
             if (exports.verbose)  {
                 console.log("createRequest "+method+" "+url + " "
                             + call + " " + JSON.stringify(parameters));
@@ -283,10 +284,11 @@
 	    }
             queryString = queryString.replace(/^&/,"?");
 	    if (!url) {
+                storeUrl = storeUrl || this.storeUrl;
                 if (exports.verbose) {
-                    console.log(method + ": "+this.storeUrl + call + queryString + " as " + this.username);
+                    console.log(method + ": "+storeUrl + call + queryString + " as " + this.username);
                 }
-	        xhr.open(method, this.storeUrl + call + queryString, true);
+	        xhr.open(method, storeUrl + call + queryString, true);
             } else { // explicit URL, so don't append call
                 if (exports.verbose) {
                     console.log(method + ": "+url + queryString + " as " + this.username);
@@ -767,6 +769,13 @@
      * @author Robert Fromont robert@fromont.net.nz
      */
     class GraphStore extends GraphStoreQuery{
+        
+        /**
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
+         */
+        get storeEditUrl() {
+            return this._storeEditUrl;
+        }
         /** 
          * Create a store client 
          * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
@@ -775,7 +784,7 @@
          */
         constructor(baseUrl, username, password) {
             super(baseUrl, username, password);
-            this.storeUrl = this.baseUrl + "api/edit/store/";
+            this._storeEditUrl = this.baseUrl + "api/edit/store/";
         }
 
         /**
@@ -823,7 +832,7 @@
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteTranscript(id, onResult) {
-	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST").send();
+	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST", this.storeEditUrl).send();
         }
     }
     
