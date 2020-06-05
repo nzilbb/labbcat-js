@@ -214,21 +214,21 @@
         constructor(baseUrl, username, password) {
             if (!/\/$/.test(baseUrl)) baseUrl += "/";
             this._baseUrl = baseUrl;
-            this._storeUrl = baseUrl + "store/";
+            this._storeUrl = baseUrl + "api/store/";
             
             this._username = username;
             this._password = password;
         }
         
         /**
-         * The base URL - e.g. https://labbcat.canterbury.ac.nz/demo/store/
+         * The base URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
          */
         get baseUrl() {
             return this._baseUrl;
         }
         
         /**
-         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/store/
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
          */
         get storeUrl() {
             return this._storeUrl;
@@ -775,7 +775,7 @@
          */
         constructor(baseUrl, username, password) {
             super(baseUrl, username, password);
-            this.storeUrl = this.baseUrl + "edit/store/";
+            this.storeUrl = this.baseUrl + "api/edit/store/";
         }
 
         /**
