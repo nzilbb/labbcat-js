@@ -25,6 +25,7 @@
     "mocha": "^7.0.1"
   },
   "dependencies": {
+    "minimist": ">=0.2.1",
     "btoa": "^1.2.1",
     "form-data": "^3.0.0",
     "fs": "0.0.1-security",
