@@ -16,6 +16,8 @@ This library is both a node module and a browser-importable script (nzilbb.labbc
 provides functionality for querying and extracting data from LaBB-CAT corpora, directly
 from JavaScript.
 
+The current version of this library requires LaBB-CAT version 20200608.1507.
+
 ## Basic usage
 
 The following example shows how to perform a search and download audio and Praat TextGrids
