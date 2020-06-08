@@ -242,21 +242,21 @@
         constructor(baseUrl, username, password) {
             if (!/\/$/.test(baseUrl)) baseUrl += "/";
             this._baseUrl = baseUrl;
-            this._storeUrl = baseUrl + "store/";
+            this._storeUrl = baseUrl + "api/store/";
             
             this._username = username;
             this._password = password;
         }
         
         /**
-         * The base URL - e.g. https://labbcat.canterbury.ac.nz/demo/store/
+         * The base URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
          */
         get baseUrl() {
             return this._baseUrl;
         }
         
         /**
-         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/store/
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
          */
         get storeUrl() {
             return this._storeUrl;
@@ -279,9 +279,10 @@
         // @param {resultCallback} onResult Invoked when the request has returned a result.
         // @param {string} [url=this.storeUrl] The URL
         // @param {string} [method=GET] The HTTP method e.g. "POST"
+        // @param {string} [storeUrl=null] The URL for the graph store.
         // @return {XMLHttpRequest} An open request.
         //
-        createRequest(call, parameters, onResult, url, method) {
+        createRequest(call, parameters, onResult, url, method, storeUrl) {
             if (exports.verbose)  {
                 console.log("createRequest "+method+" "+url + " "
                             + call + " " + JSON.stringify(parameters));
@@ -311,10 +312,11 @@
 	    }
             queryString = queryString.replace(/^&amp;/,"?");
 	    if (!url) {
+                storeUrl = storeUrl || this.storeUrl;
                 if (exports.verbose) {
-                    console.log(method + ": "+this.storeUrl + call + queryString + " as " + this.username);
+                    console.log(method + ": "+storeUrl + call + queryString + " as " + this.username);
                 }
-	        xhr.open(method, this.storeUrl + call + queryString, true);
+	        xhr.open(method, storeUrl + call + queryString, true);
             } else { // explicit URL, so don't append call
                 if (exports.verbose) {
                     console.log(method + ": "+url + queryString + " as " + this.username);
@@ -473,7 +475,7 @@
          * the following can be used: 
          * &lt;ul>
          *  &lt;li>&lt;code>/Ada.+/.test(id)&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>labels('who').includes('Robert')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('participant').includes('Robert')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>('CC', 'IA', 'MU').includes(my('corpus').label)&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>my('episode').label == 'Ada Aitcheson'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>my('transcript_scribe').label == 'Robert'&lt;/code>&lt;/li>
@@ -487,7 +489,7 @@
          *  &lt;li>&lt;code>list('transcript').length gt; 100&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>annotators('transcript_rating').includes('Robert')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC' &amp;amp;&amp;amp;
-         * labels('who').includes('Robert')&lt;/code>&lt;/li> 
+         * labels('participant').includes('Robert')&lt;/code>&lt;/li> 
          * &lt;/ul>
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be: The number of matching transcripts.
@@ -509,7 +511,7 @@
          * the following can be used:
          * &lt;ul>
          *  &lt;li>&lt;code>/Ada.+/.test(id)&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>labels('who').includes('Robert')&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>labels('participant').includes('Robert')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>('CC', 'IA', 'MU').includes(my('corpus').label)&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>my('episode').label == 'Ada Aitcheson'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>my('transcript_scribe').label == 'Robert'&lt;/code>&lt;/li>
@@ -523,7 +525,7 @@
          *  &lt;li>&lt;code>list('transcript').length gt; 100&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>annotators('transcript_rating').includes('Robert')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC' &amp;amp;&amp;amp;
-         * labels('who').includes('Robert')&lt;/code>&lt;/li> 
+         * labels('participant').includes('Robert')&lt;/code>&lt;/li> 
          * &lt;/ul>
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
          * @param {int} [pageNumber] The zero-based page number to return, or null to return
@@ -603,7 +605,7 @@
          * &lt;ul>
          *  &lt;li>&lt;code>id == 'ew_0_456'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>!/th[aeiou].&amp;#47;/.test(label)&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('who').label == 'Robert' &amp;amp;&amp;amp; my('utterances').start.offset ==
+         *  &lt;li>&lt;code>my('participant').label == 'Robert' &amp;amp;&amp;amp; my('utterances').start.offset ==
          * 12.345&lt;/code>&lt;/li> 
          *  &lt;li>&lt;code>graph.id == 'AdaAicheson-01.trs' &amp;amp;&amp;amp; layer.id == 'orthography'
          * &amp;amp;&amp;amp; start.offset &amp;gt; 10.5&lt;/code>&lt;/li> 
@@ -628,7 +630,7 @@
          * &lt;ul>
          *  &lt;li>&lt;code>id == 'ew_0_456'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>!/th[aeiou].&amp;#47;/.test(label)&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('who').label == 'Robert' &amp;amp;&amp;amp; my('utterances').start.offset ==
+         *  &lt;li>&lt;code>my('participant').label == 'Robert' &amp;amp;&amp;amp; my('utterances').start.offset ==
          * 12.345&lt;/code>&lt;/li> 
          *  &lt;li>&lt;code>graph.id == 'AdaAicheson-01.trs' &amp;amp;&amp;amp; layer.id == 'orthography'
          * &amp;amp;&amp;amp; start.offset &amp;gt; 10.5&lt;/code>&lt;/li> 
@@ -795,6 +797,13 @@
      * @author Robert Fromont robert@fromont.net.nz
      */
     class GraphStore extends GraphStoreQuery{
+        
+        /**
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
+         */
+        get storeEditUrl() {
+            return this._storeEditUrl;
+        }
         /** 
          * Create a store client 
          * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
@@ -803,7 +812,7 @@
          */
         constructor(baseUrl, username, password) {
             super(baseUrl, username, password);
-            this.storeUrl = this.baseUrl + "edit/store/";
+            this._storeEditUrl = this.baseUrl + "api/edit/store/";
         }
 
         /**
@@ -851,7 +860,7 @@
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteTranscript(id, onResult) {
-	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST").send();
+	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST", this.storeEditUrl).send();
         }
     }
     
@@ -1965,6 +1974,150 @@
             }
             nextFragment(0);
         }
+
+        /**
+         * Gets transcript attribute values for given transcript IDs.
+         * @param {string[]} transcriptIds A list of transcript IDs (transcript names).
+         * @param {string[]} layerIds A list of layer IDs corresponding to transcript
+         * attributes. In general, these are layers whose ID is prefixed 'transcript_',
+         * however formally it's any layer where layer.parentId == 'graph' &amp;&amp;
+         * layer.alignment == 0, which includes 'corpus' as well as transcript attribute layers.
+         * @param {string} fileName The full path for the file where the results CSV
+         * should be saved. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: The CSV file path - i.e. &lt;var>fileName&lt;/var>
+         * or null if the request failed.  
+         */
+        getTranscriptAttributes(transcriptIds, layerIds, fileName, onResult) {
+            if (!runningOnNode) {
+                onResult &amp;&amp; onResult(
+                    null, ["getTranscriptAttributes is not yet implemented for browsers"], [], // TODO
+                    "getTranscriptAttributes");
+                return;
+            }
+            if (exports.verbose) {
+                console.log("getTranscriptAttributes("+transcriptIds.length+" transcriptIds, "
+                            +JSON.stringify(layerIds)+")");
+            }
+	    const xhr = new XMLHttpRequest();            
+            const url = this.baseUrl + "transcripts";            
+	    let queryString = "?todo=export&amp;exportType=csv&amp;layer=graph";
+            for (let id of layerIds) queryString += "&amp;layer="+encodeURIComponent(id);
+            for (let id of transcriptIds) queryString += "&amp;id="+encodeURIComponent(id);
+            if (exports.verbose) {
+                console.log("GET: "+url + queryString + " as " + this.username);
+            }
+	    xhr.open("GET", url + queryString, true);
+	    if (this.username) {
+	        xhr.setRequestHeader(
+                    "Authorization", "Basic " + btoa(this.username + ":" + this._password))
+ 	    }
+	    xhr.setRequestHeader("Accept", "text/csv");
+
+            xhr.addEventListener("error", function(evt) {
+                if (exports.verbose) {
+                    console.log("getTranscriptAttributes "+i+" ERROR: "+this.responseText);
+                }
+                fragments.push(null); // add a blank element
+                if (onResult) {
+                    onResult(null, ["Could not get transcript attributes: "
+                                    +this.responseText], [], "getTranscriptAttributes");
+                }
+            }, false);
+            
+	    xhr.addEventListener("load", function(evt) {
+                if (exports.verbose) {
+                    console.log("getTranscriptAttributes loaded. " + JSON.stringify(this.response));
+                }
+                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                    if (exports.verbose) {
+                        console.log("getTranscriptAttributes wrote file " + fileName);
+                    }
+                    let errors = null;
+                    if (err) {
+                        if (exports.verbose) {
+                            console.log("getTranscriptAttributes SAVE ERROR: "+err);
+                        }
+                        errors = ["Could not get transcript attributes: "+err];
+                    }
+                    onResult(fileName, errors, [], "getTranscriptAttributes");
+                });
+            }, false);
+            
+            xhr.send();
+        }
+        
+        /**
+         * Gets participant attribute values for given participant IDs.
+         * @param {string[]} participantIds A list of participant IDs.
+         * @param {string[]} layerIds A list of layer IDs corresponding to participant
+         * attributes. In general, these are layers whose ID is prefixed 'participant_',
+         * however formally it's any layer where layer.parentId == 'participant' &amp;&amp;
+         * layer.alignment == 0.
+         * @param {string} fileName The full path for the file where the results CSV
+         * should be saved. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: The CSV file path - i.e. &lt;var>fileName&lt;/var>
+         * or null if the request failed.  
+         */
+        getParticipantAttributes(participantIds, layerIds, fileName, onResult) {
+            if (!runningOnNode) {
+                onResult &amp;&amp; onResult(
+                    null, ["getParticipantAttributes is not yet implemented for browsers"], [], // TODO
+                    "getParticipantAttributes");
+                return;
+            }
+            if (exports.verbose) {
+                console.log("getParticipantAttributes("+participantIds.length+" participantIds, "
+                            +JSON.stringify(layerIds)+")");
+            }
+	    const xhr = new XMLHttpRequest();            
+            const url = this.baseUrl + "participantsExport";            
+	    let queryString = "?type=participant&amp;content-type=text/csv&amp;csvFieldDelimiter=,";
+            for (let id of layerIds) queryString += "&amp;layer="+encodeURIComponent(id);
+            for (let id of participantIds) queryString += "&amp;participantId="+encodeURIComponent(id);
+            if (exports.verbose) {
+                console.log("GET: "+url + queryString + " as " + this.username);
+            }
+	    xhr.open("GET", url + queryString, true);
+	    if (this.username) {
+	        xhr.setRequestHeader(
+                    "Authorization", "Basic " + btoa(this.username + ":" + this._password))
+ 	    }
+	    xhr.setRequestHeader("Accept", "text/csv");
+
+            xhr.addEventListener("error", function(evt) {
+                if (exports.verbose) {
+                    console.log("getParticipantAttributes "+i+" ERROR: "+this.responseText);
+                }
+                fragments.push(null); // add a blank element
+                if (onResult) {
+                    onResult(null, ["Could not get participant attributes: "
+                                    +this.responseText], [], "getParticipantAttributes");
+                }
+            }, false);
+            
+	    xhr.addEventListener("load", function(evt) {
+                if (exports.verbose) {
+                    console.log("getParticipantAttributes loaded. " + JSON.stringify(this.response));
+                }
+                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                    if (exports.verbose) {
+                        console.log("getParticipantAttributes wrote file " + fileName);
+                    }
+                    let errors = null;
+                    if (err) {
+                        if (exports.verbose) {
+                            console.log("getParticipantAttributes SAVE ERROR: "+err);
+                        }
+                        errors = ["Could not get participant attributes: "+err];
+                    }
+                    onResult(fileName, errors, [], "getParticipantAttributes");
+                });
+            }, false);
+            
+            xhr.send();
+        }
         
     } // class Labbcat
 
@@ -2114,7 +2267,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Mar 04 2020 16:32:00 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Jun 08 2020 19:45:32 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
