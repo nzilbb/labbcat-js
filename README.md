@@ -100,3 +100,20 @@ Once *jsdoc* has been installed, you can generate the documentation, which is sa
 ```
 npm run docs
 ```
+
+### Publishing to npm
+
+Publishing to the npm package repository requires that you have an npm username/password
+that corresponds to a package maintainer in npm.
+
+The one-time login command is:
+
+```
+npm login
+```
+
+Once logged in, publishing to npm is achieved using:
+
+```
+npm publish
+```
