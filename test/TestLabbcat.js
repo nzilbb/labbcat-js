@@ -712,6 +712,48 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
         });
     });
 
+    it("implements getTranscriptAttributes", (done)=>{
+        // get a list of transcripts
+        corpus.getMatchingTranscriptIds("/BR.+/.test(id)", (transcriptIds, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(transcriptIds);
+            // for (let id of transcriptIds) console.log("transcript " + id);
+            assert.isNotEmpty(transcriptIds, "Some IDs are returned");
+            const layerIds = ["transcript_type", "corpus"];
+            const fileName = "test.csv";
+            corpus.getTranscriptAttributes(
+                transcriptIds, layerIds, fileName,
+                (result, errors, messages) => {
+                    assert.isNull(errors);
+                    assert.equal(result, fileName);
+                    assert(fs.existsSync(fileName), "Results saved");
+                    fs.unlinkSync(fileName);
+                    done();
+                });
+        });
+    });
+    
+    it("implements getParticipantAttributes", (done)=>{
+        // get a list of participants
+        corpus.getMatchingParticipantIds("/BR.+/.test(id)", (participantIds, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(participantIds);
+            // for (let id of participantIds) console.log("participant " + id);
+            assert.isNotEmpty(participantIds, "Some IDs are returned");
+            const layerIds = ["participant_gender", "participant_notes"];
+            const fileName = "test.csv";
+            corpus.getParticipantAttributes(
+                participantIds, layerIds, fileName,
+                (result, errors, messages) => {
+                    assert.isNull(errors);
+                    assert.equal(result, fileName);
+                    assert(fs.existsSync(fileName), "Results saved");
+                    fs.unlinkSync(fileName);
+                    done();
+                });
+        });
+    });
+    
     it("works with the example code", (done)=>{
         
         // get the first participant in the corpus

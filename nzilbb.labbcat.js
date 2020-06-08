@@ -1946,6 +1946,150 @@
             }
             nextFragment(0);
         }
+
+        /**
+         * Gets transcript attribute values for given transcript IDs.
+         * @param {string[]} transcriptIds A list of transcript IDs (transcript names).
+         * @param {string[]} layerIds A list of layer IDs corresponding to transcript
+         * attributes. In general, these are layers whose ID is prefixed 'transcript_',
+         * however formally it's any layer where layer.parentId == 'graph' &&
+         * layer.alignment == 0, which includes 'corpus' as well as transcript attribute layers.
+         * @param {string} fileName The full path for the file where the results CSV
+         * should be saved. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: The CSV file path - i.e. <var>fileName</var>
+         * or null if the request failed.  
+         */
+        getTranscriptAttributes(transcriptIds, layerIds, fileName, onResult) {
+            if (!runningOnNode) {
+                onResult && onResult(
+                    null, ["getTranscriptAttributes is not yet implemented for browsers"], [], // TODO
+                    "getTranscriptAttributes");
+                return;
+            }
+            if (exports.verbose) {
+                console.log("getTranscriptAttributes("+transcriptIds.length+" transcriptIds, "
+                            +JSON.stringify(layerIds)+")");
+            }
+	    const xhr = new XMLHttpRequest();            
+            const url = this.baseUrl + "transcripts";            
+	    let queryString = "?todo=export&exportType=csv&layer=graph";
+            for (let id of layerIds) queryString += "&layer="+encodeURIComponent(id);
+            for (let id of transcriptIds) queryString += "&id="+encodeURIComponent(id);
+            if (exports.verbose) {
+                console.log("GET: "+url + queryString + " as " + this.username);
+            }
+	    xhr.open("GET", url + queryString, true);
+	    if (this.username) {
+	        xhr.setRequestHeader(
+                    "Authorization", "Basic " + btoa(this.username + ":" + this._password))
+ 	    }
+	    xhr.setRequestHeader("Accept", "text/csv");
+
+            xhr.addEventListener("error", function(evt) {
+                if (exports.verbose) {
+                    console.log("getTranscriptAttributes "+i+" ERROR: "+this.responseText);
+                }
+                fragments.push(null); // add a blank element
+                if (onResult) {
+                    onResult(null, ["Could not get transcript attributes: "
+                                    +this.responseText], [], "getTranscriptAttributes");
+                }
+            }, false);
+            
+	    xhr.addEventListener("load", function(evt) {
+                if (exports.verbose) {
+                    console.log("getTranscriptAttributes loaded. " + JSON.stringify(this.response));
+                }
+                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                    if (exports.verbose) {
+                        console.log("getTranscriptAttributes wrote file " + fileName);
+                    }
+                    let errors = null;
+                    if (err) {
+                        if (exports.verbose) {
+                            console.log("getTranscriptAttributes SAVE ERROR: "+err);
+                        }
+                        errors = ["Could not get transcript attributes: "+err];
+                    }
+                    onResult(fileName, errors, [], "getTranscriptAttributes");
+                });
+            }, false);
+            
+            xhr.send();
+        }
+        
+        /**
+         * Gets participant attribute values for given participant IDs.
+         * @param {string[]} participantIds A list of participant IDs.
+         * @param {string[]} layerIds A list of layer IDs corresponding to participant
+         * attributes. In general, these are layers whose ID is prefixed 'participant_',
+         * however formally it's any layer where layer.parentId == 'participant' &&
+         * layer.alignment == 0.
+         * @param {string} fileName The full path for the file where the results CSV
+         * should be saved. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: The CSV file path - i.e. <var>fileName</var>
+         * or null if the request failed.  
+         */
+        getParticipantAttributes(participantIds, layerIds, fileName, onResult) {
+            if (!runningOnNode) {
+                onResult && onResult(
+                    null, ["getParticipantAttributes is not yet implemented for browsers"], [], // TODO
+                    "getParticipantAttributes");
+                return;
+            }
+            if (exports.verbose) {
+                console.log("getParticipantAttributes("+participantIds.length+" participantIds, "
+                            +JSON.stringify(layerIds)+")");
+            }
+	    const xhr = new XMLHttpRequest();            
+            const url = this.baseUrl + "participantsExport";            
+	    let queryString = "?type=participant&content-type=text/csv&csvFieldDelimiter=,";
+            for (let id of layerIds) queryString += "&layer="+encodeURIComponent(id);
+            for (let id of participantIds) queryString += "&participantId="+encodeURIComponent(id);
+            if (exports.verbose) {
+                console.log("GET: "+url + queryString + " as " + this.username);
+            }
+	    xhr.open("GET", url + queryString, true);
+	    if (this.username) {
+	        xhr.setRequestHeader(
+                    "Authorization", "Basic " + btoa(this.username + ":" + this._password))
+ 	    }
+	    xhr.setRequestHeader("Accept", "text/csv");
+
+            xhr.addEventListener("error", function(evt) {
+                if (exports.verbose) {
+                    console.log("getParticipantAttributes "+i+" ERROR: "+this.responseText);
+                }
+                fragments.push(null); // add a blank element
+                if (onResult) {
+                    onResult(null, ["Could not get participant attributes: "
+                                    +this.responseText], [], "getParticipantAttributes");
+                }
+            }, false);
+            
+	    xhr.addEventListener("load", function(evt) {
+                if (exports.verbose) {
+                    console.log("getParticipantAttributes loaded. " + JSON.stringify(this.response));
+                }
+                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                    if (exports.verbose) {
+                        console.log("getParticipantAttributes wrote file " + fileName);
+                    }
+                    let errors = null;
+                    if (err) {
+                        if (exports.verbose) {
+                            console.log("getParticipantAttributes SAVE ERROR: "+err);
+                        }
+                        errors = ["Could not get participant attributes: "+err];
+                    }
+                    onResult(fileName, errors, [], "getParticipantAttributes");
+                });
+            }, false);
+            
+            xhr.send();
+        }
         
     } // class Labbcat
 

@@ -175,7 +175,7 @@ describe("#GraphStoreQuery", function() {
         store.getMatchingTranscriptIds("/.+/.test(id)", (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isArray(ids);
-            // for (let id of ids) console.log("participant " + id);
+            // for (let id of ids) console.log("transcript " + id);
             assert.isNotEmpty(ids, "Some IDs are returned");
             if (ids.length < 2) {
                 console.log("Too few transcripts to test pagination");
