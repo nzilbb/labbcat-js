@@ -28,7 +28,7 @@ For batch uploading and other example code, see the *examples* subdirectory.
 ```javascript
 const labbcat = require("@nzilbb/labbcat");
 
-const corpus = new labbcat.Labbcat("https://sometld.com", "your username", "your password");
+const corpus = new labbcat.LabbcatView("https://sometld.com", "your username", "your password");
 
 // get the first participant in the corpus
 corpus.getParticipantIds((ids, errors, messages)=>{
