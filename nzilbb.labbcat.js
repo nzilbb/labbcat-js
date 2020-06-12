@@ -25,19 +25,15 @@
  * 
  * <p>This API is has the following object model:
  * <dl>
- *  <dt>{@link GraphStoreQuery}</dt><dd> implements read-only functions for a LaBB-CAT graph
+ *  <dt>{@link LabbcatView}</dt><dd> implements read-only functions for a LaBB-CAT graph
  *   store, corresponding to <q>view</q> permissions in LaBB-CAT.</dd>
- *  <dt>{@link GraphStore}</dt><dd> inherits all GraphStoreQuery functions, and also
+ *  <dt>{@link LabbcatEdit}</dt><dd> inherits all LabbcatView functions, and also
  *   implements some graph store editing functions, corresponding to <q>edit</q>
  *   permissions in LaBB-CAT.</dd>
- *  <dt>{@link Labbcat}</dt><dd> inherits all GraphStore functions, and also implements some
- *   extra functions including transcript upload and task management.</dd>
  * </dl> 
  *
- * A complete list of functions is available [here]{@link Labbcat}.
- *
  * @example
- * const corpus = new labbcat.Labbcat("https://sometld.com", "your username", "your password");
+ * const corpus = new labbcat.LabbcatView("https://sometld.com", "your username", "your password");
  * 
  * // get the first participant in the corpus
  * corpus.getParticipantIds((ids, errors, messages)=>{
@@ -179,7 +175,7 @@
         }
     }
 
-    // GraphStoreQuery class - read-only "view" access
+    // LabbcatView class - read-only "view" access
     
     /**
      * Read-only querying of LaBB-CAT corpora, based on the  
@@ -188,7 +184,7 @@
      * <p>This interface provides only <em>read-only</em> operations.
      * @example
      * // create annotation store client
-     * const store = new GraphStoreQuery("https://labbcat.canterbury.ac.nz", "demo", "demo");
+     * const store = new LabbcatView("https://labbcat.canterbury.ac.nz", "demo", "demo");
      * // get some basic information
      * store.getId((result, errors, messages, call)=>{ 
      *     console.log("id: " + result); 
@@ -204,7 +200,7 @@
      *   });
      * @author Robert Fromont robert@fromont.net.nz
      */
-    class GraphStoreQuery {
+    class LabbcatView {
         /** 
          * Create a query client 
          * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
@@ -737,430 +733,6 @@
                 startOffset : startOffset,
                 endOffset : endOffset
             }, onResult).send();
-        }
-        
-    } // class GraphStoreQuery
-
-    // GraphStore class - read/write "edit" access
-
-    /**
-     * Read/write interaction with LaBB-CAT corpora, based on the  
-     * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a>.
-     * interface.
-     * <p>This class inherits the <em>read-only</em> operations of GraphStoreQuery
-     * and adds some <em>write</em> operations for updating data.
-     * @example
-     * // create annotation store client
-     * const store = new GraphStore("https://labbcat.canterbury.ac.nz", "demo", "demo");
-     * // get a corpus
-     * store.getCorpusIds((corpora, errors, messages, call)=>{ 
-     *     console.log("transcripts in: " + corpora[0]); 
-     *     store.getTranscriptIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
-     *         console.log("Deleting all transcripts in " + id));
-     *         for (i in ids) {
-     *           store.deleteTranscript(ids[i], (ids, errors, messages, call, id)=>{ 
-     *               console.log("deleted " + id);
-     *             });
-     *         }
-     *       });
-     *   });
-     * store.deleteTranscript(documents[0]);
-     * @extends GraphStoreQuery
-     * @author Robert Fromont robert@fromont.net.nz
-     */
-    class GraphStore extends GraphStoreQuery{
-        
-        /**
-         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
-         */
-        get storeEditUrl() {
-            return this._storeEditUrl;
-        }
-        /** 
-         * Create a store client 
-         * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
-         * @param {string} username The LaBB-CAT user name.
-         * @param {string} password The LaBB-CAT password.
-         */
-        constructor(baseUrl, username, password) {
-            super(baseUrl, username, password);
-            this._storeEditUrl = this.baseUrl + "api/edit/store/";
-        }
-
-        /**
-         * Saves the given transcript. The graph can be partial e.g. include only some of
-         * the layers that the stored version of the transcript contains.
-         * @param graph The transcript to save.
-         * @param {resultCallback} onResult Invoked when the request has returned a 
-         * <var>result</var> which will be: true if changes were saved, false if there
-         * were no changes to save.
-         */
-        saveGraph(graph, onResult) { // TODO
-        }
-    
-        /**
-         * Saves the given media for the given transcript
-         * @param {string} id The transcript ID
-         * @param {string} trackSuffix The track suffix of the media.
-         * @param {string} mediaUrl A URL to the media content.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         */
-        saveMedia(id, trackSuffix, mediaUrl, onResult) { // TODO
-        }
-        
-        /**
-         * Saves the given source file (transcript) for the given transcript.
-         * @param {string} id The transcript ID
-         * @param {string} url A URL to the transcript.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         */
-        saveSource(id, url, onResult) { // TODO
-        }
-
-        /**
-         * Saves the given document for the episode of the given transcript.
-         * @param {string} id The transcript ID
-         * @param {string} url A URL to the document.
-         * @param {resultCallback} onResult Invoked when the request has returned a result.
-         */
-        saveEpisodeDocument(id, url, onResult) { // TODO
-        }
-        
-        /**
-         * Deletes the given transcript, and all assciated media, from the graph store.
-         * @param {string} id The transcript ID
-         * @param {resultCallback} onResult Invoked when the request has completed.
-         */
-        deleteTranscript(id, onResult) {
-	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST", this.storeEditUrl).send();
-        }
-    }
-    
-    // Labbcat class - GraphStore plus some LaBB-CAT specific functions
-    
-    /**
-     * Labbcat client, for accessing LaBB-CAT server functions programmatically.
-     * <p>This class inherits the <em>read-write</em> operations of 
-     * {@link GraphStoreAdministration}
-     * and adds some extra operations, including transcript upload and task management. 
-     * @example
-     * const labbcat = require("@nzilbb/labbcat");
-     * 
-     * const corpus = new labbcat.Labbcat("https://sometld.com", "your username", "your password");
-     * 
-     * // get the first participant in the corpus
-     * corpus.getParticipantIds((ids, errors, messages)=>{
-     *     const participantId = ids[0];
-     *     
-     *     // all their instances of "the" followed by a word starting with a vowel
-     *     const pattern = [
-     *         {"orthography" : "i"},
-     *         {"phonemes" : "[cCEFHiIPqQuUV0123456789~#\\$@].*"}];
-     *     
-     *     // start searching
-     *     corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
-     *         const taskId = response.threadId
-     *                 
-     *         // wait for the search to finish
-     *         corpus.waitForTask(taskId, 30, (task, errors, messages)=>{
-     *             
-     *             // get the matches
-     *             corpus.getMatches(taskId, (result, errors, messages)=>{
-     *                 const matches = result.matches;
-     *                 console.log("There were " + matches.length + " matches for " + participantId);
-     *                 
-     *                 // get TextGrids of the utterances
-     *                 corpus.getFragments(
-     *                     matches, [ "orthography", "phonemes" ], "text/praat-textgrid",
-     *                     (textgrids, errors, messages)=>{
-     *                         
-     *                         for (let textgrid of textgrids) {
-     *                             console.log(textgrid);
-     *                         }
-     *                         
-     *                         // get the utterance recordings
-     *                         corpus.getSoundFragments(matches, (wavs, errors, messages)=>{
-     *                             
-     *                             for (let wav of wavs) {
-     *                                 console.log(wav);
-     *                             }
-     *                         });
-     *                     });
-     *             });
-     *         });
-     *     });
-     * });
-     *
-     * @extends GraphStore
-     * @author Robert Fromont robert@fromont.net.nz
-     */
-    class Labbcat extends GraphStore {
-        /** 
-         * Create a query client 
-         * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link).
-         * @param {string} username The LaBB-CAT user name.
-         * @param {string} password The LaBB-CAT password.
-         */
-        constructor(baseUrl, username, password) {
-            super(baseUrl, username, password); 
-            if (exports.verbose) console.log("Labbcat: "+this.baseUrl);
-        }
-
-        /**
-         * Uploads a new transcript.
-         * @param {file|string} transcript The transcript to upload. In a browser, this
-         * must be a file object, and in Node, it must be the full path to the file. 
-         * @param {file|file[]|string|string[]} media The media to upload, if any. In a
-         * browser, these must be file objects, and in Node, they must be the full paths
-         * to the files.
-         * @param {string} mediaSuffix The media suffix for the media.
-         * @param {string} transcriptType The transcript type.
-         * @param {string} corpus The corpus for the transcript.
-         * @param {string} episode The episode the transcript belongs to.
-         * @param {resultCallback} onResult Invoked when the request has returned a
-         * result, which is the task ID of the resulting annotation generation task. The
-         * task status can be updated using {@link Labbcat#taskStatus} 
-         * @param onProgress Invoked on XMLHttpRequest progress.
-         */
-        newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
-            if (exports.verbose) {
-                console.log("newTranscript(" + transcript + ", " + media + ", " + mediaSuffix
-                            + ", " + transcriptType + ", " + corpus + ", " + episode + ")");
-            }
-            // create form
-            var fd = new FormData();
-            fd.append("todo", "new");
-            fd.append("auto", "true");
-            if (transcriptType) fd.append("transcript_type", transcriptType);
-            if (corpus) fd.append("corpus", corpus);
-            if (episode) fd.append("episode", episode);
-            
-            if (!runningOnNode) {	
-                
-	        fd.append("uploadfile1_0", transcript);
-	        if (media) {
-	            if (!mediaSuffix) mediaSuffix = "";
-	            if (media.constructor === Array) { // multiple files
-		        for (var f in media) {
-		            fd.append("uploadmedia"+mediaSuffix+"1", media[f]);
-		        } // next file
-                    } else { // a single file
-		        fd.append("uploadmedia"+mediaSuffix+"1", media);
-	            }
-	        }
-                
-	        // create HTTP request
-	        var xhr = new XMLHttpRequest();
-	        xhr.call = "newTranscript";
-	        xhr.id = transcript.name;
-	        xhr.onResult = onResult;
-	        xhr.addEventListener("load", callComplete, false);
-	        xhr.addEventListener("error", callFailed, false);
-	        xhr.addEventListener("abort", callCancelled, false);
-	        xhr.upload.addEventListener("progress", onProgress, false);
-	        xhr.upload.id = transcript.name; // for knowing what status to update during events
-	        
-	        xhr.open("POST", this.baseUrl + "edit/transcript/new");
-	        if (this.username) {
-	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
-	        }
-	        xhr.setRequestHeader("Accept", "application/json");
-	        xhr.send(fd);
-            } else { // runningOnNode
-	        
-	        // on node.js, files are actually paths
-	        var transcriptName = transcript.replace(/.*\//g, "");
-                if (exports.verbose) console.log("transcriptName: " + transcriptName);
-
-	        fd.append("uploadfile1_0", 
-		          fs.createReadStream(transcript).on('error', function(){
-		              onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
-		          }), transcriptName);
-                
-	        if (media) {
-	            if (!mediaSuffix) mediaSuffix = "";
-	            if (media.constructor === Array) { // multiple files
-		        for (var f in media) {
-		            var mediaName = media[f].replace(/.*\//g, "");
-		            try {
-			        fd.append("uploadmedia"+mediaSuffix+(f+1), 
-				          fs.createReadStream(media[f]).on('error', function(){
-				              onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
-				          }), mediaName);
-		            } catch(error) {
-			        onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
-			        return;
-		            }
-		        } // next file
-                    } else { // a single file
-		        var mediaName = media.replace(/.*\//g, "");
-		        fd.append("uploadmedia"+mediaSuffix+"1", 
-			          fs.createReadStream(media).on('error', function(){
-			              onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
-			          }), mediaName);
-	            }
-	        }
-	        
-	        var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
-	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
-	        var labbcat = this;
-                var password = this._password;
-	        fd.getLength(function(something, contentLength) {
-	            var requestParameters = {
-		        port: urlParts.port,
-		        path: urlParts.pathname,
-		        host: urlParts.hostname,
-		        headers: {
-		            "Accept" : "application/json",
-		            "content-length" : contentLength,
-		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
-		        }
-	            };
-	            if (labbcat.username && password) {
-		        requestParameters.auth = labbcat.username+':'+password;
-	            }
-	            if (/^https.*/.test(labbcat.baseUrl)) {
-		        requestParameters.protocol = "https:";
-	            }
-                    if (exports.verbose) {
-                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
-                    }
-	            fd.submit(requestParameters, function(err, res) {
-		        var responseText = "";
-		        if (!err) {
-		            res.on('data',function(buffer) {
-			        //console.log('data ' + buffer);
-			        responseText += buffer;
-		            });
-		            res.on('end',function(){
-                                if (exports.verbose) console.log("response: " + responseText);
-	                        var result = null;
-	                        var errors = null;
-	                        var messages = null;
-			        try {
-			            var response = JSON.parse(responseText);
-			            result = response.model.result || response.model;
-			            errors = response.errors;
-			            if (errors.length == 0) errors = null
-			            messages = response.messages;
-			            if (messages.length == 0) messages = null
-			        } catch(exception) {
-			            result = null
-                                    errors = ["" +exception+ ": " + labbcat.responseText];
-                                    messages = [];
-			        }
-                                // for this call, the result is an object with one key, whose
-                                // value is the threadId - so just return that
-			        onResult(result[transcriptName], errors, messages, "newTranscript",
-                                         transcriptName);
-		            });
-		        } else {
-		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "newTranscript", transcriptName);
-		        }
-		        
-		        if (res) res.resume();
-	            });
-	        }); // got length
-            } // runningOnNode
-        }
-        
-        /**
-         * Uploads a new version of an existing transcript.
-         * @param {file|string} transcript The transcript to upload. In a browser, this
-         * must be a file object, and in Node, it must be the full path to the file. 
-         * @param {resultCallback} onResult Invoked when the request has returned a result, 
-         * which is the task ID of the resulting annotation generation task. The 
-         * task status can be updated using {@link Labbcat#taskStatus}
-         * @param onProgress Invoked on XMLHttpRequest progress.
-         */
-        updateTranscript(transcript, onResult, onProgress) {
-            if (exports.verbose) console.log("updateTranscript(" + transcript + ")");
-            
-            // create form
-            var fd = new FormData();
-            fd.append("todo", "update");
-            fd.append("auto", "true");
-            
-            if (!runningOnNode) {	
-                
-	        fd.append("uploadfile1_0", transcript);
-                
-	        // create HTTP request
-	        var xhr = new XMLHttpRequest();
-	        xhr.call = "updateTranscript";
-	        xhr.id = transcript.name;
-	        xhr.onResult = onResult;
-	        xhr.addEventListener("load", callComplete, false);
-	        xhr.addEventListener("error", callFailed, false);
-	        xhr.addEventListener("abort", callCancelled, false);
-	        xhr.upload.addEventListener("progress", onProgress, false);
-	        xhr.upload.id = transcript.name; // for knowing what status to update during events
-	        
-	        xhr.open("POST", this.baseUrl + "edit/transcript/new");
-	        if (this.username) {
-	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this._password))
-	        }
-	        xhr.setRequestHeader("Accept", "application/json");
-	        xhr.send(fd);
-            } else { // runningOnNode
-	        
-	        // on node.js, files are actually paths
-	        var transcriptName = transcript.replace(/.*\//g, "");
-	        fd.append("uploadfile1_0", 
-		          fs.createReadStream(transcript).on('error', function(){
-		              onResult(null, ["Invalid transcript: " + transcriptName], [], "updateTranscript", transcriptName);
-		          }), transcriptName);
-	        
-	        var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
-	        var requestParameters = {
-	            port: urlParts.port,
-	            path: urlParts.pathname,
-	            host: urlParts.hostname,
-	            headers: { "Accept" : "application/json" }
-	        };
-	        if (this.username && this._password) {
-	            requestParameters.auth = this.username+':'+this._password;
-	        }
-	        if (/^https.*/.test(this.baseUrl)) {
-	            requestParameters.protocol = "https:";
-	        }
-	        fd.submit(requestParameters, function(err, res) {
-	            var responseText = "";
-	            if (!err) {
-		        res.on('data',function(buffer) {
-		            //console.log('data ' + buffer);
-		            responseText += buffer;
-		        });
-		        res.on('end',function(){
-                            if (exports.verbose) console.log("response: " + responseText);
-	                    var result = null;
-	                    var errors = null;
-	                    var messages = null;
-		            try {
-			        var response = JSON.parse(responseText);
-			        result = response.model.result || response.model;
-			        errors = response.errors;
-			        if (errors.length == 0) errors = null
-			        messages = response.messages;
-			        if (messages.length == 0) messages = null
-;
-		            } catch(exception) {
-			        result = null
-                                errors = ["" +exception+ ": " + labbcat.responseText];
-                                messages = [];
-		            }
-                            // for this call, the result is an object with one key, whose
-                            // value is the threadId - so just return that
-			    onResult(result[transcriptName], errors, messages, "updateTranscript",
-                                     transcriptName);
-                        });
-	            } else {
-		        onResult(null, ["" +err+ ": " + this.responseText], [], "updateTranscript", transcriptName);
-	            }
-                    
-	            if (res) res.resume();
-	        });
-            }
         }
 
         /**
@@ -2091,8 +1663,361 @@
             xhr.send();
         }
         
-    } // class Labbcat
+    } // class LabbcatView
 
+    // LabbcatEdit class - read/write "edit" access
+
+    /**
+     * Read/write interaction with LaBB-CAT corpora, based on the  
+     * <a href="https://nzilbb.github.io/ag/javadoc/nzilbb/ag/IGraphStore.html">nzilbb.ag.IGraphStore</a>.
+     * interface.
+     * <p>This class inherits the <em>read-only</em> operations of LabbcatView
+     * and adds some <em>write</em> operations for updating data.
+     * @example
+     * // create annotation store client
+     * const store = new LabbcatEdit("https://labbcat.canterbury.ac.nz", "demo", "demo");
+     * // get a corpus
+     * store.getCorpusIds((corpora, errors, messages, call)=>{ 
+     *     console.log("transcripts in: " + corpora[0]); 
+     *     store.getTranscriptIdsInCorpus(corpora[0], (ids, errors, messages, call, id)=>{ 
+     *         console.log("Deleting all transcripts in " + id));
+     *         for (i in ids) {
+     *           store.deleteTranscript(ids[i], (ids, errors, messages, call, id)=>{ 
+     *               console.log("deleted " + id);
+     *             });
+     *         }
+     *       });
+     *   });
+     * store.deleteTranscript(documents[0]);
+     * @extends LabbcatView
+     * @author Robert Fromont robert@fromont.net.nz
+     */
+    class LabbcatEdit extends LabbcatView{
+        
+        /**
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
+         */
+        get storeEditUrl() {
+            return this._storeEditUrl;
+        }
+        /** 
+         * Create a store client 
+         * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
+         * @param {string} username The LaBB-CAT user name.
+         * @param {string} password The LaBB-CAT password.
+         */
+        constructor(baseUrl, username, password) {
+            super(baseUrl, username, password);
+            this._storeEditUrl = this.baseUrl + "api/edit/store/";
+        }
+
+        /**
+         * Saves the given transcript. The graph can be partial e.g. include only some of
+         * the layers that the stored version of the transcript contains.
+         * @param graph The transcript to save.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: true if changes were saved, false if there
+         * were no changes to save.
+         */
+        saveGraph(graph, onResult) { // TODO
+        }
+    
+        /**
+         * Saves the given media for the given transcript
+         * @param {string} id The transcript ID
+         * @param {string} trackSuffix The track suffix of the media.
+         * @param {string} mediaUrl A URL to the media content.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         */
+        saveMedia(id, trackSuffix, mediaUrl, onResult) { // TODO
+        }
+        
+        /**
+         * Saves the given source file (transcript) for the given transcript.
+         * @param {string} id The transcript ID
+         * @param {string} url A URL to the transcript.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         */
+        saveSource(id, url, onResult) { // TODO
+        }
+
+        /**
+         * Saves the given document for the episode of the given transcript.
+         * @param {string} id The transcript ID
+         * @param {string} url A URL to the document.
+         * @param {resultCallback} onResult Invoked when the request has returned a result.
+         */
+        saveEpisodeDocument(id, url, onResult) { // TODO
+        }
+        
+        /**
+         * Deletes the given transcript, and all assciated media, from the graph store.
+         * @param {string} id The transcript ID
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteTranscript(id, onResult) {
+	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST", this.storeEditUrl).send();
+        }
+
+        /**
+         * Uploads a new transcript.
+         * @param {file|string} transcript The transcript to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {file|file[]|string|string[]} media The media to upload, if any. In a
+         * browser, these must be file objects, and in Node, they must be the full paths
+         * to the files.
+         * @param {string} mediaSuffix The media suffix for the media.
+         * @param {string} transcriptType The transcript type.
+         * @param {string} corpus The corpus for the transcript.
+         * @param {string} episode The episode the transcript belongs to.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * result, which is the task ID of the resulting annotation generation task. The
+         * task status can be updated using {@link Labbcat#taskStatus} 
+         * @param onProgress Invoked on XMLHttpRequest progress.
+         */
+        newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
+            if (exports.verbose) {
+                console.log("newTranscript(" + transcript + ", " + media + ", " + mediaSuffix
+                            + ", " + transcriptType + ", " + corpus + ", " + episode + ")");
+            }
+            // create form
+            var fd = new FormData();
+            fd.append("todo", "new");
+            fd.append("auto", "true");
+            if (transcriptType) fd.append("transcript_type", transcriptType);
+            if (corpus) fd.append("corpus", corpus);
+            if (episode) fd.append("episode", episode);
+            
+            if (!runningOnNode) {	
+                
+	        fd.append("uploadfile1_0", transcript);
+	        if (media) {
+	            if (!mediaSuffix) mediaSuffix = "";
+	            if (media.constructor === Array) { // multiple files
+		        for (var f in media) {
+		            fd.append("uploadmedia"+mediaSuffix+"1", media[f]);
+		        } // next file
+                    } else { // a single file
+		        fd.append("uploadmedia"+mediaSuffix+"1", media);
+	            }
+	        }
+                
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "newTranscript";
+	        xhr.id = transcript.name;
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);
+	        xhr.upload.addEventListener("progress", onProgress, false);
+	        xhr.upload.id = transcript.name; // for knowing what status to update during events
+	        
+	        xhr.open("POST", this.baseUrl + "edit/transcript/new");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+	        
+	        // on node.js, files are actually paths
+	        var transcriptName = transcript.replace(/.*\//g, "");
+                if (exports.verbose) console.log("transcriptName: " + transcriptName);
+
+	        fd.append("uploadfile1_0", 
+		          fs.createReadStream(transcript).on('error', function(){
+		              onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
+		          }), transcriptName);
+                
+	        if (media) {
+	            if (!mediaSuffix) mediaSuffix = "";
+	            if (media.constructor === Array) { // multiple files
+		        for (var f in media) {
+		            var mediaName = media[f].replace(/.*\//g, "");
+		            try {
+			        fd.append("uploadmedia"+mediaSuffix+(f+1), 
+				          fs.createReadStream(media[f]).on('error', function(){
+				              onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
+				          }), mediaName);
+		            } catch(error) {
+			        onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
+			        return;
+		            }
+		        } // next file
+                    } else { // a single file
+		        var mediaName = media.replace(/.*\//g, "");
+		        fd.append("uploadmedia"+mediaSuffix+"1", 
+			          fs.createReadStream(media).on('error', function(){
+			              onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
+			          }), mediaName);
+	            }
+	        }
+	        
+	        var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username && password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+                                // for this call, the result is an object with one key, whose
+                                // value is the threadId - so just return that
+			        onResult(result[transcriptName], errors, messages, "newTranscript",
+                                         transcriptName);
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "newTranscript", transcriptName);
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
+        
+        /**
+         * Uploads a new version of an existing transcript.
+         * @param {file|string} transcript The transcript to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {resultCallback} onResult Invoked when the request has returned a result, 
+         * which is the task ID of the resulting annotation generation task. The 
+         * task status can be updated using {@link Labbcat#taskStatus}
+         * @param onProgress Invoked on XMLHttpRequest progress.
+         */
+        updateTranscript(transcript, onResult, onProgress) {
+            if (exports.verbose) console.log("updateTranscript(" + transcript + ")");
+            
+            // create form
+            var fd = new FormData();
+            fd.append("todo", "update");
+            fd.append("auto", "true");
+            
+            if (!runningOnNode) {	
+                
+	        fd.append("uploadfile1_0", transcript);
+                
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "updateTranscript";
+	        xhr.id = transcript.name;
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);
+	        xhr.upload.addEventListener("progress", onProgress, false);
+	        xhr.upload.id = transcript.name; // for knowing what status to update during events
+	        
+	        xhr.open("POST", this.baseUrl + "edit/transcript/new");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this._password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+	        
+	        // on node.js, files are actually paths
+	        var transcriptName = transcript.replace(/.*\//g, "");
+	        fd.append("uploadfile1_0", 
+		          fs.createReadStream(transcript).on('error', function(){
+		              onResult(null, ["Invalid transcript: " + transcriptName], [], "updateTranscript", transcriptName);
+		          }), transcriptName);
+	        
+	        var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
+	        var requestParameters = {
+	            port: urlParts.port,
+	            path: urlParts.pathname,
+	            host: urlParts.hostname,
+	            headers: { "Accept" : "application/json" }
+	        };
+	        if (this.username && this._password) {
+	            requestParameters.auth = this.username+':'+this._password;
+	        }
+	        if (/^https.*/.test(this.baseUrl)) {
+	            requestParameters.protocol = "https:";
+	        }
+	        fd.submit(requestParameters, function(err, res) {
+	            var responseText = "";
+	            if (!err) {
+		        res.on('data',function(buffer) {
+		            //console.log('data ' + buffer);
+		            responseText += buffer;
+		        });
+		        res.on('end',function(){
+                            if (exports.verbose) console.log("response: " + responseText);
+	                    var result = null;
+	                    var errors = null;
+	                    var messages = null;
+		            try {
+			        var response = JSON.parse(responseText);
+			        result = response.model.result || response.model;
+			        errors = response.errors;
+			        if (errors.length == 0) errors = null
+			        messages = response.messages;
+			        if (messages.length == 0) messages = null
+;
+		            } catch(exception) {
+			        result = null
+                                errors = ["" +exception+ ": " + labbcat.responseText];
+                                messages = [];
+		            }
+                            // for this call, the result is an object with one key, whose
+                            // value is the threadId - so just return that
+			    onResult(result[transcriptName], errors, messages, "updateTranscript",
+                                     transcriptName);
+                        });
+	            } else {
+		        onResult(null, ["" +err+ ": " + this.responseText], [], "updateTranscript", transcriptName);
+	            }
+                    
+	            if (res) res.resume();
+	        });
+            }
+        }
+
+    } // class LabbcatEdit
+    
     /**
      * Interpreter for match ID strings.
      * <p>The schema is:</p>
@@ -2216,9 +2141,8 @@
         get prefix() { return this._prefix; }
     }
     
-    exports.GraphStoreQuery = GraphStoreQuery;
-    exports.GraphStore = GraphStore;
-    exports.Labbcat = Labbcat;
+    exports.LabbcatView = LabbcatView;
+    exports.LabbcatEdit = LabbcatEdit;
     exports.MatchId = MatchId;
     exports.verbose = false;
 

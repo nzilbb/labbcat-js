@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Unit tests for GraphStoreQuery.
+ * Unit tests for LabbcatView.
  * <p>These tests test the functionality of the client library, not the server. 
  * <p>They assume the existence of a valid LaBB-CAT instance (configured by
  * <var>labbcatUrl</var>) which responds correctly to requests, but do not generally test
@@ -14,19 +14,19 @@ const assert = require('chai').assert;
 const fs = require('fs');
 const labbcat = require('../nzilbb.labbcat');
 
-// YOU MUST ENSURE THE FOLLOWING SETTINGS ARE VALID FOR YOU TEST LABBCAT SERVER:
+// YOU MUST ENSURE THE FOLLOWING SETTINGS ARE VALID FOR YOU TEST LABB-CAT SERVER:
 const baseUrl = "http://localhost:8080/labbcat/";
 const username = "labbcat";
 const password = "labbcat";
-var corpus = null;
+var store = null; 
 
-describe("#Labbcat", function() { // not an arrow function because we want to this.timeout...
+describe("#LabbcatView", function() {
     // waitForTask and getMatches can take a few seconds
     this.timeout(45000);
-    
+
     before((done)=>{
-        corpus = new labbcat.Labbcat(baseUrl, username, password);
-        corpus.getId((id, errors, messages)=>{
+        store = new labbcat.LabbcatView(baseUrl, username, password);
+        store.getId((id, errors, messages)=>{
             assert.isNull(
                 errors, "\nCould not connect to LaBB-CAT."
                     +"\nThese unit tests require a running LaBB-CAT server to test against."
@@ -34,23 +34,370 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
             done();
         });
     });
-    
-    beforeEach(function(done) {
+    beforeEach((done)=>{
         // verbosity only applies in tests that enable it
         labbcat.verbose = false;
         done();
     });
-
-    it("inherits methods (getId at least)", (done)=>{
-        corpus.getId((result, errors, messages, call)=>{
-            assert.isNull(errors, JSON.stringify(errors))
-            assert.equal(result, baseUrl);
+    
+    it("implements getId", (done)=>{
+        assert.equal(baseUrl + "api/store/", store.storeUrl);
+        store.getId((id, errors, messages)=>{
+            assert.isNull(errors);
+            assert.equal(id, baseUrl);
+            done();
+        });
+    });
+    
+    it("implements getLayerIds", (done)=>{
+        //labbcat.verbose = true;
+        store.getLayerIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(ids);
+            //for (let id of ids) console.log("layer " + id);
+            assert.isNotEmpty(ids, "Some IDs are returned");
+            assert.include(ids, "transcript", "Has transcript layer");
+            assert.include(ids, "turns", "Has turns layer");
+            assert.include(ids, "utterances", "Has utterances layer");
+            assert.include(ids, "transcript_type", "Has transcript_type layer");
+            done();
+        });
+    });
+    
+    it("implements getLayers", (done)=>{
+        store.getLayers((layers, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(layers);
+            //for (let layer of layers) console.log("layer " + layer.id);
+            assert.isNotEmpty(layers, "Some IDs are returned");
+            const ids = layers.map(layer => layer.id);
+            assert.include(ids, "transcript", "Has transcript layer");
+            assert.include(ids, "turns", "Has turns layer");
+            assert.include(ids, "utterances", "Has utterances layer");
+            assert.include(ids, "transcript_type", "Has transcript_type layer");
+            done();
+        });
+    });
+    
+    it("implements getCorpusIds", (done)=>{
+        store.getCorpusIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(ids);
+            // for (let id of ids) console.log("corpus " + id);
+            assert.isNotEmpty(ids, "Some IDs are returned");
             done();
         });
     });
 
+    it("implements getParticipantIds", (done)=>{
+        store.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(ids);
+            // for (let id of ids) console.log("participant " + id);
+            assert.isNotEmpty(ids, "Some IDs are returned");
+            done();
+        });
+    });
+
+    it("implements getTranscriptIds", (done)=>{
+        store.getTranscriptIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(ids);
+            // for (let id of ids) console.log("graph " + id);
+            assert.isNotEmpty(ids, "Some IDs are returned");
+            done();
+        });
+    });
+
+    it("implements countMatchingParticipantIds", (done)=>{
+        store.countMatchingParticipantIds("/.+/.test(id)", (count, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNumber(count);
+            assert.isAtLeast(count, 1, "There are some matches");
+            done();
+        });
+    });
+    
+    it("implements getMatchingParticipantIds", (done)=>{
+        store.getMatchingParticipantIds("/.+/.test(id)", (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(ids);
+            // for (let id of ids) console.log("participant " + id);
+            assert.isNotEmpty(ids, "Some IDs are returned");
+            if (ids.length < 2) {
+                console.log("Too few participants to test pagination");
+                done();
+            } else {
+                store.getMatchingParticipantIds("/.+/.test(id)", 2, 0, (ids, errors, messages)=>{
+                    assert.isNull(errors);
+                    assert.isArray(ids);
+                    assert.equal(ids.length, 2, "Two IDs are returned");
+                    done();
+                });
+            }
+        });
+    });
+    
+    it("implements getTranscriptIdsInCorpus", (done)=>{
+        store.getCorpusIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isAtLeast(ids.length, 1, "There's at least one corpus");
+            store.getTranscriptIdsInCorpus(ids[0], (ids, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isArray(ids);
+                // for (let id of ids) console.log("graph " + id);
+                assert.isNotEmpty(ids, "Some IDs are returned");
+                done();
+            });
+        });
+    });
+
+    it("implements getTranscriptIdsWithParticipant", (done)=>{
+        store.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isAtLeast(ids.length, 1, "There's at least one participant");
+            store.getTranscriptIdsWithParticipant(ids[0], (ids, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isArray(ids);
+                // for (let id of ids) console.log("graph " + id);
+                assert.isNotEmpty(ids, "Some IDs are returned");
+                done();
+            });
+        });
+    });
+
+    it("implements countMatchingTranscriptIds", (done)=>{
+        store.countMatchingTranscriptIds("/.+/.test(id)", (count, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNumber(count);
+            assert.isAtLeast(count, 1, "There are some matches");
+            done();
+        });
+    });
+    
+    it("implements getMatchingTranscriptIds", (done)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isArray(ids);
+            // for (let id of ids) console.log("transcript " + id);
+            assert.isNotEmpty(ids, "Some IDs are returned");
+            if (ids.length < 2) {
+                console.log("Too few transcripts to test pagination");
+                done();
+            } else {
+                store.getMatchingTranscriptIds("/.+/.test(id)", 2, 0, (ids, errors, messages)=>{
+                    assert.isNull(errors);
+                    assert.isArray(ids);
+                    assert.equal(ids.length, 2, "Two IDs are returned");
+                    done();
+                });
+            }
+        });
+    });
+    
+    it("implements countAnnotations", (done)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isAtLeast(ids.length, 1, "There's at least one transcript");
+            store.countAnnotations(ids[0], "orthography", (count, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isNumber(count);
+                assert.isAtLeast(count, 1, "There are some matches");
+                done();
+            });
+        });
+    });
+
+    it("implements getAnnotations", (done)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isAtLeast(ids.length, 1, "There's at least one transcript");
+            let graphId = ids[0];
+            
+            store.countAnnotations(graphId, "orthography", (count, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isAtLeast(count, 2, "There are at least two annotations");
+                store.getAnnotations(
+                    graphId, "orthography", 2, 0, (annotations, errors, messages)=>{
+                        assert.isNull(errors);
+                        assert.isArray(annotations);
+                        assert.equal(annotations.length, 2, "Two annotations are returned");
+                        let annotation = annotations[0];
+                        assert.containsAllKeys(
+                            annotation, ["id", "label", "startId", "endId"],
+                            "Looks like an annotation");
+                        done();
+                    });
+            });
+        });
+    });
+    
+    it("implements getAnchors", (done)=>{
+        // get a graph to work with
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some transcript IDs are returned");
+            const graphId = ids[0];
+            
+            // get some annotations so we have valid anchor IDs
+            store.getAnnotations(graphId, "orthography", 2, 0, (annotations, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isNotEmpty(annotations, "Some annotations are returned");
+                // create an array of anchorIds
+                const anchorIds = annotations.map(a=>a.startId);
+
+                // finally, get the anchors
+                store.getAnchors(graphId, anchorIds, (anchors, errors, messages)=>{
+                    assert.isNull(errors);
+                    assert.isArray(anchors);
+                    assert.equal(anchors.length, anchorIds.length,
+                                 "Correct number of anchors is returned");
+                    let anchor = anchors[0];
+                    assert.containsAllKeys(
+                        anchor, ["id", "offset", "confidence"],
+                        "Looks like an anchor");
+                    done();
+                });
+            });
+        });
+    });
+    
+    it("implements getMedia", (done)=>{
+        store.getMatchingTranscriptIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some transcript IDs are returned - maybe check the test regex?");
+            let graphId = ids[0];
+            store.getMedia(graphId, "", "audio/wav", (url, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isString(url);
+                assert.include(url, baseUrl, "URL looks right: " + url);
+                done();
+            });
+        });
+    });
+
+    it("implements getMediaFragment", (done)=>{
+        store.getMatchingTranscriptIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some transcript IDs are returned - maybe check the test regex?");
+            const graphId = ids[0];
+            store.getMedia(graphId, "", "audio/wav", 1.0, 2.0, (url, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isString(url);
+                assert.include(url, baseUrl, "URL looks right: " + url);
+                done();
+            });
+        });
+    });
+
+    it("implements getLayer", (done)=>{
+        store.getLayer("orthography", (layer, errors, messages)=>{
+            assert.isNull(errors);
+            assert.equal("orthography", layer.id, "Correct layer");
+            assert.containsAllKeys(
+                layer, ["id", "description", "parentId", "peers", "peersOverlap"],
+                "Looks like a layer");
+            done();
+        });
+    });
+
+    it("implements getParticipant", (done)=>{
+        // find a participant ID to use
+        store.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some participant IDs exist");
+            const participantId = ids[0];
+            store.getParticipant(participantId, (participant, errorrs, messages)=>{
+                assert.isNull(errors);
+                assert.equal(participant.label, participantId, "Correct participant"); // not getId()
+                assert.containsAllKeys(
+                    participant, ["id", "label"],
+                    "Looks like an annotation");
+                done();
+            });
+        });
+    });
+
+    it("implements countMatchingAnnotations", (done)=>{
+        store.countMatchingAnnotations(
+            "layer.id == 'orthography' && label == 'and'", (count, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isNumber(count);
+                assert.isAtLeast(count, 1, "There are some matches");
+                done();
+            });
+    });
+    
+    it("implements getMatchingAnnotations", (done)=>{
+        store.getMatchingAnnotations(
+            "layer.id == 'orthography' && label == 'and'", 2, 0,
+            (annotations, errors, messages) =>{
+                assert.isNull(errors);
+                assert.isArray(annotations);
+                assert.equal(annotations.length, 2, "Two annotations are returned");
+                let annotation = annotations[0];
+                assert.containsAllKeys(
+                    annotation, ["id", "label", "startId", "endId"],
+                    "Looks like an annotation");
+                done();
+            });
+    });
+    
+    it("implements getMediaTracks", (done)=>{
+        store.getMediaTracks((tracks, errors, messages)=> {
+            assert.isNull(errors);
+            assert.isArray(tracks);
+            //for (let track of tracks) console.log("track " + JSON.stringify(track));
+            assert.isNotEmpty(tracks, "Some tracks are returned");
+            let track = tracks[0];
+            assert.containsAllKeys(track, ["suffix", "description"], "Looks like a track");
+            done();
+        });
+    });
+    
+    it("implements getAvailableMedia", (done)=>{
+        // get a graph to work with
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some transcript IDs are returned");
+            const graphId = ids[0];
+            
+            store.getAvailableMedia(graphId, (files, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isNotEmpty(files, graphId + " has some media");
+                let file = files[0];
+                assert.containsAllKeys(
+                    file, ["name", "mimeType", "url", "trackSuffix"], "Looks like a MediaFile");
+                done();
+            });
+        });
+    });
+    
+    it("implements getEpisodeDocuments", (done)=>{
+        // get a graph to work with
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some transcript IDs are returned");
+            const graphId = ids[0];
+            
+            store.getEpisodeDocuments(graphId, (files, errors, messages)=>{
+                assert.isNull(errors);
+                if (files.length == 0) {
+                    console.warn(
+                        graphId + " has no documents, can't test for well-formed response");
+                } else {                
+                    let file = files[0];
+                    assert.containsAllKeys(
+                        file, ["name", "mimeType", "url", "trackSuffix"],
+                        "Looks like a MediaFile");
+                }
+                done();
+            });
+        });
+    });
+
     it("implements getTasks", (done)=>{
-        corpus.getTasks((tasks, errors, messages)=>{
+        store.getTasks((tasks, errors, messages)=>{
             assert.isNull(errors, JSON.stringify(errors))
             assert.isObject(tasks);
             // not sure what we expect, but let's just print out what we got
@@ -69,14 +416,14 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
 
     it("implements taskStatus", (done)=>{
         // first get a list of tasks
-        corpus.getTasks((tasks, errors, messages)=>{
+        store.getTasks((tasks, errors, messages)=>{
             assert.isNull(errors, JSON.stringify(errors))
             if (Object.keys(tasks).length == 0) {
                 console.warn("There are no tasks, so can't test getTask.");
                 done();
             } else {
                 const threadId = Object.keys(tasks)[0];
-                corpus.taskStatus(threadId, (task, errors, messages)=>{
+                store.taskStatus(threadId, (task, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors))
                     assert.isNotNull(task);
                     assert.isObject(task);
@@ -90,16 +437,16 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
         });
     });
 
-   it("implements waitForTask", (done)=>{
+    it("implements waitForTask", (done)=>{
         // first get a list of tasks
-        corpus.getTasks((tasks, errors, messages)=>{
+        store.getTasks((tasks, errors, messages)=>{
             assert.isNull(errors, JSON.stringify(errors))
             if (Object.keys(tasks).length == 0) {
                 console.warn("There are no tasks, so can't test getTask.");
                 done();
             } else {
                 const threadId = Object.keys(tasks)[0];
-                corpus.waitForTask(threadId, 1, (task, errors, messages)=>{
+                store.waitForTask(threadId, 1, (task, errors, messages)=>{
                     assert.equal(threadId, task.threadId, "Correct task");
                     assert.containsAllKeys(
                         task, ["threadId", "threadName", "running", "percentComplete", "status"],
@@ -108,100 +455,10 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                 });
             }
         });
-   });
-    
-    it("implements newTranscript, updateTranscript, and deleteTranscript", (done)=>{
-        const transcriptName = "labbcat-js.test.txt";
-        const transcriptPath = "test/" + transcriptName;
-        
-        // ensure the transcript doesn't exist to start with        
-        corpus.deleteTranscript(transcriptName);
-        
-        corpus.getCorpusIds((ids, errors, messages)=>{
-            assert.isNull(errors, JSON.stringify(errors))
-            assert.isAtLeast(ids.length, 1, "There's at least one corpus");
-            const corpusId = ids[0];
-            corpus.getLayer("transcript_type", (typeLayer, errors, messages)=>{
-                assert.isNull(errors, JSON.stringify(errors))
-                assert.isNotNull(typeLayer);
-                assert.isNotEmpty(typeLayer.validLabels, "There is at least one transcript type");
-                const transcriptType = Object.keys(typeLayer.validLabels)[0];
-
-                assert(fs.existsSync(transcriptPath), "Test transcript exists");
-                corpus.newTranscript(
-                    transcriptPath, null, null, transcriptType, corpusId, "test",
-                    (threadId, errors, messages)=>{
-                        assert.isNull(errors, JSON.stringify(errors));
-                        assert.isNotNull(threadId);
-                        
-                        corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
-                            assert.isNull(errors, JSON.stringify(errors));
-                            assert.isFalse(task.running, "Upload task finished in a timely manner");
-                            
-                            corpus.releaseTask(threadId);
-                        
-                            // ensure the transcript exists
-                            corpus.countMatchingTranscriptIds(
-                                "id = '"+transcriptName+"'", (count, errors, messages)=>{
-                                    assert.isNull(errors, JSON.stringify(errors))
-                                    assert.isNumber(count);
-                                    assert.equal(count, 1, "Transcript is in the store");
-                                    
-                                    // re-upload it
-                                    corpus.updateTranscript(transcriptPath, (threadId, errors, messages)=>{
-                                        assert.isNull(errors, JSON.stringify(errors))
-                                        assert.isNotNull(threadId);
-                                        
-                                        corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
-                                            assert.isNull(errors, JSON.stringify(errors));
-                                            assert.isFalse(
-                                                task.running,
-                                                "Upload task finished in a timely manner");
-                                            
-                                            corpus.releaseTask(threadId);
-                        
-                                            // ensure the transcript exists
-                                            corpus.countMatchingTranscriptIds(
-                                                "id = '"+transcriptName+"'", (count, errors, messages)=>{
-                                                    assert.isNull(errors, JSON.stringify(errors))
-                                                    assert.isNumber(count);
-                                                    assert.equal(
-                                                        count, 1,
-                                                        "Transcript is still in the store");
-                                                    
-                                                    // delete it
-                                                    corpus.deleteTranscript(
-                                                        transcriptName, (result, errors, messages)=>{
-                                                            assert.isNull(
-                                                                errors, JSON.stringify(errors))
-                                                            
-                                                            // ensure the transcript no longer exists
-                                                            corpus.countMatchingParticipantIds(
-                                                                "id = '"+transcriptName+"'",
-                                                                (count, errors, messages)=>{
-                                                                    assert.isNull(
-                                                                        errors,
-                                                                        JSON.stringify(errors))
-                                                                    assert.isNumber(count);
-                                                                    assert.equal(
-                                                                        count, 0,
-                                                                        "Transcript is gone");
-                                                                    done();
-                                                                });
-                                                        });
-                                                });
-                                        });
-                                    });
-                                });
-                        });
-                    });
-            });
-        });
     });
     
-
     it("fails with getTask and invalid numeric id", (done)=>{
-        corpus.taskStatus(9999, (result, errors, messages)=>{
+        store.taskStatus(9999, (result, errors, messages)=>{
             assert.isNotNull(errors);
             // console.log(errors[0]);
             done();
@@ -209,7 +466,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
     });
 
     it("fails with getTask and invalid alphabetic id", (done)=>{
-        corpus.taskStatus("invalid taskId", (result, errors, messages)=>{
+        store.taskStatus("invalid taskId", (result, errors, messages)=>{
             assert.isNotNull(errors);
             // console.log(errors[0]);
             done();
@@ -217,7 +474,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
     });
     
     it("fails with search and invalid pattern", (done)=>{
-        corpus.search({}, null, false, (response, errors, messages)=>{
+        store.search({}, null, false, (response, errors, messages)=>{
             assert.isNotNull(errors, JSON.stringify(errors))
             done();
         });
@@ -229,23 +486,23 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
             "layers" : {
                 "orthography" : { "pattern" : ".*"}}}]};
         
-        corpus.search(pattern, null, false, (response, errors, messages)=>{
+        store.search(pattern, null, false, (response, errors, messages)=>{
             assert.isNull(errors, JSON.stringify(errors))
             assert.isNotNull(response, JSON.stringify(errors))
             assert.isObject(response, JSON.stringify(errors))
             const threadId = response.threadId
             assert.isNotNull(threadId);
             
-            corpus.cancelTask(threadId, (result, errors, messages)=>{
+            store.cancelTask(threadId, (result, errors, messages)=>{
                 assert.isNull(errors, JSON.stringify(errors))
 
                 setTimeout(()=>{ // wait a second to give it a chance to stop
                     // ensure task is no longer running
-                    corpus.taskStatus(threadId, (task, errors, messages)=>{
+                    store.taskStatus(threadId, (task, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors));
                         assert.isNotNull(task);
                         assert.isFalse(task.running);
-                        corpus.releaseTask(threadId);
+                        store.releaseTask(threadId);
                         done();
                     });
                 }, 1000);
@@ -255,7 +512,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
     
     it("implements search, getMatches and getMatchAnnotations", (done)=>{
         // get a participant ID to use
-        corpus.getParticipantIds((ids, errors, messages)=>{
+        store.getParticipantIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
@@ -264,20 +521,20 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
             const pattern = {"columns" : [{
                 "layers" : {
                     "orthography" : { "pattern" : "i"}}}]};
-            corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+            store.search(pattern, [ participantId ], false, (response, errors, messages)=>{
                 assert.isNull(errors, JSON.stringify(errors))
                 assert.isNotNull(response)
                 assert.isObject(response)
                 const threadId = response.threadId
 
-                corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
+                store.waitForTask(threadId, 30, (task, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors));
                     
                     // if the task is still running, it's taking too long, so cancel it
-                    if (task.running) corpus.cancelTask(threadId);
+                    if (task.running) store.cancelTask(threadId);
                     assert.isFalse(task.running, "Search finished in a timely manner");
 
-                    corpus.getMatches(threadId, 2, (result, errors, messages)=>{
+                    store.getMatches(threadId, 2, (result, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(result)
                         assert.isNotNull(result.name)
@@ -288,7 +545,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                          +" cannot test getMatchAnnotations");
                         const pageLength = Math.min(5, matches.length);
                         
-                        corpus.getMatches(threadId, 2, pageLength, 0, (result, errors, messages)=>{
+                        store.getMatches(threadId, 2, pageLength, 0, (result, errors, messages)=>{
                             assert.isNull(errors, "Pagination works: " + JSON.stringify(errors))
                             assert.isNotNull(result)
                             assert.isNotNull(result.name)
@@ -298,7 +555,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                             
                             const layerIds = [ "orthography" ];
                             const matchIds = matches.map(match => match.MatchId);
-                            corpus.getMatchAnnotations(
+                            store.getMatchAnnotations(
                                 matchIds, layerIds, 0, 1, (annotations, errors, messages)=>{
                                     assert.isNull(errors, JSON.stringify(errors))
                                     assert.isNotNull(annotations)
@@ -315,7 +572,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                         "Looks like an annotation");
                                     
                                     // ensure we can also pass in a list of matches
-                                    corpus.getMatchAnnotations(
+                                    store.getMatchAnnotations(
                                         matches, layerIds, 0, 1, (annotations, errors, messages)=>{
                                             assert.isNull(
                                                 errors,
@@ -336,7 +593,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                 annotation, ["id", "label", "startId", "endId"],
                                                 "Looks like an annotation");
                                             
-                                            corpus.releaseTask(threadId);
+                                            store.releaseTask(threadId);
                                             done();
                                         });
                                 });
@@ -349,7 +606,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
     
     it("implements abbreviated search patterns", (done)=>{
         // get a participant ID to use
-        corpus.getParticipantIds((ids, errors, messages)=>{
+        store.getParticipantIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
@@ -358,20 +615,20 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
             const fullPattern = {"columns" : [{
                 "layers" : {
                     "orthography" : { "pattern" : "i"}}}]};
-            corpus.search(fullPattern, [ participantId ], false, (response, errors, messages)=>{
+            store.search(fullPattern, [ participantId ], false, (response, errors, messages)=>{
                 assert.isNull(errors, JSON.stringify(errors))
                 assert.isNotNull(response)
                 assert.isObject(response)
                 const unabbreviatedThreadId = response.threadId
 
-                corpus.waitForTask(unabbreviatedThreadId, 30, (task, errors, messages)=>{
+                store.waitForTask(unabbreviatedThreadId, 30, (task, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors));
                     
                     // if the task is still running, it's taking too long, so cancel it
-                    if (task.running) corpus.cancelTask(unabbreviatedThreadId);
+                    if (task.running) store.cancelTask(unabbreviatedThreadId);
                     assert.isFalse(task.running, "Search finished in a timely manner");
 
-                    corpus.getMatches(unabbreviatedThreadId, 2, (result, errors, messages)=>{
+                    store.getMatches(unabbreviatedThreadId, 2, (result, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(result)
                         assert.isNotNull(result.name)
@@ -382,7 +639,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         
                         // all instances of "and"
                         const abbreviatedPattern = {"orthography" : "i"};
-                        corpus.search(
+                        store.search(
                             abbreviatedPattern, [ participantId ], false,
                             (response, errors, messages)=>{
                                 assert.isNull(errors, JSON.stringify(errors))
@@ -390,17 +647,17 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 assert.isObject(response)
                                 const abbreviatedThreadId = response.threadId
                                 
-                                corpus.waitForTask(
+                                store.waitForTask(
                                     abbreviatedThreadId, 30, (task, errors, messages)=>{
                                         assert.isNull(errors, JSON.stringify(errors));
                                         
                                         // if the task is still running, it's taking too long, so cancel it
-                                        if (task.running) corpus.cancelTask(abbreviatedThreadId);
+                                        if (task.running) store.cancelTask(abbreviatedThreadId);
                                         assert.isFalse(
                                             task.running,
                                             "Second search finished in a timely manner");
                                         
-                                        corpus.getMatches(
+                                        store.getMatches(
                                             abbreviatedThreadId, 2, (result, errors, messages)=>{
                                                 assert.isNull(errors, JSON.stringify(errors))
                                                 assert.isNotNull(result)
@@ -414,9 +671,9 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                     "abbreviated an unabbreviated patterns return the same number of results");
 
                                                 // be tidy
-                                                corpus.releaseTask(unabbreviatedThreadId); 
-                                                corpus.releaseTask(abbreviatedThreadId);
-                                               
+                                                store.releaseTask(unabbreviatedThreadId); 
+                                                store.releaseTask(abbreviatedThreadId);
+                                                
                                                 done();
                                             });
                                     });
@@ -429,27 +686,27 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
     
     it("implements getSoundFragments", (done)=>{
         // get a participant ID to use
-        corpus.getParticipantIds((ids, errors, messages)=>{
+        store.getParticipantIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
             
             // all instances of "I"
             const pattern = {"orthography" : "i"};
-            corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+            store.search(pattern, [ participantId ], false, (response, errors, messages)=>{
                 assert.isNull(errors, JSON.stringify(errors))
                 assert.isNotNull(response)
                 assert.isObject(response)
                 const threadId = response.threadId
 
-                corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
+                store.waitForTask(threadId, 30, (task, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors));
                     
                     // if the task is still running, it's taking too long, so cancel it
-                    if (task.running) corpus.cancelTask(threadId);
+                    if (task.running) store.cancelTask(threadId);
                     assert.isFalse(task.running, "Search finished in a timely manner");
                     
-                    corpus.getMatches(threadId, 5, 0, (result, errors, messages)=>{
+                    store.getMatches(threadId, 5, 0, (result, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(result)
                         assert.isNotNull(result.name)
@@ -458,7 +715,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                             matches.length, 0,
                             "No matches were returned, cannot test getSoundFragments");
                         
-                        corpus.releaseTask(threadId);
+                        store.releaseTask(threadId);
                         
                         // convert MatchIds to arrays of individual Ids
                         const graphIds = matches.map(match => match.Transcript);
@@ -466,7 +723,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                         const endOffsets = matches.map(match => match.LineEnd);
 
                         // getSoundFragments with all parameters
-                        corpus.getSoundFragments(
+                        store.getSoundFragments(
                             graphIds, startOffsets, endOffsets, 16000, "test",
                             (wavs, errors, messages)=>{
                                 assert.isNull(errors, "getSoundFragments all params: "
@@ -491,7 +748,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 }
 
                                 // getSoundFragments without dir
-                                corpus.getSoundFragments(
+                                store.getSoundFragments(
                                     graphIds, startOffsets, endOffsets, 16000,
                                     (wavs, errors, messages)=>{
                                         assert.isNull(errors, "getSoundFragments without dir: "
@@ -506,7 +763,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                             assert.isTrue(fs.existsSync(wavs[m]),
                                                           "File exists: " + matches[m]);
                                             assert.isAbove(fs.statSync(wavs[m]).size, 0,
-                                                   "Non-zero sized file: " + matches[m]);
+                                                           "Non-zero sized file: " + matches[m]);
                                         } // next file
                                         // some fragments might be repeated, so we delete the
                                         // files only after all checks are complete
@@ -515,7 +772,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                         }
                                         
                                         // getSoundFragments without sampleRate
-                                        corpus.getSoundFragments(
+                                        store.getSoundFragments(
                                             graphIds, startOffsets, endOffsets,
                                             (wavs, errors, messages)=>{
                                                 assert.isNull(
@@ -545,7 +802,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                 
                                                 // getSoundFragments with matches instead of
                                                 // graphIds, startOffsets, and endOffsets
-                                                corpus.getSoundFragments(
+                                                store.getSoundFragments(
                                                     matches, (wavs, errors, messages)=>{
                                                         assert.isNull(
                                                             errors, "getSoundFragments w matches: "
@@ -586,27 +843,27 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
 
     it("implements getFragments", (done)=>{
         // get a participant ID to use
-        corpus.getParticipantIds((ids, errors, messages)=>{
+        store.getParticipantIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
             
             // all instances of "I"
             const pattern = {"orthography" : "i"};
-            corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+            store.search(pattern, [ participantId ], false, (response, errors, messages)=>{
                 assert.isNull(errors, JSON.stringify(errors))
                 assert.isNotNull(response)
                 assert.isObject(response)
                 const threadId = response.threadId
                 
-                corpus.waitForTask(threadId, 30, (task, errors, messages)=>{
+                store.waitForTask(threadId, 30, (task, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors));
                     
                     // if the task is still running, it's taking too long, so cancel it
-                    if (task.running) corpus.cancelTask(threadId);
+                    if (task.running) store.cancelTask(threadId);
                     assert.isFalse(task.running, "Search finished in a timely manner");
                     
-                    corpus.getMatches(threadId, (result, errors, messages)=>{
+                    store.getMatches(threadId, (result, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(result)
                         assert.isNotNull(result.name)
@@ -615,7 +872,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                             matches.length, 0,
                             "No matches were returned, cannot test getSoundFragments");
                         
-                        corpus.releaseTask(threadId);
+                        store.releaseTask(threadId);
                         
                         const upTo = Math.min(5, matches.length);
                         const subset = matches.slice(0, upTo);
@@ -626,7 +883,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
 
                         const layerIds = [ "orthography" ];
                         // getFragments with dir
-                        corpus.getFragments(
+                        store.getFragments(
                             graphIds, startOffsets, endOffsets, layerIds, "text/praat-textgrid",
                             "test", (textgrids, errors, messages)=>{
                                 assert.isNull(errors, "getFragments with dir: "
@@ -650,7 +907,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 }
                                 
                                 // getFragments without dir
-                                corpus.getFragments(
+                                store.getFragments(
                                     graphIds, startOffsets, endOffsets, layerIds,
                                     "text/praat-textgrid", (textgrids, errors, messages)=>{
                                         assert.isNull(errors, "getFragments without dir: "
@@ -675,7 +932,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
 
                                         // getFragments with matches instead of
                                         // graphIds, startOffsets, and endOffsets
-                                        corpus.getFragments(
+                                        store.getFragments(
                                             subset, layerIds, "text/praat-textgrid",
                                             (textgrids, errors, messages)=>{
                                                 assert.isNull(errors, "getFragments with matches: "
@@ -683,7 +940,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                                 assert.equal(
                                                     subset.length, textgrids.length,
                                                     "files array is same size as matches array");
-                                        
+                                                
                                                 for (let m = 0; m < upTo; m++) {
                                                     // console.log(textgrids[m]);
                                                     assert.isNotNull(
@@ -714,14 +971,14 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
 
     it("implements getTranscriptAttributes", (done)=>{
         // get a list of transcripts
-        corpus.getMatchingTranscriptIds("/BR.+/.test(id)", (transcriptIds, errors, messages)=>{
+        store.getMatchingTranscriptIds("/BR.+/.test(id)", (transcriptIds, errors, messages)=>{
             assert.isNull(errors);
             assert.isArray(transcriptIds);
             // for (let id of transcriptIds) console.log("transcript " + id);
             assert.isNotEmpty(transcriptIds, "Some IDs are returned");
             const layerIds = ["transcript_type", "corpus"];
             const fileName = "test.csv";
-            corpus.getTranscriptAttributes(
+            store.getTranscriptAttributes(
                 transcriptIds, layerIds, fileName,
                 (result, errors, messages) => {
                     assert.isNull(errors);
@@ -735,14 +992,14 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
     
     it("implements getParticipantAttributes", (done)=>{
         // get a list of participants
-        corpus.getMatchingParticipantIds("/BR.+/.test(id)", (participantIds, errors, messages)=>{
+        store.getMatchingParticipantIds("/BR.+/.test(id)", (participantIds, errors, messages)=>{
             assert.isNull(errors);
             assert.isArray(participantIds);
             // for (let id of participantIds) console.log("participant " + id);
             assert.isNotEmpty(participantIds, "Some IDs are returned");
             const layerIds = ["participant_gender", "participant_notes"];
             const fileName = "test.csv";
-            corpus.getParticipantAttributes(
+            store.getParticipantAttributes(
                 participantIds, layerIds, fileName,
                 (result, errors, messages) => {
                     assert.isNull(errors);
@@ -757,7 +1014,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
     it("works with the example code", (done)=>{
         
         // get the first participant in the corpus
-        corpus.getParticipantIds((ids, errors, messages)=>{
+        store.getParticipantIds((ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
@@ -768,22 +1025,22 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                 {"phonemes" : "[cCEFHiIPqQuUV0123456789~#\\$@].*"}];
 
             // start searching
-            corpus.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+            store.search(pattern, [ participantId ], false, (response, errors, messages)=>{
                 assert.isNull(errors, JSON.stringify(errors))
                 assert.isNotNull(response)
                 assert.isObject(response)
                 const taskId = response.threadId
                 
                 // wait for the search to finish
-                corpus.waitForTask(taskId, 30, (task, errors, messages)=>{
+                store.waitForTask(taskId, 30, (task, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors));
                     
                     // if the task is still running, it's taking too long, so cancel it
-                    if (task.running) corpus.cancelTask(taskId);
+                    if (task.running) store.cancelTask(taskId);
                     assert.isFalse(task.running, "Search finished in a timely manner");
 
                     // get the matches
-                    corpus.getMatches(taskId, (result, errors, messages)=>{
+                    store.getMatches(taskId, (result, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(result)
                         assert.isNotNull(result.name)
@@ -794,10 +1051,10 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
 
                         //console.log("There were " + matches.length + " matches for " + participantId);
                         
-                        corpus.releaseTask(taskId);
+                        store.releaseTask(taskId);
 
                         // get TextGrids of the utterances
-                        corpus.getFragments(
+                        store.getFragments(
                             matches, [ "orthography", "phonemes" ], "text/praat-textgrid",
                             (textgrids, errors, messages)=>{
                                 assert.isNull(errors, "getFragments with dir: "
@@ -812,7 +1069,7 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                                 }
                                 
                                 // get the utterance recordings
-                                corpus.getSoundFragments(
+                                store.getSoundFragments(
                                     matches, (wavs, errors, messages)=>{
                                         assert.isNull(errors, JSON.stringify(errors))
                                         assert.equal(
@@ -831,7 +1088,6 @@ describe("#Labbcat", function() { // not an arrow function because we want to th
                 });
             });
         });
-   });
+    });
+    
 });
-
-
