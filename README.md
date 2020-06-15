@@ -3,6 +3,21 @@
 Client library for communicating with [LaBB-CAT](https://labbcat.canterbury.ac.nz/)
 servers using JavaScript.
 
+```javascript
+const labbcat = require("@nzilbb/labbcat");
+
+const corpus = new labbcat.LabbcatEdit("https://sometld.com", "your username", "your password");
+
+corpus.newTranscript(
+  "quakestory.eaf", "quakestory.wav", "story", "QB", taskId => {
+    corpus.waitForTask(taskId, 30, task=>{
+        corpus.getAnnotations("quakestory.eaf", "pos", (tags) => {
+            // process POS tags...
+          });
+      });
+  });
+```
+
 LaBB-CAT is a web-based linguistic annotation store that stores audio or video
 recordings, text transcripts, and other annotations.
 
