@@ -1766,16 +1766,33 @@
          * @param {file|file[]|string|string[]} media The media to upload, if any. In a
          * browser, these must be file objects, and in Node, they must be the full paths
          * to the files.
-         * @param {string} mediaSuffix The media suffix for the media.
+         * @param {string} [mediaSuffix] The media suffix for the media.
          * @param {string} transcriptType The transcript type.
          * @param {string} corpus The corpus for the transcript.
-         * @param {string} episode The episode the transcript belongs to.
+         * @param {string} [episode] The episode the transcript belongs to.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * result, which is the task ID of the resulting annotation generation task. The
          * task status can be updated using {@link Labbcat#taskStatus} 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
+            if (typeof corpus === "function") {
+                // (transcript, media, transcriptType, corpus, onResult, onProgress)
+                onProgress = episode;
+                onResult = corpus;
+                episode = null;
+                corpus = transcriptType;
+                transcriptType = mediaSuffix;
+                mediaSuffix = null;
+            } else if (typeof episode === "function") {
+                // (transcript, media, transcriptType, corpus, episode, onResult, onProgress)
+                onProgress = onResult;
+                onResult = episode;
+                episode = corpus;
+                corpus= transcriptType;
+                transcriptType = mediaSuffix;
+                mediaSuffix = null;
+            }
             if (exports.verbose) {
                 console.log("newTranscript(" + transcript + ", " + media + ", " + mediaSuffix
                             + ", " + transcriptType + ", " + corpus + ", " + episode + ")");
