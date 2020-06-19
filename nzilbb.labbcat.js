@@ -2049,9 +2049,9 @@
      * // add a corpus
      * store.createCorpus("new-corpus", "en", "New English Corpus", (corpus, errors, messages, call)=>{ 
      *     console.log("new corpus ID is: " + corpus.corpus_id); 
-     *     store.updateCorpus(corpus.corpus_id, "new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
+     *     store.updateCorpus("new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
      *         console.log("corpus updated, language is now: " + corpus.corpus_language); 
-     *         store.deleteCorpus(corpus.corpus_id, (result, errors, messages, call)=>{ 
+     *         store.deleteCorpus("new-corpus", (result, errors, messages, call)=>{ 
      *             console.log("corpus deleted"); 
      *         });
      *       });
@@ -2139,14 +2139,12 @@
          * @param {string} corpus_language The ISO 639-1 code for the default language.
          * @param {string} corpus_description The description of the corpus.
          * @param {resultCallback} onResult Invoked when the request has returned a 
-         * <var>result</var> which will be: A copy of the corpus record, 
-         * including <em> corpus_id </em>; The database key for the record. 
+         * <var>result</var> which will be: A copy of the corpus record. 
          */
-        updateCorpus(corpus_id, corpus_name, corpus_language, corpus_description, onResult) {
+        updateCorpus(corpus_name, corpus_language, corpus_description, onResult) {
             this.createRequest(
                 "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "PUT")
                 .send(JSON.stringify({
-                    corpus_id : corpus_id,
                     corpus_name : corpus_name,
                     corpus_language : corpus_language,
                     corpus_description : corpus_description}));
@@ -2154,13 +2152,13 @@
         
         /**
          * Deletes an existing corpus record.
-         * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
+         * @param {string} corpus_name The name/ID of the corpus.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
-        deleteCorpus(corpus_id, onResult) {
+        deleteCorpus(corpus_name, onResult) {
             this.createRequest(
-                "corpora", null, onResult, this.baseUrl+"api/admin/corpora/"+ corpus_id, "DELETE")
-                .send();
+                "corpora", null, onResult, `${this.baseUrl}api/admin/corpora/${corpus_name}`,
+                "DELETE").send();
         }
     }
     
