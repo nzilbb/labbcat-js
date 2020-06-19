@@ -2070,7 +2070,7 @@
          * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/edit/store/
          */
         get storeAdminUrl() {
-            return this._storeEditUrl;
+            return this._storeAdminUrl;
         }
         /** 
          * Create a store client 
@@ -2080,7 +2080,7 @@
          */
         constructor(baseUrl, username, password) {
             super(baseUrl, username, password);
-            this._storeEditUrl = this.baseUrl + "api/admin/store/";
+            this._storeAdminUrl = this.baseUrl + "api/admin/store/";
         }
 
         /**

@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Unit tests for LabbcatEditQuery.
+ * Unit tests for LabbcatEdit.
  * <p>These tests test the functionality of the client library, not the server. 
  * <p>They assume the existence of a valid LaBB-CAT instance (configured by
  * <var>labbcatUrl</var>) which responds correctly to requests, but do not generally test
