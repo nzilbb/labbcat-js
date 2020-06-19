@@ -903,7 +903,7 @@
          * @param {int} [matchesPerTranscript=null] Optional maximum number of matches per
          * transcript to return. <tt>null</tt> means all matches.
          * @param {resultCallback} onResult Invoked when the request has returned a 
-         * <var>result</var> which will be: An object with one attribtue, "threadId",
+         * <var>result</var> which will be: An object with one attribute, "threadId",
          * which identifies the resulting task, which can be passed to 
          * {@link Labbcat#getMatches}, {@link Labbcat#taskStatus}, 
          * {@link Labbcat#waitForTask}, etc.
@@ -1688,14 +1688,13 @@
      *         }
      *       });
      *   });
-     * store.deleteTranscript(documents[0]);
      * @extends LabbcatView
      * @author Robert Fromont robert@fromont.net.nz
      */
     class LabbcatEdit extends LabbcatView{
         
         /**
-         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/edit/store/
          */
         get storeEditUrl() {
             return this._storeEditUrl;
@@ -2035,6 +2034,133 @@
 
     } // class LabbcatEdit
     
+    // LabbcatAdmin class - read/write "admin" access
+
+    /**
+     * Read/write/administration interaction with LaBB-CAT corpora.
+     * <p>This class inherits the <em>read/write</em> operations of LabbcatEdit
+     * and adds some administration functions.
+     * @example
+     * // create annotation store client
+     * const store = new labbcat.LabbcatAdmin("http://localhost:8080/labbcat", "labbcat", "labbcat");
+     * // add a corpus
+     * store.createCorpus("new-corpus", "en", "New English Corpus", (corpus, errors, messages, call)=>{ 
+     *     console.log("new corpus ID is: " + corpus.corpus_id); 
+     *   });
+     * store.readCorpora((corpora, errors, messages, call)=>{ 
+     *     for (let corpus of corpora) {
+     *       console.log("corpus: " + corpus.corpus_name); 
+     *     } // next corpus
+     *   });
+     * store.updateCorpus("new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
+     *     console.log("corpus updated, language is now: " + corpus.corpus_language); 
+     *     store.deleteCorpus(corpus.corpus_id, (result, errors, messages, call)=>{ 
+     *         console.log("corpus deleted"); 
+     *     });
+     *   });
+     * @extends LabbcatView
+     * @author Robert Fromont robert@fromont.net.nz
+     */
+    class LabbcatAdmin extends LabbcatEdit {
+        
+        /**
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/edit/store/
+         */
+        get storeAdminUrl() {
+            return this._storeEditUrl;
+        }
+        /** 
+         * Create a store client 
+         * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
+         * @param {string} username The LaBB-CAT user name.
+         * @param {string} password The LaBB-CAT password.
+         */
+        constructor(baseUrl, username, password) {
+            super(baseUrl, username, password);
+            this._storeEditUrl = this.baseUrl + "api/admin/store/";
+        }
+
+        /**
+         * Creates a new corpus record.
+         * @param {string} corpus_name The name/ID of the corpus.
+         * @param {string} corpus_language The ISO 639-1 code for the default language.
+         * @param {string} corpus_description The description of the corpus.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the corpus record, 
+         * including <em> corpus_id </em>; The database key for the record. 
+         */
+        createCorpus(corpus_name, corpus_language, corpus_description, onResult) {
+            this.createRequest(
+                "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "POST")
+                .send(JSON.stringify({
+                    corpus_name : corpus_name,
+                    corpus_language : corpus_language,
+                    corpus_description : corpus_description}));
+        }
+        
+        /**
+         * Reads a list of corpus records.
+         * @param {int} [p] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [l] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of corpus records with the following
+         * attributes:
+         * <dl>
+         *  <dt> corpus_id </dt> <dd> The database key for the record. </dd>
+         *  <dt> corpus_name </dt> <dd> The name/id of the corpus. </dd>
+         *  <dt> corpus_language </dt> <dd> The ISO 639-1 code for the default language. </dd>
+         *  <dt> corpus_description </dt> <dd> The description of the corpus. </dd>
+         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. </dd>
+         * </dl>
+         */
+        readCorpora(p, l, onResult) {
+            if (typeof p === "function") { // (onResult)
+                onResult = p;
+                p = null;
+                l = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                l = null;
+            }
+            this.createRequest("corpora", { p:p, l:l }, onResult, this.baseUrl+"api/admin/corpora")
+                .send();
+        }
+        
+        /**
+         * Updates an existing corpus record.
+         * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
+         * @param {string} corpus_name The name/ID of the corpus.
+         * @param {string} corpus_language The ISO 639-1 code for the default language.
+         * @param {string} corpus_description The description of the corpus.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the corpus record, 
+         * including <em> corpus_id </em>; The database key for the record. 
+         */
+        updateCorpus(corpus_id, corpus_name, corpus_language, corpus_description, onResult) {
+            this.createRequest(
+                "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "PUT")
+                .send(JSON.stringify({
+                    corpus_id : corpus_id,
+                    corpus_name : corpus_name,
+                    corpus_language : corpus_language,
+                    corpus_description : corpus_description}));
+        }
+        
+        /**
+         * Deletes an existing corpus record.
+         * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteCorpus(corpus_id, onResult) {
+            this.createRequest(
+                "corpora", null, onResult, this.baseUrl+"api/admin/corpora/"+ corpus_id, "DELETE")
+                .send();
+        }
+    }
+    
     /**
      * Interpreter for match ID strings.
      * <p>The schema is:</p>
@@ -2160,6 +2286,7 @@
     
     exports.LabbcatView = LabbcatView;
     exports.LabbcatEdit = LabbcatEdit;
+    exports.LabbcatAdmin = LabbcatAdmin;
     exports.MatchId = MatchId;
     exports.verbose = false;
 
