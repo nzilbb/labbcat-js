@@ -30,6 +30,9 @@
  *  <dt>{@link LabbcatEdit}</dt><dd> inherits all LabbcatView functions, and also
  *   implements some graph store editing functions, corresponding to <q>edit</q>
  *   permissions in LaBB-CAT.</dd>
+ *  <dt>{@link LabbcatAdmin}</dt><dd> inherits all LabbcatEdit functions, and also
+ *   implements some administration functions, corresponding to <q>admin</q>
+ *   permissions in LaBB-CAT.</dd>
  * </dl> 
  *
  * @example
@@ -2046,17 +2049,17 @@
      * // add a corpus
      * store.createCorpus("new-corpus", "en", "New English Corpus", (corpus, errors, messages, call)=>{ 
      *     console.log("new corpus ID is: " + corpus.corpus_id); 
+     *     store.updateCorpus(corpus.corpus_id, "new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
+     *         console.log("corpus updated, language is now: " + corpus.corpus_language); 
+     *         store.deleteCorpus(corpus.corpus_id, (result, errors, messages, call)=>{ 
+     *             console.log("corpus deleted"); 
+     *         });
+     *       });
      *   });
      * store.readCorpora((corpora, errors, messages, call)=>{ 
      *     for (let corpus of corpora) {
      *       console.log("corpus: " + corpus.corpus_name); 
      *     } // next corpus
-     *   });
-     * store.updateCorpus("new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
-     *     console.log("corpus updated, language is now: " + corpus.corpus_language); 
-     *     store.deleteCorpus(corpus.corpus_id, (result, errors, messages, call)=>{ 
-     *         console.log("corpus deleted"); 
-     *     });
      *   });
      * @extends LabbcatView
      * @author Robert Fromont robert@fromont.net.nz
@@ -2087,7 +2090,7 @@
          * @param {string} corpus_description The description of the corpus.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: A copy of the corpus record, 
-         * including <em> corpus_id </em>; The database key for the record. 
+         * including <em> corpus_id </em> - The database key for the record. 
          */
         createCorpus(corpus_name, corpus_language, corpus_description, onResult) {
             this.createRequest(

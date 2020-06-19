@@ -58,6 +58,9 @@
  *  &lt;dt>{@link LabbcatEdit}&lt;/dt>&lt;dd> inherits all LabbcatView functions, and also
  *   implements some graph store editing functions, corresponding to &lt;q>edit&lt;/q>
  *   permissions in LaBB-CAT.&lt;/dd>
+ *  &lt;dt>{@link LabbcatAdmin}&lt;/dt>&lt;dd> inherits all LabbcatEdit functions, and also
+ *   implements some administration functions, corresponding to &lt;q>admin&lt;/q>
+ *   permissions in LaBB-CAT.&lt;/dd>
  * &lt;/dl> 
  *
  * @example
@@ -931,7 +934,7 @@
          * @param {int} [matchesPerTranscript=null] Optional maximum number of matches per
          * transcript to return. &lt;tt>null&lt;/tt> means all matches.
          * @param {resultCallback} onResult Invoked when the request has returned a 
-         * &lt;var>result&lt;/var> which will be: An object with one attribtue, "threadId",
+         * &lt;var>result&lt;/var> which will be: An object with one attribute, "threadId",
          * which identifies the resulting task, which can be passed to 
          * {@link Labbcat#getMatches}, {@link Labbcat#taskStatus}, 
          * {@link Labbcat#waitForTask}, etc.
@@ -1716,14 +1719,13 @@
      *         }
      *       });
      *   });
-     * store.deleteTranscript(documents[0]);
      * @extends LabbcatView
      * @author Robert Fromont robert@fromont.net.nz
      */
     class LabbcatEdit extends LabbcatView{
         
         /**
-         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/store/
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/edit/store/
          */
         get storeEditUrl() {
             return this._storeEditUrl;
@@ -2063,6 +2065,133 @@
 
     } // class LabbcatEdit
     
+    // LabbcatAdmin class - read/write "admin" access
+
+    /**
+     * Read/write/administration interaction with LaBB-CAT corpora.
+     * &lt;p>This class inherits the &lt;em>read/write&lt;/em> operations of LabbcatEdit
+     * and adds some administration functions.
+     * @example
+     * // create annotation store client
+     * const store = new labbcat.LabbcatAdmin("http://localhost:8080/labbcat", "labbcat", "labbcat");
+     * // add a corpus
+     * store.createCorpus("new-corpus", "en", "New English Corpus", (corpus, errors, messages, call)=>{ 
+     *     console.log("new corpus ID is: " + corpus.corpus_id); 
+     *   });
+     * store.readCorpora((corpora, errors, messages, call)=>{ 
+     *     for (let corpus of corpora) {
+     *       console.log("corpus: " + corpus.corpus_name); 
+     *     } // next corpus
+     *   });
+     * store.updateCorpus("new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
+     *     console.log("corpus updated, language is now: " + corpus.corpus_language); 
+     *     store.deleteCorpus(corpus.corpus_id, (result, errors, messages, call)=>{ 
+     *         console.log("corpus deleted"); 
+     *     });
+     *   });
+     * @extends LabbcatView
+     * @author Robert Fromont robert@fromont.net.nz
+     */
+    class LabbcatAdmin extends LabbcatEdit {
+        
+        /**
+         * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/edit/store/
+         */
+        get storeAdminUrl() {
+            return this._storeEditUrl;
+        }
+        /** 
+         * Create a store client 
+         * @param {string} baseUrl The LaBB-CAT base URL (i.e. the address of the 'home' link)
+         * @param {string} username The LaBB-CAT user name.
+         * @param {string} password The LaBB-CAT password.
+         */
+        constructor(baseUrl, username, password) {
+            super(baseUrl, username, password);
+            this._storeEditUrl = this.baseUrl + "api/admin/store/";
+        }
+
+        /**
+         * Creates a new corpus record.
+         * @param {string} corpus_name The name/ID of the corpus.
+         * @param {string} corpus_language The ISO 639-1 code for the default language.
+         * @param {string} corpus_description The description of the corpus.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A copy of the corpus record, 
+         * including &lt;em> corpus_id &lt;/em>; The database key for the record. 
+         */
+        createCorpus(corpus_name, corpus_language, corpus_description, onResult) {
+            this.createRequest(
+                "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "POST")
+                .send(JSON.stringify({
+                    corpus_name : corpus_name,
+                    corpus_language : corpus_language,
+                    corpus_description : corpus_description}));
+        }
+        
+        /**
+         * Reads a list of corpus records.
+         * @param {int} [p] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [l] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A list of corpus records with the following
+         * attributes:
+         * &lt;dl>
+         *  &lt;dt> corpus_id &lt;/dt> &lt;dd> The database key for the record. &lt;/dd>
+         *  &lt;dt> corpus_name &lt;/dt> &lt;dd> The name/id of the corpus. &lt;/dd>
+         *  &lt;dt> corpus_language &lt;/dt> &lt;dd> The ISO 639-1 code for the default language. &lt;/dd>
+         *  &lt;dt> corpus_description &lt;/dt> &lt;dd> The description of the corpus. &lt;/dd>
+         *  &lt;dt> _cantDelete &lt;/dt> &lt;dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. &lt;/dd>
+         * &lt;/dl>
+         */
+        readCorpora(p, l, onResult) {
+            if (typeof p === "function") { // (onResult)
+                onResult = p;
+                p = null;
+                l = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                l = null;
+            }
+            this.createRequest("corpora", { p:p, l:l }, onResult, this.baseUrl+"api/admin/corpora")
+                .send();
+        }
+        
+        /**
+         * Updates an existing corpus record.
+         * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
+         * @param {string} corpus_name The name/ID of the corpus.
+         * @param {string} corpus_language The ISO 639-1 code for the default language.
+         * @param {string} corpus_description The description of the corpus.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A copy of the corpus record, 
+         * including &lt;em> corpus_id &lt;/em>; The database key for the record. 
+         */
+        updateCorpus(corpus_id, corpus_name, corpus_language, corpus_description, onResult) {
+            this.createRequest(
+                "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "PUT")
+                .send(JSON.stringify({
+                    corpus_id : corpus_id,
+                    corpus_name : corpus_name,
+                    corpus_language : corpus_language,
+                    corpus_description : corpus_description}));
+        }
+        
+        /**
+         * Deletes an existing corpus record.
+         * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteCorpus(corpus_id, onResult) {
+            this.createRequest(
+                "corpora", null, onResult, this.baseUrl+"api/admin/corpora/"+ corpus_id, "DELETE")
+                .send();
+        }
+    }
+    
     /**
      * Interpreter for match ID strings.
      * &lt;p>The schema is:&lt;/p>
@@ -2188,6 +2317,7 @@
     
     exports.LabbcatView = LabbcatView;
     exports.LabbcatEdit = LabbcatEdit;
+    exports.LabbcatAdmin = LabbcatAdmin;
     exports.MatchId = MatchId;
     exports.verbose = false;
 
@@ -2202,13 +2332,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LabbcatEdit.html">LabbcatEdit</a></li><li><a href="LabbcatView.html">LabbcatView</a></li><li><a href="MatchId.html">MatchId</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LabbcatAdmin.html">LabbcatAdmin</a></li><li><a href="LabbcatEdit.html">LabbcatEdit</a></li><li><a href="LabbcatView.html">LabbcatView</a></li><li><a href="MatchId.html">MatchId</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Jun 15 2020 12:49:03 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Jun 19 2020 13:32:54 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
