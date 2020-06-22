@@ -101,6 +101,12 @@ Detailed documentation is available [here](https://nzilbb.github.io/labbcat-js/)
 npm test
 ```
 
+To run specific tests, provide the path to the test module, e.g.
+
+```
+npm test test/TestLabbcatAdmin
+```
+
 ### Generating documentation
 
 Documentation is generated using *jsdoc*, which you must install first:
