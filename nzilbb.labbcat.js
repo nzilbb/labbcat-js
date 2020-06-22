@@ -2103,9 +2103,9 @@
         
         /**
          * Reads a list of corpus records.
-         * @param {int} [p] The zero-based  page of records to return (if null, all
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
          * records will be returned). 
-         * @param {int} [l] The length of pages (if null, the default page length is 20).
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: A list of corpus records with the following
          * attributes:
@@ -2119,16 +2119,20 @@
          *    a string representing the reason the record can't be deleted. </dd>
          * </dl>
          */
-        readCorpora(p, l, onResult) {
-            if (typeof p === "function") { // (onResult)
-                onResult = p;
-                p = null;
-                l = null;
+        readCorpora(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
             } else if (typeof l === "function") { // (p, onResult)
                 onResult = l;
-                l = null;
+                pageLength = null;
             }
-            this.createRequest("corpora", { p:p, l:l }, onResult, this.baseUrl+"api/admin/corpora")
+            this.createRequest(
+                "corpora", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/corpora")
                 .send();
         }
         
