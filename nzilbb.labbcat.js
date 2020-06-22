@@ -2164,6 +2164,83 @@
                 "corpora", null, onResult, `${this.baseUrl}api/admin/corpora/${corpus_name}`,
                 "DELETE").send();
         }
+        
+        /**
+         * Creates a new project record.
+         * @param {string} project The name/ID of the project.
+         * @param {string} description The description of the project.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the project record, 
+         * including <em> project_id </em> - The database key for the record. 
+         */
+        createProject(project, description, onResult) {
+            this.createRequest(
+                "projects", null, onResult, this.baseUrl+"api/admin/projects", "POST")
+                .send(JSON.stringify({
+                    project : project,
+                    description : description}));
+        }
+        
+        /**
+         * Reads a list of project records.
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of project records with the following
+         * attributes:
+         * <dl>
+         *  <dt> project_id </dt> <dd> The database key for the record. </dd>
+         *  <dt> project </dt> <dd> The name/id of the project. </dd>
+         *  <dt> description </dt> <dd> The description of the project. </dd>
+         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. </dd>
+         * </dl>
+         */
+        readProjects(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            this.createRequest(
+                "projects", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/projects")
+                .send();
+        }
+        
+        /**
+         * Updates an existing project record.
+         * @param {string} project_id The database key for the record. // TODO eliminate project_id
+         * @param {string} project The name/ID of the project.
+         * @param {string} description The description of the project.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the project record. 
+         */
+        updateProject(project, description, onResult) {
+            this.createRequest(
+                "projects", null, onResult, this.baseUrl+"api/admin/projects", "PUT")
+                .send(JSON.stringify({
+                    project : project,
+                    description : description}));
+        }
+        
+        /**
+         * Deletes an existing project record.
+         * @param {string} project The name/ID of the project.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteProject(project, onResult) {
+            this.createRequest(
+                "projects", null, onResult, `${this.baseUrl}api/admin/projects/${project}`,
+                "DELETE").send();
+        }
     }
     
     /**

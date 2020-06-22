@@ -51,7 +51,7 @@ describe("#LabbcatAdmin", function() {
         });
     });
 
-    it("implements corpora CRUD operations", (done)=>{
+    it("implements corpus CRUD operations", (done)=>{
 
         const corpus_name = "unit-test";
         const corpus_language = "en";
@@ -148,6 +148,102 @@ describe("#LabbcatAdmin", function() {
                                                         assert.isNotNull(
                                                             errors,
                                                             "deleteCorpus fails for nonexistant corpus ID");
+                                                        assert.include(errors[0], "doesn't exist");
+                                                        done();
+                                                    });                                            
+                                            });
+                                        });
+                                });
+                            });
+                    });
+                });
+        });
+    });
+    
+    it("implements project CRUD operations", (done)=>{
+
+        const project_name = "unit-test";
+        const description = "Temporary project for unit testing";
+        
+        // ensure the transcript doesn't exist to start with
+        store.deleteProject(project_name, (result, errors, messages)=>{
+            
+            // create the project
+            store.createProject(
+                project_name, description, (project, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    assert.isNotNull(project);
+                    assert.equal(project.project, project_name, "project saved");
+                    assert.equal(project.description, description, "description saved");
+                    
+                    // ensure the project exists
+                    store.readProjects((projects, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(projects, "The projects are returned")
+                        assert.isAtLeast(projects.length, 1, "There is at least one project");
+                        
+                        const matchedProjects = projects.filter(c => {
+                            return c.project == project_name;});
+                        assert.equal(matchedProjects.length, 1,
+                                     "The new project is present: " + JSON.stringify(projects));
+                        assert.equal(matchedProjects[0].project, project_name,
+                                     "project name present");
+                        assert.equal(matchedProjects[0].description, description,
+                                     "description correct");
+                        
+                        // update it
+                        const new_description = "New description";
+                        store.updateProject(
+                            project_name, new_description,
+                            (updatedProject, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors))
+                                assert.isNotNull(updatedProject);
+                                assert.equal(updatedProject.project, project_name,
+                                             "project name unchanged");
+                                assert.equal(updatedProject.description, new_description,
+                                             "description changed");
+                                
+                                // ensure the project updated
+                                store.readProjects((projects, errors, messages)=>{
+                                    assert.isNull(errors, JSON.stringify(errors))
+                                    assert.isNotNull(projects, "The projects are returned")
+                                    assert.isAtLeast(projects.length, 1,
+                                                     "There is at least one project");
+                                    
+                                    const newMatchedProjects = projects.filter(c => {
+                                        return c.project == project_name;});
+                                    assert.equal(
+                                        newMatchedProjects.length, 1,
+                                        "The updated project is present");
+                                    assert.equal(
+                                        newMatchedProjects[0].project, project_name,
+                                        "updated project name correct");
+                                    assert.equal(
+                                        newMatchedProjects[0].description,
+                                        new_description,
+                                        "updated description correct");
+                                    
+                                    // delete it
+                                    store.deleteProject(
+                                        project_name, (result, errors, messages)=>{
+                                            assert.isNull(errors, JSON.stringify(errors))
+                                            
+                                            // ensure the transcript no longer exists
+                                            store.readProjects((projects, errors, messages)=>{
+                                                assert.isNull(errors, JSON.stringify(errors))
+                                                assert.isNotNull(projects, "The projects are returned")
+                                                
+                                                const finalMatchedProjects = projects.filter(c => {
+                                                    return c.project == project_name;});
+                                                assert.equal(finalMatchedProjects.length, 0,
+                                                             "The new project is gone");
+                                                
+                                                // can't delete it again
+                                                store.deleteProject(
+                                                    project_name, (result, errors, messages) =>{
+                                                        assert.isNotNull(
+                                                            errors,
+                                                            "deleteProject fails for nonexistant project ID");
                                                         assert.include(errors[0], "doesn't exist");
                                                         done();
                                                     });                                            
