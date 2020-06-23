@@ -2077,17 +2077,17 @@
      * // add a corpus
      * store.createCorpus("new-corpus", "en", "New English Corpus", (corpus, errors, messages, call)=>{ 
      *     console.log("new corpus ID is: " + corpus.corpus_id); 
+     *     store.updateCorpus("new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
+     *         console.log("corpus updated, language is now: " + corpus.corpus_language); 
+     *         store.deleteCorpus("new-corpus", (result, errors, messages, call)=>{ 
+     *             console.log("corpus deleted"); 
+     *         });
+     *       });
      *   });
      * store.readCorpora((corpora, errors, messages, call)=>{ 
      *     for (let corpus of corpora) {
      *       console.log("corpus: " + corpus.corpus_name); 
      *     } // next corpus
-     *   });
-     * store.updateCorpus("new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
-     *     console.log("corpus updated, language is now: " + corpus.corpus_language); 
-     *     store.deleteCorpus(corpus.corpus_id, (result, errors, messages, call)=>{ 
-     *         console.log("corpus deleted"); 
-     *     });
      *   });
      * @extends LabbcatView
      * @author Robert Fromont robert@fromont.net.nz
@@ -2098,7 +2098,7 @@
          * The graph store URL - e.g. https://labbcat.canterbury.ac.nz/demo/api/edit/store/
          */
         get storeAdminUrl() {
-            return this._storeEditUrl;
+            return this._storeAdminUrl;
         }
         /** 
          * Create a store client 
@@ -2108,17 +2108,20 @@
          */
         constructor(baseUrl, username, password) {
             super(baseUrl, username, password);
-            this._storeEditUrl = this.baseUrl + "api/admin/store/";
+            this._storeAdminUrl = this.baseUrl + "api/admin/store/";
         }
 
         /**
          * Creates a new corpus record.
+         * @see LabbcatAdmin#readCorpora
+         * @see LabbcatAdmin#updateCorpus
+         * @see LabbcatAdmin#deleteCorpus
          * @param {string} corpus_name The name/ID of the corpus.
          * @param {string} corpus_language The ISO 639-1 code for the default language.
          * @param {string} corpus_description The description of the corpus.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * &lt;var>result&lt;/var> which will be: A copy of the corpus record, 
-         * including &lt;em> corpus_id &lt;/em>; The database key for the record. 
+         * including &lt;em> corpus_id &lt;/em> - The database key for the record. 
          */
         createCorpus(corpus_name, corpus_language, corpus_description, onResult) {
             this.createRequest(
@@ -2131,9 +2134,12 @@
         
         /**
          * Reads a list of corpus records.
-         * @param {int} [p] The zero-based  page of records to return (if null, all
+         * @see LabbcatAdmin#createCorpus
+         * @see LabbcatAdmin#updateCorpus
+         * @see LabbcatAdmin#deleteCorpus
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
          * records will be returned). 
-         * @param {int} [l] The length of pages (if null, the default page length is 20).
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * &lt;var>result&lt;/var> which will be: A list of corpus records with the following
          * attributes:
@@ -2147,34 +2153,39 @@
          *    a string representing the reason the record can't be deleted. &lt;/dd>
          * &lt;/dl>
          */
-        readCorpora(p, l, onResult) {
-            if (typeof p === "function") { // (onResult)
-                onResult = p;
-                p = null;
-                l = null;
+        readCorpora(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
             } else if (typeof l === "function") { // (p, onResult)
                 onResult = l;
-                l = null;
+                pageLength = null;
             }
-            this.createRequest("corpora", { p:p, l:l }, onResult, this.baseUrl+"api/admin/corpora")
+            this.createRequest(
+                "corpora", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/corpora")
                 .send();
         }
         
         /**
          * Updates an existing corpus record.
+         * @see LabbcatAdmin#createCorpus
+         * @see LabbcatAdmin#readCorpora
+         * @see LabbcatAdmin#deleteCorpus
          * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
          * @param {string} corpus_name The name/ID of the corpus.
          * @param {string} corpus_language The ISO 639-1 code for the default language.
          * @param {string} corpus_description The description of the corpus.
          * @param {resultCallback} onResult Invoked when the request has returned a 
-         * &lt;var>result&lt;/var> which will be: A copy of the corpus record, 
-         * including &lt;em> corpus_id &lt;/em>; The database key for the record. 
+         * &lt;var>result&lt;/var> which will be: A copy of the corpus record. 
          */
-        updateCorpus(corpus_id, corpus_name, corpus_language, corpus_description, onResult) {
+        updateCorpus(corpus_name, corpus_language, corpus_description, onResult) {
             this.createRequest(
                 "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "PUT")
                 .send(JSON.stringify({
-                    corpus_id : corpus_id,
                     corpus_name : corpus_name,
                     corpus_language : corpus_language,
                     corpus_description : corpus_description}));
@@ -2182,13 +2193,196 @@
         
         /**
          * Deletes an existing corpus record.
-         * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
+         * @see LabbcatAdmin#createCorpus
+         * @see LabbcatAdmin#readCorpora
+         * @see LabbcatAdmin#updateCorpus
+         * @param {string} corpus_name The name/ID of the corpus.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
-        deleteCorpus(corpus_id, onResult) {
+        deleteCorpus(corpus_name, onResult) {
             this.createRequest(
-                "corpora", null, onResult, this.baseUrl+"api/admin/corpora/"+ corpus_id, "DELETE")
+                "corpora", null, onResult, `${this.baseUrl}api/admin/corpora/${corpus_name}`,
+                "DELETE").send();
+        }
+        
+        /**
+         * Creates a new project record.
+         * @see LabbcatAdmin#readProjects
+         * @see LabbcatAdmin#updateProject
+         * @see LabbcatAdmin#deleteProject
+         * @param {string} project The name/ID of the project.
+         * @param {string} description The description of the project.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A copy of the project record, 
+         * including &lt;em> project_id &lt;/em> - The database key for the record. 
+         */
+        createProject(project, description, onResult) {
+            this.createRequest(
+                "projects", null, onResult, this.baseUrl+"api/admin/projects", "POST")
+                .send(JSON.stringify({
+                    project : project,
+                    description : description}));
+        }
+        
+        /**
+         * Reads a list of project records.
+         * @see LabbcatAdmin#createProject
+         * @see LabbcatAdmin#updateProject
+         * @see LabbcatAdmin#deleteProject
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A list of project records with the following
+         * attributes:
+         * &lt;dl>
+         *  &lt;dt> project_id &lt;/dt> &lt;dd> The database key for the record. &lt;/dd>
+         *  &lt;dt> project &lt;/dt> &lt;dd> The name/id of the project. &lt;/dd>
+         *  &lt;dt> description &lt;/dt> &lt;dd> The description of the project. &lt;/dd>
+         *  &lt;dt> _cantDelete &lt;/dt> &lt;dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. &lt;/dd>
+         * &lt;/dl>
+         */
+        readProjects(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            this.createRequest(
+                "projects", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/projects")
                 .send();
+        }
+        
+        /**
+         * Updates an existing project record.
+         * @see LabbcatAdmin#createProject
+         * @see LabbcatAdmin#readProjects
+         * @see LabbcatAdmin#deleteProject
+         * @param {string} project_id The database key for the record. // TODO eliminate project_id
+         * @param {string} project The name/ID of the project.
+         * @param {string} description The description of the project.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A copy of the project record. 
+         */
+        updateProject(project, description, onResult) {
+            this.createRequest(
+                "projects", null, onResult, this.baseUrl+"api/admin/projects", "PUT")
+                .send(JSON.stringify({
+                    project : project,
+                    description : description}));
+        }
+        
+        /**
+         * Deletes an existing project record.
+         * @see LabbcatAdmin#createProject
+         * @see LabbcatAdmin#readProjects
+         * @see LabbcatAdmin#updateProject
+         * @param {string} project The name/ID of the project.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteProject(project, onResult) {
+            this.createRequest(
+                "projects", null, onResult, `${this.baseUrl}api/admin/projects/${project}`,
+                "DELETE").send();
+        }
+        
+        /**
+         * Creates a new media track record.
+         * @see LabbcatAdmin#readMediaTracks
+         * @see LabbcatAdmin#updateTask
+         * @see LabbcatAdmin#deleteTask
+         * @param {string} suffix The suffix of the mediaTrack.
+         * @param {string} description The description of the mediaTrack.
+         * @param {int} display_order The position of the mediaTrack relative to other mediaTracks.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A copy of the mediaTrack record. 
+         */
+        createMediaTrack(suffix, description, display_order, onResult) {
+            this.createRequest(
+                "mediaTracks", null, onResult, this.baseUrl+"api/admin/mediatracks", "POST")
+                .send(JSON.stringify({
+                    suffix : suffix,
+                    description : description,
+                    display_order: display_order}));
+        }
+        
+        /**
+         * Reads a list of media track records.
+         * @see LabbcatAdmin#createMediaTrack
+         * @see LabbcatAdmin#updateTask
+         * @see LabbcatAdmin#deleteTask
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A list of mediaTrack records with the following
+         * attributes:
+         * &lt;dl>
+         *  &lt;dt> suffix &lt;/dt> &lt;dd> The suffix of the mediaTrack. &lt;/dd>
+         *  &lt;dt> description &lt;/dt> &lt;dd> The description of the mediaTrack. &lt;/dd>
+         *  &lt;dt> display_order &lt;/dt> &lt;dd> The position of the mediaTrack relative to other mediaTracks. &lt;/dd>
+         *  &lt;dt> _cantDelete &lt;/dt> &lt;dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. &lt;/dd>
+         * &lt;/dl>
+         */
+        readMediaTracks(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            this.createRequest(
+                "mediaTracks", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/mediatracks")
+                .send();
+        }
+        
+        /**
+         * Updates an existing media track record.
+         * @see LabbcatAdmin#createMediaTrack
+         * @see LabbcatAdmin#readMediaTracks
+         * @see LabbcatAdmin#deleteMediaTrack
+         * @param {string} suffix The suffix of the mediaTrack.
+         * @param {string} description The description of the mediaTrack.
+         * @param {int} display_order The position of the mediaTrack relative to other mediaTracks.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A copy of the mediaTrack record. 
+         */
+        updateMediaTrack(suffix, description, display_order, onResult) {
+            this.createRequest(
+                "mediaTracks", null, onResult, this.baseUrl+"api/admin/mediatracks", "PUT")
+                .send(JSON.stringify({
+                    suffix : suffix,
+                    description : description,
+                    display_order: display_order}));
+        }
+        
+        /**
+         * Deletes an existing media track record.
+         * @see LabbcatAdmin#createMediaTrack
+         * @see LabbcatAdmin#readMediaTracks
+         * @see LabbcatAdmin#updateMediaTrack
+         * @param {string} suffix The suffix of the mediaTrack.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteMediaTrack(suffix, onResult) {
+            this.createRequest(
+                "mediaTracks", null, onResult, `${this.baseUrl}api/admin/mediatracks/${suffix}`,
+                "DELETE").send();
         }
     }
     
@@ -2338,7 +2532,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Jun 19 2020 13:32:54 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Jun 23 2020 17:16:26 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

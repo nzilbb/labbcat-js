@@ -237,17 +237,17 @@ const store = new labbcat.LabbcatAdmin("http://localhost:8080/labbcat", "labbcat
 // add a corpus
 store.createCorpus("new-corpus", "en", "New English Corpus", (corpus, errors, messages, call)=>{ 
     console.log("new corpus ID is: " + corpus.corpus_id); 
+    store.updateCorpus("new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
+        console.log("corpus updated, language is now: " + corpus.corpus_language); 
+        store.deleteCorpus("new-corpus", (result, errors, messages, call)=>{ 
+            console.log("corpus deleted"); 
+        });
+      });
   });
 store.readCorpora((corpora, errors, messages, call)=>{ 
     for (let corpus of corpora) {
       console.log("corpus: " + corpus.corpus_name); 
     } // next corpus
-  });
-store.updateCorpus("new-corpus", "de", "New German Corpus", (corpus, errors, messages, call)=>{ 
-    console.log("corpus updated, language is now: " + corpus.corpus_language); 
-    store.deleteCorpus(corpus.corpus_id, (result, errors, messages, call)=>{ 
-        console.log("corpus deleted"); 
-    });
   });</code></pre>
 
 
@@ -1580,7 +1580,7 @@ labels('participant').includes('Robert')</code></li>
 
             <td class="description last">Invoked when the request has returned a 
 <var>result</var> which will be: A copy of the corpus record, 
-including <em> corpus_id </em>; The database key for the record.</td>
+including <em> corpus_id </em> - The database key for the record.</td>
         </tr>
 
     
@@ -1621,12 +1621,23 @@ including <em> corpus_id </em>; The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2095">line 2095</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2098">line 2098</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#readCorpora">LabbcatAdmin#readCorpora</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateCorpus">LabbcatAdmin#updateCorpus</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteCorpus">LabbcatAdmin#deleteCorpus</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -1657,7 +1668,421 @@ including <em> corpus_id </em>; The database key for the record.</td>
     
 
     
-    <h4 class="name" id="deleteCorpus"><span class="type-signature"></span>deleteCorpus<span class="signature">(corpus_id, onResult)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="createMediaTrack"><span class="type-signature"></span>createMediaTrack<span class="signature">(suffix, description, display_order, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Creates a new media track record.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>suffix</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The suffix of the mediaTrack.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The description of the mediaTrack.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>display_order</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The position of the mediaTrack relative to other mediaTracks.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A copy of the mediaTrack record.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2280">line 2280</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#readMediaTracks">LabbcatAdmin#readMediaTracks</a></li>
+        
+            <li>LabbcatAdmin#updateTask</li>
+        
+            <li>LabbcatAdmin#deleteTask</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="createProject"><span class="type-signature"></span>createProject<span class="signature">(project, description, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Creates a new project record.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>project</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The name/ID of the project.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The description of the project.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A copy of the project record, 
+including <em> project_id </em> - The database key for the record.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2191">line 2191</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#readProjects">LabbcatAdmin#readProjects</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateProject">LabbcatAdmin#updateProject</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteProject">LabbcatAdmin#deleteProject</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="deleteCorpus"><span class="type-signature"></span>deleteCorpus<span class="signature">(corpus_name, onResult)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1701,7 +2126,7 @@ including <em> corpus_id </em>; The database key for the record.</td>
 
         <tr>
             
-                <td class="name"><code>corpus_id</code></td>
+                <td class="name"><code>corpus_name</code></td>
             
 
             <td class="type">
@@ -1717,7 +2142,7 @@ including <em> corpus_id </em>; The database key for the record.</td>
 
             
 
-            <td class="description last">The database key for the record. // TODO eliminate corpus_id</td>
+            <td class="description last">The name/ID of the corpus.</td>
         </tr>
 
     
@@ -1781,12 +2206,365 @@ including <em> corpus_id </em>; The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2160">line 2160</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2174">line 2174</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createCorpus">LabbcatAdmin#createCorpus</a></li>
+        
+            <li><a href="LabbcatAdmin.html#readCorpora">LabbcatAdmin#readCorpora</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateCorpus">LabbcatAdmin#updateCorpus</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="deleteMediaTrack"><span class="type-signature"></span>deleteMediaTrack<span class="signature">(suffix, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Deletes an existing media track record.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>suffix</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The suffix of the mediaTrack.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has completed.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2354">line 2354</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createMediaTrack">LabbcatAdmin#createMediaTrack</a></li>
+        
+            <li><a href="LabbcatAdmin.html#readMediaTracks">LabbcatAdmin#readMediaTracks</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateMediaTrack">LabbcatAdmin#updateMediaTrack</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="deleteProject"><span class="type-signature"></span>deleteProject<span class="signature">(project, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Deletes an existing project record.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>project</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The name/ID of the project.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has completed.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2263">line 2263</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createProject">LabbcatAdmin#createProject</a></li>
+        
+            <li><a href="LabbcatAdmin.html#readProjects">LabbcatAdmin#readProjects</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateProject">LabbcatAdmin#updateProject</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -7691,7 +8469,7 @@ or null if the request failed.</td>
     
 
     
-    <h4 class="name" id="readCorpora"><span class="type-signature"></span>readCorpora<span class="signature">(p<span class="signature-attributes">opt</span>, l<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="readCorpora"><span class="type-signature"></span>readCorpora<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
     
 
     
@@ -7737,7 +8515,7 @@ or null if the request failed.</td>
 
         <tr>
             
-                <td class="name"><code>p</code></td>
+                <td class="name"><code>pageNumber</code></td>
             
 
             <td class="type">
@@ -7771,7 +8549,7 @@ records will be returned).</td>
 
         <tr>
             
-                <td class="name"><code>l</code></td>
+                <td class="name"><code>pageLength</code></td>
             
 
             <td class="type">
@@ -7880,12 +8658,493 @@ attributes:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2122">line 2122</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2128">line 2128</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createCorpus">LabbcatAdmin#createCorpus</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateCorpus">LabbcatAdmin#updateCorpus</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteCorpus">LabbcatAdmin#deleteCorpus</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readMediaTracks"><span class="type-signature"></span>readMediaTracks<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of media track records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based  page of records to return (if null, all
+records will be returned).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The length of pages (if null, the default page length is 20).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of mediaTrack records with the following
+attributes:
+<dl>
+ <dt> suffix </dt> <dd> The suffix of the mediaTrack. </dd>
+ <dt> description </dt> <dd> The description of the mediaTrack. </dd>
+ <dt> display_order </dt> <dd> The position of the mediaTrack relative to other mediaTracks. </dd>
+ <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+   records returned from the server that can not currently be deleted; 
+   a string representing the reason the record can't be deleted. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2309">line 2309</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createMediaTrack">LabbcatAdmin#createMediaTrack</a></li>
+        
+            <li>LabbcatAdmin#updateTask</li>
+        
+            <li>LabbcatAdmin#deleteTask</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readProjects"><span class="type-signature"></span>readProjects<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of project records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based  page of records to return (if null, all
+records will be returned).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The length of pages (if null, the default page length is 20).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of project records with the following
+attributes:
+<dl>
+ <dt> project_id </dt> <dd> The database key for the record. </dd>
+ <dt> project </dt> <dd> The name/id of the project. </dd>
+ <dt> description </dt> <dd> The description of the project. </dd>
+ <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+   records returned from the server that can not currently be deleted; 
+   a string representing the reason the record can't be deleted. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2219">line 2219</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createProject">LabbcatAdmin#createProject</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateProject">LabbcatAdmin#updateProject</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteProject">LabbcatAdmin#deleteProject</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -8879,8 +10138,7 @@ Labbcat#waitForTask, etc.</td>
             
 
             <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be: A copy of the corpus record, 
-including <em> corpus_id </em>; The database key for the record.</td>
+<var>result</var> which will be: A copy of the corpus record.</td>
         </tr>
 
     
@@ -8921,12 +10179,459 @@ including <em> corpus_id </em>; The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2145">line 2145</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2157">line 2157</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createCorpus">LabbcatAdmin#createCorpus</a></li>
+        
+            <li><a href="LabbcatAdmin.html#readCorpora">LabbcatAdmin#readCorpora</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteCorpus">LabbcatAdmin#deleteCorpus</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="updateMediaTrack"><span class="type-signature"></span>updateMediaTrack<span class="signature">(suffix, description, display_order, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Updates an existing media track record.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>suffix</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The suffix of the mediaTrack.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The description of the mediaTrack.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>display_order</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The position of the mediaTrack relative to other mediaTracks.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A copy of the mediaTrack record.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2337">line 2337</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createMediaTrack">LabbcatAdmin#createMediaTrack</a></li>
+        
+            <li><a href="LabbcatAdmin.html#readMediaTracks">LabbcatAdmin#readMediaTracks</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteMediaTrack">LabbcatAdmin#deleteMediaTrack</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="updateProject"><span class="type-signature"></span>updateProject<span class="signature">(project_id, project, description, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Updates an existing project record.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>project_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The database key for the record. // TODO eliminate project_id</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>project</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The name/ID of the project.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The description of the project.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A copy of the project record.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2247">line 2247</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createProject">LabbcatAdmin#createProject</a></li>
+        
+            <li><a href="LabbcatAdmin.html#readProjects">LabbcatAdmin#readProjects</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteProject">LabbcatAdmin#deleteProject</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -9164,7 +10869,7 @@ will be false if the task finished.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Jun 19 2020 13:32:54 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Jun 23 2020 17:16:26 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

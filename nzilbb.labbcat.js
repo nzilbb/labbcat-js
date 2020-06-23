@@ -2085,10 +2085,9 @@
 
         /**
          * Creates a new corpus record.
-         * See also: 
-         * {@link LabbcatAdmin#readCorpora}
-         * {@link LabbcatAdmin#updateCorpus}
-         * {@link LabbcatAdmin#deleteCorpus}
+         * @see LabbcatAdmin#readCorpora
+         * @see LabbcatAdmin#updateCorpus
+         * @see LabbcatAdmin#deleteCorpus
          * @param {string} corpus_name The name/ID of the corpus.
          * @param {string} corpus_language The ISO 639-1 code for the default language.
          * @param {string} corpus_description The description of the corpus.
@@ -2107,10 +2106,9 @@
         
         /**
          * Reads a list of corpus records.
-         * See also: 
-         * {@link LabbcatAdmin#createCorpus}
-         * {@link LabbcatAdmin#updateCorpus}
-         * {@link LabbcatAdmin#deleteCorpus}
+         * @see LabbcatAdmin#createCorpus
+         * @see LabbcatAdmin#updateCorpus
+         * @see LabbcatAdmin#deleteCorpus
          * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
          * records will be returned). 
          * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -2146,10 +2144,9 @@
         
         /**
          * Updates an existing corpus record.
-         * See also: 
-         * {@link LabbcatAdmin#createCorpus}
-         * {@link LabbcatAdmin#readCorpora}
-         * {@link LabbcatAdmin#deleteCorpus}
+         * @see LabbcatAdmin#createCorpus
+         * @see LabbcatAdmin#readCorpora
+         * @see LabbcatAdmin#deleteCorpus
          * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
          * @param {string} corpus_name The name/ID of the corpus.
          * @param {string} corpus_language The ISO 639-1 code for the default language.
@@ -2168,10 +2165,9 @@
         
         /**
          * Deletes an existing corpus record.
-         * See also: 
-         * {@link LabbcatAdmin#createCorpus}
-         * {@link LabbcatAdmin#readCorpora}
-         * {@link LabbcatAdmin#updateCorpus}
+         * @see LabbcatAdmin#createCorpus
+         * @see LabbcatAdmin#readCorpora
+         * @see LabbcatAdmin#updateCorpus
          * @param {string} corpus_name The name/ID of the corpus.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
@@ -2183,10 +2179,9 @@
         
         /**
          * Creates a new project record.
-         * See also: 
-         * {@link LabbcatAdmin#readProjects}
-         * {@link LabbcatAdmin#updateProject}
-         * {@link LabbcatAdmin#deleteProject}
+         * @see LabbcatAdmin#readProjects
+         * @see LabbcatAdmin#updateProject
+         * @see LabbcatAdmin#deleteProject
          * @param {string} project The name/ID of the project.
          * @param {string} description The description of the project.
          * @param {resultCallback} onResult Invoked when the request has returned a 
@@ -2203,9 +2198,9 @@
         
         /**
          * Reads a list of project records.
-         * {@link LabbcatAdmin#createProject}
-         * {@link LabbcatAdmin#updateProject}
-         * {@link LabbcatAdmin#deleteProject}
+         * @see LabbcatAdmin#createProject
+         * @see LabbcatAdmin#updateProject
+         * @see LabbcatAdmin#deleteProject
          * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
          * records will be returned). 
          * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -2240,9 +2235,9 @@
         
         /**
          * Updates an existing project record.
-         * {@link LabbcatAdmin#createProject}
-         * {@link LabbcatAdmin#readProjects}
-         * {@link LabbcatAdmin#deleteProject}
+         * @see LabbcatAdmin#createProject
+         * @see LabbcatAdmin#readProjects
+         * @see LabbcatAdmin#deleteProject
          * @param {string} project_id The database key for the record. // TODO eliminate project_id
          * @param {string} project The name/ID of the project.
          * @param {string} description The description of the project.
@@ -2259,9 +2254,9 @@
         
         /**
          * Deletes an existing project record.
-         * {@link LabbcatAdmin#createProject}
-         * {@link LabbcatAdmin#readProjects}
-         * {@link LabbcatAdmin#updateProject}
+         * @see LabbcatAdmin#createProject
+         * @see LabbcatAdmin#readProjects
+         * @see LabbcatAdmin#updateProject
          * @param {string} project The name/ID of the project.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
@@ -2273,9 +2268,9 @@
         
         /**
          * Creates a new media track record.
-         * {@link LabbcatAdmin#readMediaTracks}
-         * {@link LabbcatAdmin#updateTask}
-         * {@link LabbcatAdmin#deleteTask}
+         * @see LabbcatAdmin#readMediaTracks
+         * @see LabbcatAdmin#updateTask
+         * @see LabbcatAdmin#deleteTask
          * @param {string} suffix The suffix of the mediaTrack.
          * @param {string} description The description of the mediaTrack.
          * @param {int} display_order The position of the mediaTrack relative to other mediaTracks.
@@ -2293,9 +2288,9 @@
         
         /**
          * Reads a list of media track records.
-         * {@link LabbcatAdmin#createMediaTrack}
-         * {@link LabbcatAdmin#updateTask}
-         * {@link LabbcatAdmin#deleteTask}
+         * @see LabbcatAdmin#createMediaTrack
+         * @see LabbcatAdmin#updateTask
+         * @see LabbcatAdmin#deleteTask
          * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
          * records will be returned). 
          * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -2330,9 +2325,9 @@
         
         /**
          * Updates an existing media track record.
-         * {@link LabbcatAdmin#createMediaTrack}
-         * {@link LabbcatAdmin#readMediaTracks}
-         * {@link LabbcatAdmin#deleteTask}
+         * @see LabbcatAdmin#createMediaTrack
+         * @see LabbcatAdmin#readMediaTracks
+         * @see LabbcatAdmin#deleteMediaTrack
          * @param {string} suffix The suffix of the mediaTrack.
          * @param {string} description The description of the mediaTrack.
          * @param {int} display_order The position of the mediaTrack relative to other mediaTracks.
@@ -2349,10 +2344,10 @@
         }
         
         /**
-         * Deletes an existing mediaTrack record.
-         * {@link LabbcatAdmin#createMediaTrack}
-         * {@link LabbcatAdmin#readMediaTracks}
-         * {@link LabbcatAdmin#updateTask}
+         * Deletes an existing media track record.
+         * @see LabbcatAdmin#createMediaTrack
+         * @see LabbcatAdmin#readMediaTracks
+         * @see LabbcatAdmin#updateMediaTrack
          * @param {string} suffix The suffix of the mediaTrack.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
