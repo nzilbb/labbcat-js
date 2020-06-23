@@ -40,6 +40,16 @@ describe("#LabbcatView", function() {
         done();
     });
     
+    it("handles invalid credentials", (done)=>{
+        let testStore = new labbcat.LabbcatView(baseUrl, username, "wrong password");
+        testStore.getId((id, errors, messages)=>{
+            assert.isNotNull(errors, "Requires username and password");
+            assert.isTrue(errors[0].endsWith("401"),
+                          "HTTP status is returned in error: " + JSON.stringify(errors));
+            done();
+        });
+    });
+
     it("implements getId", (done)=>{
         assert.equal(baseUrl + "api/store/", store.storeUrl);
         store.getId((id, errors, messages)=>{
