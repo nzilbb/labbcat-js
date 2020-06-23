@@ -255,4 +255,111 @@ describe("#LabbcatAdmin", function() {
                 });
         });
     });
+
+    it("implements mediatrack CRUD operations", (done)=>{
+
+        const track_suffix = "unit-test";
+        const description = "Temporary track for unit testing";
+        const display_order = 99;
+        
+        // ensure the transcript doesn't exist to start with
+        store.deleteMediaTrack(track_suffix, (result, errors, messages)=>{
+            
+            // create the track
+            store.createMediaTrack(
+                track_suffix, description, display_order, (track, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    assert.isNotNull(track);
+                    assert.equal(track.suffix, track_suffix, "track saved");
+                    assert.equal(track.description, description, "description saved");
+                    assert.equal(track.display_order, display_order, "display_order saved");
+                    
+                    // ensure the track exists
+                    store.readMediaTracks((tracks, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(tracks, "The tracks are returned")
+                        assert.isAtLeast(tracks.length, 1, "There is at least one track");
+                        
+                        const matchedTracks = tracks.filter(c => {
+                            return c.suffix == track_suffix;});
+                        assert.equal(matchedTracks.length, 1,
+                                     "The new track is present: " + JSON.stringify(tracks));
+                        assert.equal(matchedTracks[0].suffix, track_suffix,
+                                     "track suffix present");
+                        assert.equal(matchedTracks[0].description, description,
+                                     "description correct");
+                        assert.equal(matchedTracks[0].display_order, display_order,
+                                     "display_order correct");
+                        
+                        // update it
+                        const new_description = "New description";
+                        const new_display_order = 100;
+                        store.updateMediaTrack(
+                            track_suffix, new_description, new_display_order,
+                            (updatedTrack, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors))
+                                assert.isNotNull(updatedTrack);
+                                assert.equal(updatedTrack.suffix, track_suffix,
+                                             "track suffix unchanged");
+                                assert.equal(updatedTrack.description, new_description,
+                                             "description changed");
+                                assert.equal(updatedTrack.display_order, new_display_order,
+                                             "display_order changed");
+                                
+                                // ensure the track updated
+                                store.readMediaTracks((tracks, errors, messages)=>{
+                                    assert.isNull(errors, JSON.stringify(errors))
+                                    assert.isNotNull(tracks, "The tracks are returned")
+                                    assert.isAtLeast(tracks.length, 1,
+                                                     "There is at least one track");
+                                    
+                                    const newMatchedTracks = tracks.filter(c => {
+                                        return c.suffix == track_suffix;});
+                                    assert.equal(
+                                        newMatchedTracks.length, 1,
+                                        "The updated track is present");
+                                    assert.equal(
+                                        newMatchedTracks[0].suffix, track_suffix,
+                                        "updated track suffix correct");
+                                    assert.equal(
+                                        newMatchedTracks[0].description,
+                                        new_description,
+                                        "updated description correct");
+                                    assert.equal(
+                                        newMatchedTracks[0].display_order,
+                                        new_display_order,
+                                        "updated display_order correct");
+                                    
+                                    // delete it
+                                    store.deleteMediaTrack(
+                                        track_suffix, (result, errors, messages)=>{
+                                            assert.isNull(errors, JSON.stringify(errors))
+                                            
+                                            // ensure the transcript no longer exists
+                                            store.readMediaTracks((tracks, errors, messages)=>{
+                                                assert.isNull(errors, JSON.stringify(errors))
+                                                assert.isNotNull(tracks, "The tracks are returned")
+                                                
+                                                const finalMatchedTracks = tracks.filter(c => {
+                                                    return c.suffix == track_suffix;});
+                                                assert.equal(finalMatchedTracks.length, 0,
+                                                             "The new track is gone");
+                                                
+                                                // can't delete it again
+                                                store.deleteMediaTrack(
+                                                    track_suffix, (result, errors, messages) =>{
+                                                        assert.isNotNull(
+                                                            errors,
+                                                            "deleteTrack fails for nonexistant track ID");
+                                                        assert.include(errors[0], "doesn't exist");
+                                                        done();
+                                                    });                                            
+                                            });
+                                        });
+                                });
+                            });
+                    });
+                });
+        });
+    });
 });

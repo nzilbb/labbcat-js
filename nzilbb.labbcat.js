@@ -2085,6 +2085,10 @@
 
         /**
          * Creates a new corpus record.
+         * See also: 
+         * {@link LabbcatAdmin#readCorpora}
+         * {@link LabbcatAdmin#updateCorpus}
+         * {@link LabbcatAdmin#deleteCorpus}
          * @param {string} corpus_name The name/ID of the corpus.
          * @param {string} corpus_language The ISO 639-1 code for the default language.
          * @param {string} corpus_description The description of the corpus.
@@ -2103,6 +2107,10 @@
         
         /**
          * Reads a list of corpus records.
+         * See also: 
+         * {@link LabbcatAdmin#createCorpus}
+         * {@link LabbcatAdmin#updateCorpus}
+         * {@link LabbcatAdmin#deleteCorpus}
          * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
          * records will be returned). 
          * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -2138,6 +2146,10 @@
         
         /**
          * Updates an existing corpus record.
+         * See also: 
+         * {@link LabbcatAdmin#createCorpus}
+         * {@link LabbcatAdmin#readCorpora}
+         * {@link LabbcatAdmin#deleteCorpus}
          * @param {string} corpus_id The database key for the record. // TODO eliminate corpus_id
          * @param {string} corpus_name The name/ID of the corpus.
          * @param {string} corpus_language The ISO 639-1 code for the default language.
@@ -2156,6 +2168,10 @@
         
         /**
          * Deletes an existing corpus record.
+         * See also: 
+         * {@link LabbcatAdmin#createCorpus}
+         * {@link LabbcatAdmin#readCorpora}
+         * {@link LabbcatAdmin#updateCorpus}
          * @param {string} corpus_name The name/ID of the corpus.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
@@ -2167,6 +2183,10 @@
         
         /**
          * Creates a new project record.
+         * See also: 
+         * {@link LabbcatAdmin#readProjects}
+         * {@link LabbcatAdmin#updateProject}
+         * {@link LabbcatAdmin#deleteProject}
          * @param {string} project The name/ID of the project.
          * @param {string} description The description of the project.
          * @param {resultCallback} onResult Invoked when the request has returned a 
@@ -2183,6 +2203,9 @@
         
         /**
          * Reads a list of project records.
+         * {@link LabbcatAdmin#createProject}
+         * {@link LabbcatAdmin#updateProject}
+         * {@link LabbcatAdmin#deleteProject}
          * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
          * records will be returned). 
          * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -2217,6 +2240,9 @@
         
         /**
          * Updates an existing project record.
+         * {@link LabbcatAdmin#createProject}
+         * {@link LabbcatAdmin#readProjects}
+         * {@link LabbcatAdmin#deleteProject}
          * @param {string} project_id The database key for the record. // TODO eliminate project_id
          * @param {string} project The name/ID of the project.
          * @param {string} description The description of the project.
@@ -2233,12 +2259,106 @@
         
         /**
          * Deletes an existing project record.
+         * {@link LabbcatAdmin#createProject}
+         * {@link LabbcatAdmin#readProjects}
+         * {@link LabbcatAdmin#updateProject}
          * @param {string} project The name/ID of the project.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteProject(project, onResult) {
             this.createRequest(
                 "projects", null, onResult, `${this.baseUrl}api/admin/projects/${project}`,
+                "DELETE").send();
+        }
+        
+        /**
+         * Creates a new media track record.
+         * {@link LabbcatAdmin#readMediaTracks}
+         * {@link LabbcatAdmin#updateTask}
+         * {@link LabbcatAdmin#deleteTask}
+         * @param {string} suffix The suffix of the mediaTrack.
+         * @param {string} description The description of the mediaTrack.
+         * @param {int} display_order The position of the mediaTrack relative to other mediaTracks.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the mediaTrack record. 
+         */
+        createMediaTrack(suffix, description, display_order, onResult) {
+            this.createRequest(
+                "mediaTracks", null, onResult, this.baseUrl+"api/admin/mediatracks", "POST")
+                .send(JSON.stringify({
+                    suffix : suffix,
+                    description : description,
+                    display_order: display_order}));
+        }
+        
+        /**
+         * Reads a list of media track records.
+         * {@link LabbcatAdmin#createMediaTrack}
+         * {@link LabbcatAdmin#updateTask}
+         * {@link LabbcatAdmin#deleteTask}
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of mediaTrack records with the following
+         * attributes:
+         * <dl>
+         *  <dt> suffix </dt> <dd> The suffix of the mediaTrack. </dd>
+         *  <dt> description </dt> <dd> The description of the mediaTrack. </dd>
+         *  <dt> display_order </dt> <dd> The position of the mediaTrack relative to other mediaTracks. </dd>
+         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. </dd>
+         * </dl>
+         */
+        readMediaTracks(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            this.createRequest(
+                "mediaTracks", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/mediatracks")
+                .send();
+        }
+        
+        /**
+         * Updates an existing media track record.
+         * {@link LabbcatAdmin#createMediaTrack}
+         * {@link LabbcatAdmin#readMediaTracks}
+         * {@link LabbcatAdmin#deleteTask}
+         * @param {string} suffix The suffix of the mediaTrack.
+         * @param {string} description The description of the mediaTrack.
+         * @param {int} display_order The position of the mediaTrack relative to other mediaTracks.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the mediaTrack record. 
+         */
+        updateMediaTrack(suffix, description, display_order, onResult) {
+            this.createRequest(
+                "mediaTracks", null, onResult, this.baseUrl+"api/admin/mediatracks", "PUT")
+                .send(JSON.stringify({
+                    suffix : suffix,
+                    description : description,
+                    display_order: display_order}));
+        }
+        
+        /**
+         * Deletes an existing mediaTrack record.
+         * {@link LabbcatAdmin#createMediaTrack}
+         * {@link LabbcatAdmin#readMediaTracks}
+         * {@link LabbcatAdmin#updateTask}
+         * @param {string} suffix The suffix of the mediaTrack.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteMediaTrack(suffix, onResult) {
+            this.createRequest(
+                "mediaTracks", null, onResult, `${this.baseUrl}api/admin/mediatracks/${suffix}`,
                 "DELETE").send();
         }
     }
