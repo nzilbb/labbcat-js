@@ -2356,6 +2356,94 @@
                 "mediaTracks", null, onResult, `${this.baseUrl}api/admin/mediatracks/${suffix}`,
                 "DELETE").send();
         }
+        
+        /**
+         * Creates a new role record.
+         * @see LabbcatAdmin#readRoles
+         * @see LabbcatAdmin#updateRole
+         * @see LabbcatAdmin#deleteRole
+         * @param {string} role_id The name/ID of the role.
+         * @param {string} description The description of the role.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the role record, 
+         * including <em> role_id </em> - The database key for the record. 
+         */
+        createRole(role_id, description, onResult) {
+            this.createRequest(
+                "roles", null, onResult, this.baseUrl+"api/admin/roles", "POST")
+                .send(JSON.stringify({
+                    role_id : role_id,
+                    description : description}));
+        }
+        
+        /**
+         * Reads a list of role records.
+         * @see LabbcatAdmin#createRole
+         * @see LabbcatAdmin#updateRole
+         * @see LabbcatAdmin#deleteRole
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of role records with the following
+         * attributes:
+         * <dl>
+         *  <dt> role_id </dt> <dd> The name/id of the role. </dd>
+         *  <dt> description </dt> <dd> The description of the role. </dd>
+         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. </dd>
+         * </dl>
+         */
+        readRoles(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            this.createRequest(
+                "roles", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/roles")
+                .send();
+        }
+        
+        /**
+         * Updates an existing role record.
+         * @see LabbcatAdmin#createRole
+         * @see LabbcatAdmin#readRoles
+         * @see LabbcatAdmin#deleteRole
+         * @param {string} role_id The name/ID of the role.
+         * @param {string} description The description of the role.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the role record. 
+         */
+        updateRole(role_id, description, onResult) {
+            this.createRequest(
+                "roles", null, onResult, this.baseUrl+"api/admin/roles", "PUT")
+                .send(JSON.stringify({
+                    role_id : role_id,
+                    description : description}));
+        }
+        
+        /**
+         * Deletes an existing role record.
+         * @see LabbcatAdmin#createRole
+         * @see LabbcatAdmin#readRoles
+         * @see LabbcatAdmin#updateRole
+         * @param {string} role_id The name/ID of the role.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteRole(role_id, onResult) {
+            this.createRequest(
+                "roles", null, onResult, `${this.baseUrl}api/admin/roles/${role_id}`,
+                "DELETE").send();
+        }
+        
     }
     
     /**

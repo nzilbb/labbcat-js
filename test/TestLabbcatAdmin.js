@@ -362,4 +362,101 @@ describe("#LabbcatAdmin", function() {
                 });
         });
     });
+    
+    it("implements role CRUD operations", (done)=>{
+
+        const role_id = "unit-test";
+        const description = "Temporary role for unit testing";
+        
+        // ensure the transcript doesn't exist to start with
+        store.deleteRole(role_id, (result, errors, messages)=>{
+            
+            // create the role
+            store.createRole(
+                role_id, description, (role, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    assert.isNotNull(role);
+                    assert.equal(role.role_id, role_id, "role saved");
+                    assert.equal(role.description, description, "description saved");
+                    
+                    // ensure the role exists
+                    store.readRoles((roles, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(roles, "The roles are returned")
+                        assert.isAtLeast(roles.length, 1, "There is at least one role");
+                        
+                        const matchedRoles = roles.filter(c => {
+                            return c.role_id == role_id;});
+                        assert.equal(matchedRoles.length, 1,
+                                     "The new role is present: " + JSON.stringify(roles));
+                        assert.equal(matchedRoles[0].role_id, role_id,
+                                     "role name present");
+                        assert.equal(matchedRoles[0].description, description,
+                                     "description correct");
+                        
+                        // update it
+                        const new_description = "New description";
+                        store.updateRole(
+                            role_id, new_description,
+                            (updatedRole, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors))
+                                assert.isNotNull(updatedRole);
+                                assert.equal(updatedRole.role_id, role_id,
+                                             "role name unchanged");
+                                assert.equal(updatedRole.description, new_description,
+                                             "description changed");
+                                
+                                // ensure the role updated
+                                store.readRoles((roles, errors, messages)=>{
+                                    assert.isNull(errors, JSON.stringify(errors))
+                                    assert.isNotNull(roles, "The roles are returned")
+                                    assert.isAtLeast(roles.length, 1,
+                                                     "There is at least one role");
+                                    
+                                    const newMatchedRoles = roles.filter(c => {
+                                        return c.role_id == role_id;});
+                                    assert.equal(
+                                        newMatchedRoles.length, 1,
+                                        "The updated role is present");
+                                    assert.equal(
+                                        newMatchedRoles[0].role_id, role_id,
+                                        "updated role name correct");
+                                    assert.equal(
+                                        newMatchedRoles[0].description,
+                                        new_description,
+                                        "updated description correct");
+                                    
+                                    // delete it
+                                    store.deleteRole(
+                                        role_id, (result, errors, messages)=>{
+                                            assert.isNull(errors, JSON.stringify(errors))
+                                            
+                                            // ensure the transcript no longer exists
+                                            store.readRoles((roles, errors, messages)=>{
+                                                assert.isNull(errors, JSON.stringify(errors))
+                                                assert.isNotNull(roles, "The roles are returned")
+                                                
+                                                const finalMatchedRoles = roles.filter(c => {
+                                                    return c.role_id == role_id;});
+                                                assert.equal(finalMatchedRoles.length, 0,
+                                                             "The new role is gone");
+                                                
+                                                // can't delete it again
+                                                store.deleteRole(
+                                                    role_id, (result, errors, messages) =>{
+                                                        assert.isNotNull(
+                                                            errors,
+                                                            "deleteRole fails for nonexistant role ID");
+                                                        assert.include(errors[0], "doesn't exist");
+                                                        done();
+                                                    });                                            
+                                            });
+                                        });
+                                });
+                            });
+                    });
+                });
+        });
+    });
+
 });
