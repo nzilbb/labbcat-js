@@ -463,7 +463,7 @@ describe("#LabbcatAdmin", function() {
 
         const role_id = "admin"; // a role_id sure to exist
         const entity = "t";
-        const attribute_name = "corpus";
+        const layer = "corpus";
         const value_pattern = "unit-test.*";
         
         // ensure the record doesn't exist to start with
@@ -471,16 +471,16 @@ describe("#LabbcatAdmin", function() {
             
             // create the role
             store.createRolePermission(
-                role_id, entity, attribute_name, value_pattern, (record, errors, messages)=>{
+                role_id, entity, layer, value_pattern, (record, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors));
                     assert.isNotNull(record);
                     assert.equal(record.role_id, role_id, "role_id saved");
                     assert.equal(record.entity, entity, "entity saved");
-                    assert.equal(record.attribute_name, attribute_name, "attribute_name saved");
+                    assert.equal(record.layer, layer, "layer saved");
                     assert.equal(record.value_pattern, value_pattern, "value_pattern saved");
                     
                     // ensure the role exists
-                    store.readRolePermissions((records, errors, messages)=>{
+                    store.readRolePermissions(role_id, (records, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(records, "The records are returned")
                         assert.isAtLeast(records.length, 1, "There is at least one record");
@@ -492,28 +492,26 @@ describe("#LabbcatAdmin", function() {
                             "The new record is present: " + JSON.stringify(matchedRecords));
                         assert.equal(matchedRecords[0].role_id, role_id, "role_id present");
                         assert.equal(matchedRecords[0].entity, entity, "entity present");
-                        assert.equal(matchedRecords[0].attribute_name, attribute_name,
-                                     "attribute_name present");
+                        assert.equal(matchedRecords[0].layer, layer, "layer present");
                         assert.equal(matchedRecords[0].value_pattern, value_pattern,
                                      "value_pattern present");
                         
                         // update it
-                        const new_attribute_name = "language";
+                        const new_layer = "transcript_language";
                         const new_value_pattern = "en.*";
                         store.updateRolePermission(
-                            role_id, entity, new_attribute_name, new_value_pattern,
+                            role_id, entity, new_layer, new_value_pattern,
                             (updatedRecord, errors, messages)=>{
                                 assert.isNull(errors, JSON.stringify(errors))
                                 assert.isNotNull(updatedRecord);
                                 assert.equal(updatedRecord.role_id, role_id, "role_id unchanged");
                                 assert.equal(updatedRecord.entity, entity, "entity unchanged");
-                                assert.equal(updatedRecord.attribute_name, new_attribute_name,
-                                             "attribute_name changed");
+                                assert.equal(updatedRecord.layer, new_layer, "layer changed");
                                 assert.equal(updatedRecord.value_pattern, new_value_pattern,
                                              "value_pattern changed");
                                 
                                 // ensure the role updated
-                                store.readRolePermissions((updatedRecords, errors, messages)=>{
+                                store.readRolePermissions(role_id, (updatedRecords, errors, messages)=>{
                                     assert.isNull(errors, JSON.stringify(errors))
                                     assert.isNotNull(
                                         updatedRecords, "Updated records are returned")
@@ -531,9 +529,8 @@ describe("#LabbcatAdmin", function() {
                                     assert.equal(updatedMatchedRecords[0].entity, entity,
                                                  "updated entity present");
                                     assert.equal(
-                                        updatedMatchedRecords[0].attribute_name,
-                                        new_attribute_name,
-                                        "attribute_name updated");
+                                        updatedMatchedRecords[0].layer, new_layer,
+                                        "layer updated");
                                     assert.equal(updatedMatchedRecords[0].value_pattern,
                                                  new_value_pattern,
                                                  "value_pattern updated");
@@ -545,7 +542,7 @@ describe("#LabbcatAdmin", function() {
                                             
                                             // ensure the transcript no longer exists
                                             store.readRolePermissions(
-                                                (records, errors, messages)=>{
+                                                role_id, (records, errors, messages)=>{
                                                     assert.isNull(errors, JSON.stringify(errors))
                                                     assert.isNotNull(
                                                         records, "The roles are returned")
