@@ -484,6 +484,10 @@ describe("#LabbcatAdmin", function() {
                         assert.isNull(errors, JSON.stringify(errors))
                         assert.isNotNull(records, "The records are returned")
                         assert.isAtLeast(records.length, 1, "There is at least one record");
+
+                        for (var c of records) {
+                            assert.equal(c.role_id, role_id, "only select role returned");
+                        }
                         
                         const matchedRecords = records.filter(c => {
                             return c.role_id == role_id && c.entity == entity;});

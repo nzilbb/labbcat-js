@@ -2532,7 +2532,7 @@
                         }
                     }
                     if (onResult) onResult(permissions, errors, messages, call, id);
-                }, this.baseUrl+"api/admin/roles/permissions")
+                }, `${this.baseUrl}api/admin/roles/permissions/${role_id}`)
                 .send();
         }
         
