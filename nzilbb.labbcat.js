@@ -2444,6 +2444,103 @@
                 "DELETE").send();
         }
         
+        /**
+         * Creates a new rolePermission record.
+         * @see LabbcatAdmin#readRolePermissions
+         * @see LabbcatAdmin#updateRolePermission
+         * @see LabbcatAdmin#deleteRolePermission
+         * @param {string} role_id The name/ID of the role.
+         * @param {string} entity A string indentifying the entities the permission
+         * applies to.
+         * @param {string} attribute_name The name of a transcript attribute (or "corpus")
+         * the value of which determines the access.
+         * @param {string} value_pattern A regular expression; if the value of the
+         * attribute identified by <var> attribute_name </var> matches this pattern, then
+         * access to the entities identfied by <var> entity </var> is granted.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the rolePermission record, 
+         * including <em> rolePermission_id </em> - The database key for the record. 
+         */
+        createRolePermission(role_id, entity, attribute_name, value_pattern, onResult) {
+            this.createRequest(
+                "rolePermissions", null, onResult, this.baseUrl+"api/admin/roles/permissions", "POST")
+                .send(JSON.stringify({
+                    role_id : role_id,
+                    entity : entity,
+                    attribute_name : attribute_name,
+                    value_pattern : value_pattern}));
+        }
+        
+        /**
+         * Reads a list of rolePermission records.
+         * @see LabbcatAdmin#createRolePermission
+         * @see LabbcatAdmin#updateRolePermission
+         * @see LabbcatAdmin#deleteRolePermission
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of rolePermission records with the following
+         * attributes:
+         * <dl>
+         *  <dt> rolePermission_id </dt> <dd> The name/id of the rolePermission. </dd>
+         *  <dt> description </dt> <dd> The description of the rolePermission. </dd>
+         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. </dd>
+         * </dl>
+         */
+        readRolePermissions(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            this.createRequest(
+                "rolePermissions", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/roles/permissions")
+                .send();
+        }
+        
+        /**
+         * Updates an existing rolePermission record.
+         * @see LabbcatAdmin#createRolePermission
+         * @see LabbcatAdmin#readRolePermissions
+         * @see LabbcatAdmin#deleteRolePermission
+         * @param {string} rolePermission_id The name/ID of the rolePermission.
+         * @param {string} description The description of the rolePermission.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the rolePermission record. 
+         */
+        updateRolePermission(role_id, entity, attribute_name, value_pattern, onResult) {
+            this.createRequest(
+                "rolePermissions", null, onResult, this.baseUrl+"api/admin/roles/permissions", "PUT")
+                .send(JSON.stringify({
+                    role_id : role_id,
+                    entity : entity,
+                    attribute_name : attribute_name,
+                    value_pattern : value_pattern}));
+        }
+        
+        /**
+         * Deletes an existing rolePermission record.
+         * @see LabbcatAdmin#createRolePermission
+         * @see LabbcatAdmin#readRolePermissions
+         * @see LabbcatAdmin#updateRolePermission
+         * @param {string} rolePermission_id The name/ID of the rolePermission.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteRolePermission(role_id, entity, onResult) {
+            this.createRequest(
+                "rolePermissions", null, onResult, `${this.baseUrl}api/admin/roles/permissions/${role_id}/${entity}`,
+                "DELETE").send();
+        }
+        
     }
     
     /**
