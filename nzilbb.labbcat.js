@@ -37,6 +37,9 @@
  *
  * @example
  * const corpus = new labbcat.LabbcatView("https://sometld.com", "your username", "your password");
+ *
+ * // optionally, we can set the language that messages are returned in 
+ * labbcat.language = "es";
  * 
  * // get the first participant in the corpus
  * corpus.getParticipantIds((ids, errors, messages)=>{
@@ -298,6 +301,9 @@
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
  	    }
+            if (exports.language) {
+	        xhr.setRequestHeader("Accept-Language", exports.language);
+            }
 	    xhr.setRequestHeader("Accept", "application/json");
 	    return xhr;
         }
@@ -2716,5 +2722,6 @@
     exports.LabbcatAdmin = LabbcatAdmin;
     exports.MatchId = MatchId;
     exports.verbose = false;
+    exports.language = false;
 
 }(typeof exports === 'undefined' ? this.labbcat = {} : exports));

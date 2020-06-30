@@ -37,6 +37,7 @@ describe("#LabbcatAdmin", function() {
     beforeEach((done)=>{
         // verbosity only applies in tests that enable it
         labbcat.verbose = false;
+        labbcat.language = "en";
         done();
     });
 
@@ -51,8 +52,19 @@ describe("#LabbcatAdmin", function() {
         });
     });
 
+    it("localizes messages", (done)=>{
+        labbcat.language = "es";
+        // can't delete it again
+        store.deleteCorpus(
+            "this corpus doesn't exist", (result, errors, messages) =>{
+                assert.isNotNull(errors, "deleteCorpus fails for nonexistant corpus ID");
+                assert.include(errors[0], "no existe");
+                done();
+            });                                            
+    });
+    
     it("implements corpus CRUD operations", (done)=>{
-
+        
         const corpus_name = "unit-test";
         const corpus_language = "en";
         const corpus_description = "Temporary corpus for unit testing";
@@ -132,7 +144,7 @@ describe("#LabbcatAdmin", function() {
                                         corpus_name, (result, errors, messages)=>{
                                             assert.isNull(errors, JSON.stringify(errors))
                                             
-                                            // ensure the transcript no longer exists
+                                            // ensure the corpus no longer exists
                                             store.readCorpora((corpora, errors, messages)=>{
                                                 assert.isNull(errors, JSON.stringify(errors))
                                                 assert.isNotNull(corpora, "The corpora are returned")
@@ -148,7 +160,7 @@ describe("#LabbcatAdmin", function() {
                                                         assert.isNotNull(
                                                             errors,
                                                             "deleteCorpus fails for nonexistant corpus ID");
-                                                        assert.include(errors[0], "doesn't exist");
+                                                        assert.include(errors[0], "not found");
                                                         done();
                                                     });                                            
                                             });
@@ -244,7 +256,7 @@ describe("#LabbcatAdmin", function() {
                                                         assert.isNotNull(
                                                             errors,
                                                             "deleteProject fails for nonexistant project ID");
-                                                        assert.include(errors[0], "doesn't exist");
+                                                        assert.include(errors[0], "not found");
                                                         done();
                                                     });                                            
                                             });
@@ -351,7 +363,7 @@ describe("#LabbcatAdmin", function() {
                                                         assert.isNotNull(
                                                             errors,
                                                             "deleteTrack fails for nonexistant track ID");
-                                                        assert.include(errors[0], "doesn't exist");
+                                                        assert.include(errors[0], "not found");
                                                         done();
                                                     });                                            
                                             });
@@ -447,7 +459,7 @@ describe("#LabbcatAdmin", function() {
                                                         assert.isNotNull(
                                                             errors,
                                                             "deleteRole fails for nonexistant role ID");
-                                                        assert.include(errors[0], "doesn't exist");
+                                                        assert.include(errors[0], "not found");
                                                         done();
                                                     });                                            
                                             });
@@ -566,7 +578,7 @@ describe("#LabbcatAdmin", function() {
                                                                 errors,
                                                                 "deleteRole fails for nonexistant record");
                                                             assert.include(
-                                                                errors[0], "doesn't exist");
+                                                                errors[0], "not found");
                                                             done();
                                                         });
                                                 });

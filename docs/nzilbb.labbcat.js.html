@@ -65,6 +65,9 @@
  *
  * @example
  * const corpus = new labbcat.LabbcatView("https://sometld.com", "your username", "your password");
+ *
+ * // optionally, we can set the language that messages are returned in 
+ * labbcat.language = "es";
  * 
  * // get the first participant in the corpus
  * corpus.getParticipantIds((ids, errors, messages)=>{
@@ -326,6 +329,9 @@
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
  	    }
+            if (exports.language) {
+	        xhr.setRequestHeader("Accept-Language", exports.language);
+            }
 	    xhr.setRequestHeader("Accept", "application/json");
 	    return xhr;
         }
@@ -2472,6 +2478,148 @@
                 "DELETE").send();
         }
         
+        /**
+         * Creates a new role permission record.
+         * @see LabbcatAdmin#readRolePermissions
+         * @see LabbcatAdmin#updateRolePermission
+         * @see LabbcatAdmin#deleteRolePermission
+         * @param {string} role_id The name/ID of the role.
+         * @param {string} entity A string indentifying the entities the permission
+         * applies to.
+         * @param {string} layer The ID of a  a transcript attribute layer (or "corpus")
+         * the label of which determines the access.
+         * @param {string} value_pattern A regular expression; if the value of the
+         * label identified by &lt;var> layer &lt;/var> matches this pattern, then
+         * access to the entities identfied by &lt;var> entity &lt;/var> is granted.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A copy of the role permission record, 
+         * including &lt;em> rolePermission_id &lt;/em> - The database key for the record. 
+         */
+        createRolePermission(role_id, entity, layer, value_pattern, onResult) {
+            this.createRequest(
+                "rolePermissions", null, (permission, errors, messages, call, id) => {
+                    if (permission) {
+                        // attribute_name -> layer
+                        if (permission.attribute_name == "corpus") {
+                            permission.layer = permission.attribute_name;
+                        } else {
+                            permission.layer = "transcript_" + permission.attribute_name;
+                        }
+                    }
+                    if (onResult) onResult(permission, errors, messages, call, id);
+                }, this.baseUrl+"api/admin/roles/permissions", "POST")
+                .send(JSON.stringify({
+                    role_id : role_id,
+                    entity : entity,
+                    attribute_name : layer.replace(/^transcript_/,""), // layer -> attribute_name
+                    value_pattern : value_pattern}));
+        }
+        
+        /**
+         * Reads a list of role permission records for a given user role.
+         * @see LabbcatAdmin#createRolePermission
+         * @see LabbcatAdmin#updateRolePermission
+         * @see LabbcatAdmin#deleteRolePermission
+         * @param {string} role_id The name/ID of the role.
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A list of role permission records with the following
+         * attributes:
+         * &lt;dl>
+         *  &lt;dt> role_id &lt;/dt> &lt;dd> The name/id of the rolePermission. &lt;/dd>
+         *  &lt;dt> entity &lt;/dt> &lt;dd> A string indentifying the entities the permission
+         *    applies to. &lt;/dd>
+         *  &lt;dt> layer &lt;/dt> &lt;dd> The ID of a  a transcript attribute layer (or "corpus")
+         *    the label of which determines the access. &lt;/dd>
+         *  &lt;dt> value_pattern &lt;/dt> &lt;dd> A regular expression; if the value of the
+         *    label identified by &lt;var> layer &lt;/var> matches this pattern, then
+         *    access to the entities identfied by &lt;var> entity &lt;/var> is granted. &lt;/dd>
+         *  &lt;dt> _cantDelete &lt;/dt> &lt;dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. &lt;/dd>
+         * &lt;/dl>
+         */
+        readRolePermissions(role_id, pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            this.createRequest(
+                "rolePermissions", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, (permissions, errors, messages, call, id) => {
+                    if (permissions) {
+                        // attribute_name -> layer
+                        for (var permission of permissions) {
+                            if (permission.attribute_name == "corpus") {
+                                permission.layer = permission.attribute_name;
+                            } else {
+                                permission.layer = "transcript_" + permission.attribute_name;
+                            }
+                        }
+                    }
+                    if (onResult) onResult(permissions, errors, messages, call, id);
+                }, `${this.baseUrl}api/admin/roles/permissions/${role_id}`)
+                .send();
+        }
+        
+        /**
+         * Updates an existing role permission record.
+         * @see LabbcatAdmin#createRolePermission
+         * @see LabbcatAdmin#readRolePermissions
+         * @see LabbcatAdmin#deleteRolePermission
+         * @param {string} role_id The name/ID of the role.
+         * @param {string} entity A string indentifying the entities the permission
+         * applies to.
+         * @param {string} layer The ID of a  a transcript attribute layer (or "corpus")
+         * the label of which determines the access.
+         * @param {string} value_pattern A regular expression; if the value of the
+         * label identified by &lt;var> layer &lt;/var> matches this pattern, then
+         * access to the entities identfied by &lt;var> entity &lt;/var> is granted.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: A copy of the role permission record. 
+         */
+        updateRolePermission(role_id, entity, layer, value_pattern, onResult) {
+            var permission = this.createRequest(
+                "rolePermissions", null, (permission, errors, messages, call, id) => {
+                    if (permission) {
+                        // attribute_name -> layer
+                        if (permission.attribute_name == "corpus") {
+                            permission.layer = permission.attribute_name;
+                        } else {
+                            permission.layer = "transcript_" + permission.attribute_name;
+                        }
+                    }
+                    if (onResult) onResult(permission, errors, messages, call, id);
+                }, this.baseUrl+"api/admin/roles/permissions", "PUT")
+                .send(JSON.stringify({
+                    role_id : role_id,
+                    entity : entity,
+                    attribute_name : layer.replace(/^transcript_/,""), // layer -> attribute_name
+                    value_pattern : value_pattern}));
+        }
+        
+        /**
+         * Deletes an existing role permission record.
+         * @see LabbcatAdmin#createRolePermission
+         * @see LabbcatAdmin#readRolePermissions
+         * @see LabbcatAdmin#updateRolePermission
+         * @param {string} rolePermission_id The name/ID of the rolePermission.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteRolePermission(role_id, entity, onResult) {
+            this.createRequest(
+                "rolePermissions", null, onResult, `${this.baseUrl}api/admin/roles/permissions/${role_id}/${entity}`,
+                "DELETE").send();
+        }
+        
     }
     
     /**
@@ -2602,6 +2750,7 @@
     exports.LabbcatAdmin = LabbcatAdmin;
     exports.MatchId = MatchId;
     exports.verbose = false;
+    exports.language = false;
 
 }(typeof exports === 'undefined' ? this.labbcat = {} : exports));
 </code></pre>
@@ -2620,7 +2769,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jun 24 2020 13:55:06 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Jun 30 2020 19:50:27 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
