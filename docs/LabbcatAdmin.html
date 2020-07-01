@@ -10464,6 +10464,167 @@ attributes:
     
 
     
+    <h4 class="name" id="readSystemAttributes"><span class="type-signature"></span>readSystemAttributes<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of system attribute records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of system attribute records with the following
+attributes:
+<dl>
+ <dt> attribute </dt> <dd> ID of the attribute. </dd>
+ <dt> type </dt> <dd> The type of the attribute - "string", "integer",
+                      "boolean", "select", etc. </dd>
+ <dt> style </dt> <dd> Style definition which depends on <var> type </var> -
+                       e.g. whether the "boolean" is shown as a checkbox or
+                       radio buttons, etc. </dd>
+ <dt> label </dt> <dd> User-facing label for the attribute. </dd>
+ <dt> description </dt> <dd> User-facing (long) description for the attribute. </dd>
+ <dt> options </dt> <dd> If <var> type </var> is "select", this is an object
+                         defining the valid options for the attribute, where
+                         the attribute key is the attribute value and the attribute
+                         value is the user-facing label for the option. </dd>
+ <dt> value </dt> <dd> The value of the attribute. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2617">line 2617</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#updateSystemAttribute">LabbcatAdmin#updateSystemAttribute</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="releaseTask"><span class="type-signature"></span>releaseTask<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
     
 
@@ -12391,6 +12552,197 @@ access to the entities identfied by <var> entity </var> is granted.</td>
     
 
     
+    <h4 class="name" id="updateSystemAttribute"><span class="type-signature"></span>updateSystemAttribute<span class="signature">(attribute, value, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Updates an existing system attribute record.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attribute</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The ID of the attribute.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The value of the attribute.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A copy of the system attribute record.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2631">line 2631</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#readSystemAttributes">LabbcatAdmin#readSystemAttributes</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="waitForTask"><span class="type-signature"></span>waitForTask<span class="signature">(threadId, maxSeconds, onResult)</span><span class="type-signature"></span></h4>
     
 
@@ -12598,7 +12950,7 @@ will be false if the task finished.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Jun 30 2020 19:50:27 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jul 01 2020 16:58:40 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

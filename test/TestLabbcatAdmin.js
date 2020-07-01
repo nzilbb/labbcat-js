@@ -590,4 +590,60 @@ describe("#LabbcatAdmin", function() {
         });
     });
 
+    it("implements system attribute RU operations", (done)=>{
+
+        // ensure the project exists
+        store.readSystemAttributes((systemAttributes, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors))
+            assert.isNotNull(systemAttributes, "The system attributes are returned")
+            assert.isAtLeast(systemAttributes.length, 1, "There is at least one system attribute");
+            
+            const titleAttributes = systemAttributes.filter(c => {
+                return c.attribute == "title";});
+            assert.equal(titleAttributes.length, 1,
+                         "The new title is present: " + JSON.stringify(systemAttributes));
+            assert.isNotNull(titleAttributes[0].type, "type present");
+            assert.isNotNull(titleAttributes[0].style, "style present");
+            assert.isNotNull(titleAttributes[0].label, "label present");
+            assert.isNotNull(titleAttributes[0].description, "description present");
+            assert.isNotNull(titleAttributes[0].value, "value present");
+            
+            // update it
+            const newValue = "unit-test";
+            store.updateSystemAttribute(
+                "title", newValue, (updatedSystemAttribute, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors))
+                    assert.isNotNull(updatedSystemAttribute);
+                    assert.equal(updatedSystemAttribute.attribute, titleAttributes[0].attribute,
+                                 "systemAttribute ID unchanged");
+                    assert.equal(updatedSystemAttribute.value, newValue,
+                                 "value changed");
+                                
+                    // ensure the systemAttribute updated
+                    store.readSystemAttributes((systemAttributes, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(systemAttributes, "The systemAttributes are returned")
+                        assert.isAtLeast(systemAttributes.length, 1,
+                                         "There is at least one systemAttribute");
+                        
+                        const newMatchedTitle = systemAttributes.filter(c => {
+                            return c.attribute == "title";});
+                        assert.equal(newMatchedTitle.length, 1,
+                                     "The updated systemAttribute is present");
+                        assert.equal(newMatchedTitle[0].attribute, "title",
+                                     "updated systemAttribute name correct");
+                        assert.equal(newMatchedTitle[0].value, newValue,
+                                     "updated description correct");
+                        
+                        // restore original value
+                        store.updateSystemAttribute(
+                            "title", titleAttributes[0].value, (result, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors))
+                                done();
+                            });
+                    });
+                });
+        });
+    });
+    
 });

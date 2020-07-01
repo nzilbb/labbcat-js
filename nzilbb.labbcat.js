@@ -2592,6 +2592,50 @@
                 "DELETE").send();
         }
         
+        /**
+         * Reads a list of system attribute records.
+         * @see LabbcatAdmin#updateSystemAttribute
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of system attribute records with the following
+         * attributes:
+         * <dl>
+         *  <dt> attribute </dt> <dd> ID of the attribute. </dd>
+         *  <dt> type </dt> <dd> The type of the attribute - "string", "integer",
+         *                       "boolean", "select", etc. </dd>
+         *  <dt> style </dt> <dd> Style definition which depends on <var> type </var> -
+         *                        e.g. whether the "boolean" is shown as a checkbox or
+         *                        radio buttons, etc. </dd>
+         *  <dt> label </dt> <dd> User-facing label for the attribute. </dd>
+         *  <dt> description </dt> <dd> User-facing (long) description for the attribute. </dd>
+         *  <dt> options </dt> <dd> If <var> type </var> is "select", this is an object
+         *                          defining the valid options for the attribute, where
+         *                          the attribute key is the attribute value and the attribute
+         *                          value is the user-facing label for the option. </dd>
+         *  <dt> value </dt> <dd> The value of the attribute. </dd>
+         * </dl>
+         */
+        readSystemAttributes(onResult) {
+            this.createRequest(
+                "systemAttributes", null, onResult, this.baseUrl+"api/admin/systemattributes")
+                .send();
+        }
+        
+        /**
+         * Updates an existing system attribute record.
+         * @see LabbcatAdmin#readSystemAttributes
+         * @param {string} attribute The ID of the attribute.
+         * @param {string} value The value of the attribute.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the system attribute record. 
+         */
+        updateSystemAttribute(attribute, value, onResult) {
+            this.createRequest(
+                "systemAttributes", null, onResult, this.baseUrl+"api/admin/systemattributes", "PUT")
+                .send(JSON.stringify({
+                    attribute : attribute,
+                    value : value}));
+        }
+        
     }
     
     /**
