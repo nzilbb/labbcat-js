@@ -1099,5 +1099,50 @@ describe("#LabbcatView", function() {
             });
         });
     });
+
+    it("implements getSerializerDescriptors", (done)=>{
+        store.getSerializerDescriptors((descriptors, errors, messages)=> {
+            assert.isNull(errors);
+            assert.isArray(descriptors);
+            //for (let descriptor of descriptors) console.log("descriptor " + JSON.stringify(descriptor));
+            assert.isNotEmpty(descriptors, "Some descriptors are returned");
+            let descriptor = descriptors[0];
+            assert.containsAllKeys(
+                descriptor, [
+                    "name", "mimeType", "version", "icon", "numberOfInputs", "fileSuffixes",
+                    "minimumApiVersion"],
+                "Looks like a descriptor");
+            done();
+        });
+    });
     
+    it("implements getDeserializerDescriptors", (done)=>{
+        store.getDeserializerDescriptors((descriptors, errors, messages)=> {
+            assert.isNull(errors);
+            assert.isArray(descriptors);
+            //for (let descriptor of descriptors) console.log("descriptor " + JSON.stringify(descriptor));
+            assert.isNotEmpty(descriptors, "Some descriptors are returned");
+            let descriptor = descriptors[0];
+            assert.containsAllKeys(
+                descriptor, [
+                    "name", "mimeType", "version", "icon", "numberOfInputs", "fileSuffixes",
+                    "minimumApiVersion"],
+                "Looks like a descriptor");
+            done();
+        });
+    });
+
+    it("implements getSystemAttribute", (done)=>{
+        store.getSystemAttribute("title", (attribute, errors, messages)=> {
+            assert.isNull(errors);
+            assert.isObject(attribute);
+            //console.log("attribute " + JSON.stringify(attribute));
+            assert.containsAllKeys(
+                attribute, ["name", "value"],
+                "Looks like an attribute");
+            assert.equal("title", attribute.name, "Correct attribute returned");
+            done();
+        });
+    });
+
 });

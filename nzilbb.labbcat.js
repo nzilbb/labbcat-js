@@ -1028,8 +1028,8 @@
          *      <dt>LineEnd</dt> <dd>The end offset of the uttereance, usually in seconds</dd>
          *      <dt>BeforeMatch</dt> <dd>The context of the trascript text just before the
          *       match</dd> 
-         *      <dt>Transcript</dt> <dd>The transcript text that matched</dd>
-         *      <dt>BeforeMatch</dt> <dd>The context of the transcript text just after
+         *      <dt>Text</dt> <dd>The transcript text that matched</dd>
+         *      <dt>AfterMatch</dt> <dd>The context of the transcript text just after
          *       the match</dd> 
          *    </dl>
          *   </dd> 
@@ -1671,7 +1671,41 @@
             
             xhr.send();
         }
+
+        /**
+         * Lists the descriptors of all registered serializers.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A list of the descriptors of all registered
+         * serializers. 
+         */
+        getSerializerDescriptors(onResult) {
+	    this.createRequest("getSerializerDescriptors", null, onResult).send();
+        }
+
+        /**
+         * Lists the descriptors of all registered deserializers.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A list of the descriptors of all registered
+         * deserializers. 
+         */
+        getDeserializerDescriptors(onResult) {
+	    this.createRequest("getSerializerDescriptors", null, onResult).send();
+        }
+
+        /**
+         * Lists the descriptors of all registered deserializers.
+         * @param {string} attribute Name of the attribute.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A list of the descriptors of all registered
+         * deserializers. 
+         */
+        getSystemAttribute(attribute, onResult) {
+            this.createRequest(
+                "systemattributes", null, onResult, this.baseUrl+"api/systemattributes/" + attribute)
+                .send();
+        }
         
+
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
@@ -2616,7 +2650,7 @@
          */
         readSystemAttributes(onResult) {
             this.createRequest(
-                "systemAttributes", null, onResult, this.baseUrl+"api/admin/systemattributes")
+                "systemattributes", null, onResult, this.baseUrl+"api/admin/systemattributes")
                 .send();
         }
         
@@ -2630,7 +2664,7 @@
          */
         updateSystemAttribute(attribute, value, onResult) {
             this.createRequest(
-                "systemAttributes", null, onResult, this.baseUrl+"api/admin/systemattributes", "PUT")
+                "systemattributes", null, onResult, this.baseUrl+"api/admin/systemattributes", "PUT")
                 .send(JSON.stringify({
                     attribute : attribute,
                     value : value}));
