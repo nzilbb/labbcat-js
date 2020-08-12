@@ -994,7 +994,10 @@
             if (participantIds) parameters.participant_id = participantIds;
             if (transcriptTypes) parameters.transcript_type = transcriptTypes;
 
-            this.createRequest("search", parameters, onResult, this.baseUrl+"search").send();
+            this.createRequest(
+                "search", parameters, onResult, this.baseUrl+"search",
+                "POST") // not GET, because the number of parameters can make the URL too long
+                .send();
         }
         
         /**
