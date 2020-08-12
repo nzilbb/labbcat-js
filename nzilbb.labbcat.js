@@ -1693,11 +1693,10 @@
         }
 
         /**
-         * Lists the descriptors of all registered deserializers.
+         * Gets the value of the given system attribute.
          * @param {string} attribute Name of the attribute.
          * @param {resultCallback} onResult Invoked when the request has returned a
-         * <var>result</var> which will be: A list of the descriptors of all registered
-         * deserializers. 
+         * <var>result</var> which will be: The given attribute, with name and value properties. 
          */
         getSystemAttribute(attribute, onResult) {
             this.createRequest(
@@ -1705,6 +1704,18 @@
                 .send();
         }
         
+        /**
+         * Gets information about the current user, including the roles or groups they are
+         * in.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: The user record with an attribute called
+         * "roles" which is an array of string role names. 
+         */
+        getUserInfo(onResult) {
+            this.createRequest(
+                "systemattributes", null, onResult, this.baseUrl+"api/user")
+                .send();
+        }
 
     } // class LabbcatView
 

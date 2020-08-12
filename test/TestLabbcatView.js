@@ -1145,4 +1145,13 @@ describe("#LabbcatView", function() {
         });
     });
 
+    it("implements getUserInfo", (done)=>{
+        store.getUserInfo((user, errors, messages)=> {
+            assert.isNull(errors);
+            assert.isObject(user);
+            assert.isArray(user.roles);
+            done();
+        });
+    });
+
 });
