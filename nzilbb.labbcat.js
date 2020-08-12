@@ -2164,7 +2164,8 @@
          */
         createCorpus(corpus_name, corpus_language, corpus_description, onResult) {
             this.createRequest(
-                "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "POST")
+                "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     corpus_name : corpus_name,
                     corpus_language : corpus_language,
@@ -2257,7 +2258,8 @@
          */
         createProject(project, description, onResult) {
             this.createRequest(
-                "projects", null, onResult, this.baseUrl+"api/admin/projects", "POST")
+                "projects", null, onResult, this.baseUrl+"api/admin/projects", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     project : project,
                     description : description}));
@@ -2346,7 +2348,8 @@
          */
         createMediaTrack(suffix, description, display_order, onResult) {
             this.createRequest(
-                "mediaTracks", null, onResult, this.baseUrl+"api/admin/mediatracks", "POST")
+                "mediaTracks", null, onResult, this.baseUrl+"api/admin/mediatracks", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     suffix : suffix,
                     description : description,
@@ -2437,7 +2440,8 @@
          */
         createRole(role_id, description, onResult) {
             this.createRequest(
-                "roles", null, onResult, this.baseUrl+"api/admin/roles", "POST")
+                "roles", null, onResult, this.baseUrl+"api/admin/roles", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     role_id : role_id,
                     description : description}));
@@ -2540,7 +2544,8 @@
                         }
                     }
                     if (onResult) onResult(permission, errors, messages, call, id);
-                }, this.baseUrl+"api/admin/roles/permissions", "POST")
+                }, this.baseUrl+"api/admin/roles/permissions", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     role_id : role_id,
                     entity : entity,
