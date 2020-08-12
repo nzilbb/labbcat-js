@@ -203,7 +203,7 @@ and adds some <em>write</em> operations for updating data.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1717">line 1717</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1770">line 1770</a>
     </li></ul></dd>
     
 
@@ -393,7 +393,7 @@ store.getCorpusIds((corpora, errors, messages, call)=>{
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1708">line 1708</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1761">line 1761</a>
     </li></ul></dd>
     
 
@@ -1572,7 +1572,7 @@ labels('participant').includes('Robert')</code></li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1766">line 1766</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1819">line 1819</a>
     </li></ul></dd>
     
 
@@ -2388,6 +2388,152 @@ the first page.</td>
     
 
     
+    <h4 class="name" id="getDeserializerDescriptors"><span class="type-signature"></span>getDeserializerDescriptors<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Lists the descriptors of all registered deserializers.
+<p> Deserializers are modules that import annotation structures from a specific file
+format, e.g. Praat TextGrid, plain text, etc.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: A list of the descriptors of all registered
+deserializers.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#getDeserializerDescriptors">LabbcatView#getDeserializerDescriptors</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1699">line 1699</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="getEpisodeDocuments"><span class="type-signature"></span>getEpisodeDocuments<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
     
 
@@ -2565,7 +2711,7 @@ the first page.</td>
     Get transcript fragments in a specified format.
 <p>For convenience, the first three arguments, <var>transcriptIds</var>, 
 <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
-array of match objects of the kind returned by Labbcat#getMatches, in
+array of match objects of the kind returned by <a href="LabbcatView.html#getMatches">LabbcatView#getMatches</a>, in
 which case the start/end times are the utterance boundaries - e.g.
 <pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
   labbcat.getFragments(result.matches, layerIds, mimeType, dir, (files, e, m) => {
@@ -2877,7 +3023,7 @@ more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1403">line 1403</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1406">line 1406</a>
     </li></ul></dd>
     
 
@@ -3517,7 +3663,7 @@ more permanent location.</td>
 
 <div class="description">
     Gets annotations on selected layers related to search results returned by a previous
-call to Labbcat#getMatches.
+call to <a href="LabbcatView.html#getMatches">LabbcatView#getMatches</a>.
 </div>
 
 
@@ -3589,7 +3735,7 @@ call to Labbcat#getMatches.
             
 
             <td class="description last">A list of MatchIds, or a list of match
-objects returned by Labbcat#getMatches</td>
+objects returned by <a href="LabbcatView.html#getMatches">LabbcatView#getMatches</a></td>
         </tr>
 
     
@@ -3796,7 +3942,7 @@ index in <var>matchIds</var>.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1092">line 1092</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1095">line 1095</a>
     </li></ul></dd>
     
 
@@ -3840,7 +3986,7 @@ index in <var>matchIds</var>.</td>
 
 
 <div class="description">
-    Gets a list of tokens that were matched by Labbcat#search.
+    Gets a list of tokens that were matched by <a href="LabbcatView.html#search">LabbcatView#search</a>.
 <p>If the task is still running, then this function will wait for it to finish.
 <p>This means calls can be stacked like this:
  <pre>const matches = labbcat.getMatches(
@@ -3914,7 +4060,7 @@ index in <var>matchIds</var>.</td>
                 </td>
             
 
-            <td class="description last">A task ID returned by Labbcat#search.</td>
+            <td class="description last">A task ID returned by <a href="LabbcatView.html#search">LabbcatView#search</a>.</td>
         </tr>
 
     
@@ -4073,7 +4219,7 @@ return the first page.</td>
   <dd>A list of match objects, with the following attributes
    <dl>
      <dt>MatchId</dt> <dd>A string identifying the match, of the kind expected
-       by Labbcat#getMatchAnnotations</dd>
+       by <a href="LabbcatView.html#getMatchAnnotations">LabbcatView#getMatchAnnotations</a></dd>
      <dt>Transcript</dt> <dd>The name of the transcript</dd>
      <dt>Participant</dt> <dd>The name of the participant</dd>
      <dt>Corpus</dt> <dd>The name of corpus the transcript belongs to</dd>
@@ -4081,8 +4227,8 @@ return the first page.</td>
      <dt>LineEnd</dt> <dd>The end offset of the uttereance, usually in seconds</dd>
      <dt>BeforeMatch</dt> <dd>The context of the trascript text just before the
       match</dd> 
-     <dt>Transcript</dt> <dd>The transcript text that matched</dd>
-     <dt>BeforeMatch</dt> <dd>The context of the transcript text just after
+     <dt>Text</dt> <dd>The transcript text that matched</dd>
+     <dt>AfterMatch</dt> <dd>The context of the transcript text just after
       the match</dd> 
    </dl>
   </dd> 
@@ -4132,7 +4278,7 @@ return the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1038">line 1038</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1041">line 1041</a>
     </li></ul></dd>
     
 
@@ -5806,7 +5952,7 @@ or null if the request failed.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1616">line 1616</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1619">line 1619</a>
     </li></ul></dd>
     
 
@@ -6129,6 +6275,153 @@ relate to each other.</td>
     
 
     
+    <h4 class="name" id="getSerializerDescriptors"><span class="type-signature"></span>getSerializerDescriptors<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Lists the descriptors of all registered serializers.
+<p> Serializers are modules that export annotation structures as a specific file
+format, e.g. Praat TextGrid, plain text, etc., so the <var>mimeType</var> of descriptors
+reflects what <var>mimeType</var>s can be specified for <a href="LabbcatView.html#getFragments">LabbcatView#getFragments</a>.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: A list of the descriptors of all registered
+serializers.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#getSerializerDescriptors">LabbcatView#getSerializerDescriptors</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1687">line 1687</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="getSoundFragments"><span class="type-signature"></span>getSoundFragments<span class="signature">(transcriptIds, startOffsets, endOffsets, sampleRate<span class="signature-attributes">opt</span>, dir<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
     
 
@@ -6140,7 +6433,7 @@ relate to each other.</td>
     Downloads WAV sound fragments.
 <p>For convenience, the first three arguments, <var>transcriptIds</var>, 
 <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
-array of match objects of the kind returned by Labbcat#getMatches, in
+array of match objects of the kind returned by <a href="LabbcatView.html#getMatches">LabbcatView#getMatches</a>, in
 which case the start/end times are the utterance boundaries - e.g.
 <pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
   labbcat.getMatchAnnotations(result.matches, sampleRate, dir, (files, e, m) => {
@@ -6421,7 +6714,173 @@ a more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1236">line 1236</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1239">line 1239</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getSystemAttribute"><span class="type-signature"></span>getSystemAttribute<span class="signature">(attribute, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets the value of the given system attribute.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attribute</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Name of the attribute.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: The given attribute, with name and value properties.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#getSystemAttribute">LabbcatView#getSystemAttribute</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1709">line 1709</a>
     </li></ul></dd>
     
 
@@ -6971,7 +7430,7 @@ or null if the request failed.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1544">line 1544</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1547">line 1547</a>
     </li></ul></dd>
     
 
@@ -7482,6 +7941,151 @@ or null if the request failed.</td>
     
 
     
+    <h4 class="name" id="getUserInfo"><span class="type-signature"></span>getUserInfo<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets information about the current user, including the roles or groups they are
+in.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: The user record with an attribute called
+"roles" which is an array of string role names.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#getUserInfo">LabbcatView#getUserInfo</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1722">line 1722</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="newTranscript"><span class="type-signature"></span>newTranscript<span class="signature">(transcript, media, mediaSuffix<span class="signature-attributes">opt</span>, transcriptType, corpus, episode<span class="signature-attributes">opt</span>, onResult, onProgress)</span><span class="type-signature"></span></h4>
     
 
@@ -7759,7 +8363,7 @@ to the files.</td>
 
             <td class="description last">Invoked when the request has returned a
 result, which is the task ID of the resulting annotation generation task. The
-task status can be updated using Labbcat#taskStatus</td>
+task status can be updated using <a href="LabbcatView.html#taskStatus">LabbcatView#taskStatus</a></td>
         </tr>
 
     
@@ -7826,7 +8430,7 @@ task status can be updated using Labbcat#taskStatus</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1786">line 1786</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1839">line 1839</a>
     </li></ul></dd>
     
 
@@ -8174,7 +8778,7 @@ task status can be updated using Labbcat#taskStatus</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1758">line 1758</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1811">line 1811</a>
     </li></ul></dd>
     
 
@@ -8332,7 +8936,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1730">line 1730</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1783">line 1783</a>
     </li></ul></dd>
     
 
@@ -8538,7 +9142,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1740">line 1740</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1793">line 1793</a>
     </li></ul></dd>
     
 
@@ -8721,7 +9325,7 @@ were no changes to save.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1749">line 1749</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1802">line 1802</a>
     </li></ul></dd>
     
 
@@ -9154,8 +9758,8 @@ transcript to return. <tt>null</tt> means all matches.</td>
             <td class="description last">Invoked when the request has returned a 
 <var>result</var> which will be: An object with one attribute, "threadId",
 which identifies the resulting task, which can be passed to 
-Labbcat#getMatches, Labbcat#taskStatus, 
-Labbcat#waitForTask, etc.</td>
+<a href="LabbcatView.html#getMatches">LabbcatView#getMatches</a>, <a href="LabbcatView.html#taskStatus">LabbcatView#taskStatus</a>, 
+<a href="LabbcatView.html#waitForTask">LabbcatView#waitForTask</a>, etc.</td>
         </tr>
 
     
@@ -9491,7 +10095,7 @@ must be a file object, and in Node, it must be the full path to the file.</td>
 
             <td class="description last">Invoked when the request has returned a result, 
 which is the task ID of the resulting annotation generation task. The 
-task status can be updated using Labbcat#taskStatus</td>
+task status can be updated using <a href="LabbcatView.html#taskStatus">LabbcatView#taskStatus</a></td>
         </tr>
 
     
@@ -9550,7 +10154,7 @@ task status can be updated using Labbcat#taskStatus</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1954">line 1954</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2007">line 2007</a>
     </li></ul></dd>
     
 
@@ -9793,7 +10397,7 @@ will be false if the task finished.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jul 01 2020 16:58:40 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Aug 12 2020 14:24:21 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

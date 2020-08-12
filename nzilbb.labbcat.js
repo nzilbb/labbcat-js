@@ -914,8 +914,8 @@
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: An object with one attribute, "threadId",
          * which identifies the resulting task, which can be passed to 
-         * {@link Labbcat#getMatches}, {@link Labbcat#taskStatus}, 
-         * {@link Labbcat#waitForTask}, etc.
+         * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
+         * {@link LabbcatView#waitForTask}, etc.
          */
         search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, onResult) {
             if (typeof participantIds === "function") { // (pattern, onResult)
@@ -1001,14 +1001,14 @@
         }
         
         /**
-         * Gets a list of tokens that were matched by {@link Labbcat#search}.
+         * Gets a list of tokens that were matched by {@link LabbcatView#search}.
          * <p>If the task is still running, then this function will wait for it to finish.
          * <p>This means calls can be stacked like this:
          *  <pre>const matches = labbcat.getMatches(
          *     labbcat.search(
          *        {"orthography", "and"},
          *        participantIds, true), 1);</pre>
-         * @param {string} threadId A task ID returned by {@link Labbcat#search}.
+         * @param {string} threadId A task ID returned by {@link LabbcatView#search}.
          * @param {int} [wordsContext=0] Number of words context to include in the <q>Before
          * Match</q> and <q>After Match</q> columns in the results.
          * @param {int} [pageLength] The maximum number of matches to return, or null to
@@ -1023,7 +1023,7 @@
          *   <dd>A list of match objects, with the following attributes
          *    <dl>
          *      <dt>MatchId</dt> <dd>A string identifying the match, of the kind expected
-         *        by {@link Labbcat#getMatchAnnotations}</dd>
+         *        by {@link LabbcatView#getMatchAnnotations}</dd>
          *      <dt>Transcript</dt> <dd>The name of the transcript</dd>
          *      <dt>Participant</dt> <dd>The name of the participant</dd>
          *      <dt>Corpus</dt> <dd>The name of corpus the transcript belongs to</dd>
@@ -1071,9 +1071,9 @@
         
         /**
          * Gets annotations on selected layers related to search results returned by a previous
-         * call to {@link Labbcat#getMatches}.
+         * call to {@link LabbcatView#getMatches}.
          * @param {string[]|object[]} matchIds A list of MatchIds, or a list of match
-         * objects returned by {@link Labbcat#getMatches} 
+         * objects returned by {@link LabbcatView#getMatches} 
          * @param {string[]} layerIds A list of layer IDs.
          * @param {int} [targetOffset=0] The distance from the original target of the match, e.g.
          * <ul>
@@ -1214,7 +1214,7 @@
          * Downloads WAV sound fragments.
          * <p>For convenience, the first three arguments, <var>transcriptIds</var>, 
          * <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
-         * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
+         * array of match objects of the kind returned by {@link LabbcatView#getMatches}, in
          * which case the start/end times are the utterance boundaries - e.g.
          * <pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
          *   labbcat.getMatchAnnotations(result.matches, sampleRate, dir, (files, e, m) => {
@@ -1378,7 +1378,7 @@
          * Get transcript fragments in a specified format.
          * <p>For convenience, the first three arguments, <var>transcriptIds</var>, 
          * <var>startOffsets</var>, and <var>endOffsets</var>, can be replaced by a single
-         * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
+         * array of match objects of the kind returned by {@link LabbcatView#getMatches}, in
          * which case the start/end times are the utterance boundaries - e.g.
          * <pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
          *   labbcat.getFragments(result.matches, layerIds, mimeType, dir, (files, e, m) => {
@@ -1677,6 +1677,9 @@
 
         /**
          * Lists the descriptors of all registered serializers.
+         * <p> Serializers are modules that export annotation structures as a specific file
+         * format, e.g. Praat TextGrid, plain text, etc., so the <var>mimeType</var> of descriptors
+         * reflects what <var>mimeType</var>s can be specified for {@link LabbcatView#getFragments}.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: A list of the descriptors of all registered
          * serializers. 
@@ -1687,6 +1690,8 @@
 
         /**
          * Lists the descriptors of all registered deserializers.
+         * <p> Deserializers are modules that import annotation structures from a specific file
+         * format, e.g. Praat TextGrid, plain text, etc.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be: A list of the descriptors of all registered
          * deserializers. 
@@ -1828,7 +1833,7 @@
          * @param {string} [episode] The episode the transcript belongs to.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * result, which is the task ID of the resulting annotation generation task. The
-         * task status can be updated using {@link Labbcat#taskStatus} 
+         * task status can be updated using {@link LabbcatView#taskStatus} 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
@@ -1996,7 +2001,7 @@
          * must be a file object, and in Node, it must be the full path to the file. 
          * @param {resultCallback} onResult Invoked when the request has returned a result, 
          * which is the task ID of the resulting annotation generation task. The 
-         * task status can be updated using {@link Labbcat#taskStatus}
+         * task status can be updated using {@link LabbcatView#taskStatus}
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         updateTranscript(transcript, onResult, onProgress) {

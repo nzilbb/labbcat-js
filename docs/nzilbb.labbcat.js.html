@@ -942,8 +942,8 @@
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * &lt;var>result&lt;/var> which will be: An object with one attribute, "threadId",
          * which identifies the resulting task, which can be passed to 
-         * {@link Labbcat#getMatches}, {@link Labbcat#taskStatus}, 
-         * {@link Labbcat#waitForTask}, etc.
+         * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
+         * {@link LabbcatView#waitForTask}, etc.
          */
         search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, onResult) {
             if (typeof participantIds === "function") { // (pattern, onResult)
@@ -1022,18 +1022,21 @@
             if (participantIds) parameters.participant_id = participantIds;
             if (transcriptTypes) parameters.transcript_type = transcriptTypes;
 
-            this.createRequest("search", parameters, onResult, this.baseUrl+"search").send();
+            this.createRequest(
+                "search", parameters, onResult, this.baseUrl+"search",
+                "POST") // not GET, because the number of parameters can make the URL too long
+                .send();
         }
         
         /**
-         * Gets a list of tokens that were matched by {@link Labbcat#search}.
+         * Gets a list of tokens that were matched by {@link LabbcatView#search}.
          * &lt;p>If the task is still running, then this function will wait for it to finish.
          * &lt;p>This means calls can be stacked like this:
          *  &lt;pre>const matches = labbcat.getMatches(
          *     labbcat.search(
          *        {"orthography", "and"},
          *        participantIds, true), 1);&lt;/pre>
-         * @param {string} threadId A task ID returned by {@link Labbcat#search}.
+         * @param {string} threadId A task ID returned by {@link LabbcatView#search}.
          * @param {int} [wordsContext=0] Number of words context to include in the &lt;q>Before
          * Match&lt;/q> and &lt;q>After Match&lt;/q> columns in the results.
          * @param {int} [pageLength] The maximum number of matches to return, or null to
@@ -1048,7 +1051,7 @@
          *   &lt;dd>A list of match objects, with the following attributes
          *    &lt;dl>
          *      &lt;dt>MatchId&lt;/dt> &lt;dd>A string identifying the match, of the kind expected
-         *        by {@link Labbcat#getMatchAnnotations}&lt;/dd>
+         *        by {@link LabbcatView#getMatchAnnotations}&lt;/dd>
          *      &lt;dt>Transcript&lt;/dt> &lt;dd>The name of the transcript&lt;/dd>
          *      &lt;dt>Participant&lt;/dt> &lt;dd>The name of the participant&lt;/dd>
          *      &lt;dt>Corpus&lt;/dt> &lt;dd>The name of corpus the transcript belongs to&lt;/dd>
@@ -1056,8 +1059,8 @@
          *      &lt;dt>LineEnd&lt;/dt> &lt;dd>The end offset of the uttereance, usually in seconds&lt;/dd>
          *      &lt;dt>BeforeMatch&lt;/dt> &lt;dd>The context of the trascript text just before the
          *       match&lt;/dd> 
-         *      &lt;dt>Transcript&lt;/dt> &lt;dd>The transcript text that matched&lt;/dd>
-         *      &lt;dt>BeforeMatch&lt;/dt> &lt;dd>The context of the transcript text just after
+         *      &lt;dt>Text&lt;/dt> &lt;dd>The transcript text that matched&lt;/dd>
+         *      &lt;dt>AfterMatch&lt;/dt> &lt;dd>The context of the transcript text just after
          *       the match&lt;/dd> 
          *    &lt;/dl>
          *   &lt;/dd> 
@@ -1096,9 +1099,9 @@
         
         /**
          * Gets annotations on selected layers related to search results returned by a previous
-         * call to {@link Labbcat#getMatches}.
+         * call to {@link LabbcatView#getMatches}.
          * @param {string[]|object[]} matchIds A list of MatchIds, or a list of match
-         * objects returned by {@link Labbcat#getMatches} 
+         * objects returned by {@link LabbcatView#getMatches} 
          * @param {string[]} layerIds A list of layer IDs.
          * @param {int} [targetOffset=0] The distance from the original target of the match, e.g.
          * &lt;ul>
@@ -1239,7 +1242,7 @@
          * Downloads WAV sound fragments.
          * &lt;p>For convenience, the first three arguments, &lt;var>transcriptIds&lt;/var>, 
          * &lt;var>startOffsets&lt;/var>, and &lt;var>endOffsets&lt;/var>, can be replaced by a single
-         * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
+         * array of match objects of the kind returned by {@link LabbcatView#getMatches}, in
          * which case the start/end times are the utterance boundaries - e.g.
          * &lt;pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
          *   labbcat.getMatchAnnotations(result.matches, sampleRate, dir, (files, e, m) => {
@@ -1403,7 +1406,7 @@
          * Get transcript fragments in a specified format.
          * &lt;p>For convenience, the first three arguments, &lt;var>transcriptIds&lt;/var>, 
          * &lt;var>startOffsets&lt;/var>, and &lt;var>endOffsets&lt;/var>, can be replaced by a single
-         * array of match objects of the kind returned by {@link Labbcat#getMatches}, in
+         * array of match objects of the kind returned by {@link LabbcatView#getMatches}, in
          * which case the start/end times are the utterance boundaries - e.g.
          * &lt;pre>labbcat.getMatches(threadId, wordsContext (result, e, m) => {
          *   labbcat.getFragments(result.matches, layerIds, mimeType, dir, (files, e, m) => {
@@ -1699,7 +1702,57 @@
             
             xhr.send();
         }
+
+        /**
+         * Lists the descriptors of all registered serializers.
+         * &lt;p> Serializers are modules that export annotation structures as a specific file
+         * format, e.g. Praat TextGrid, plain text, etc., so the &lt;var>mimeType&lt;/var> of descriptors
+         * reflects what &lt;var>mimeType&lt;/var>s can be specified for {@link LabbcatView#getFragments}.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: A list of the descriptors of all registered
+         * serializers. 
+         */
+        getSerializerDescriptors(onResult) {
+	    this.createRequest("getSerializerDescriptors", null, onResult).send();
+        }
+
+        /**
+         * Lists the descriptors of all registered deserializers.
+         * &lt;p> Deserializers are modules that import annotation structures from a specific file
+         * format, e.g. Praat TextGrid, plain text, etc.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: A list of the descriptors of all registered
+         * deserializers. 
+         */
+        getDeserializerDescriptors(onResult) {
+	    this.createRequest("getSerializerDescriptors", null, onResult).send();
+        }
+
+        /**
+         * Gets the value of the given system attribute.
+         * @param {string} attribute Name of the attribute.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: The given attribute, with name and value properties. 
+         */
+        getSystemAttribute(attribute, onResult) {
+            this.createRequest(
+                "systemattributes", null, onResult, this.baseUrl+"api/systemattributes/" + attribute)
+                .send();
+        }
         
+        /**
+         * Gets information about the current user, including the roles or groups they are
+         * in.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: The user record with an attribute called
+         * "roles" which is an array of string role names. 
+         */
+        getUserInfo(onResult) {
+            this.createRequest(
+                "systemattributes", null, onResult, this.baseUrl+"api/user")
+                .send();
+        }
+
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
@@ -1808,7 +1861,7 @@
          * @param {string} [episode] The episode the transcript belongs to.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * result, which is the task ID of the resulting annotation generation task. The
-         * task status can be updated using {@link Labbcat#taskStatus} 
+         * task status can be updated using {@link LabbcatView#taskStatus} 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
@@ -1976,7 +2029,7 @@
          * must be a file object, and in Node, it must be the full path to the file. 
          * @param {resultCallback} onResult Invoked when the request has returned a result, 
          * which is the task ID of the resulting annotation generation task. The 
-         * task status can be updated using {@link Labbcat#taskStatus}
+         * task status can be updated using {@link LabbcatView#taskStatus}
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
         updateTranscript(transcript, onResult, onProgress) {
@@ -2644,7 +2697,7 @@
          */
         readSystemAttributes(onResult) {
             this.createRequest(
-                "systemAttributes", null, onResult, this.baseUrl+"api/admin/systemattributes")
+                "systemattributes", null, onResult, this.baseUrl+"api/admin/systemattributes")
                 .send();
         }
         
@@ -2658,7 +2711,7 @@
          */
         updateSystemAttribute(attribute, value, onResult) {
             this.createRequest(
-                "systemAttributes", null, onResult, this.baseUrl+"api/admin/systemattributes", "PUT")
+                "systemattributes", null, onResult, this.baseUrl+"api/admin/systemattributes", "PUT")
                 .send(JSON.stringify({
                     attribute : attribute,
                     value : value}));
@@ -2813,7 +2866,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jul 01 2020 16:58:40 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Aug 12 2020 14:24:21 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
