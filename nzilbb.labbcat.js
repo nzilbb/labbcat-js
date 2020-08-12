@@ -245,31 +245,8 @@
         get username() {
             return this._username;
         }
-        
-        //
-        // Creates an http request.
-        // @param {string} call The name of the API function to call
-        // @param {object} parameters The arguments of the function, if any
-        // @param {resultCallback} onResult Invoked when the request has returned a result.
-        // @param {string} [url=this.storeUrl] The URL
-        // @param {string} [method=GET] The HTTP method e.g. "POST"
-        // @param {string} [storeUrl=null] The URL for the graph store.
-        // @return {XMLHttpRequest} An open request.
-        //
-        createRequest(call, parameters, onResult, url, method, storeUrl) {
-            if (exports.verbose)  {
-                console.log("createRequest "+method+" "+url + " "
-                            + call + " " + JSON.stringify(parameters));
-            }
-            method = method || "GET";
-            
-	    var xhr = new XMLHttpRequest();
-	    xhr.call = call;
-	    if (parameters && parameters.id) xhr.id = parameters.id;
-	    xhr.onResult = onResult;
-	    xhr.addEventListener("load", callComplete, false);
-	    xhr.addEventListener("error", callFailed, false);
-	    xhr.addEventListener("abort", callCancelled, false);
+
+        parametersToQueryString(parameters) {
 	    var queryString = "";
 	    if (parameters) {
 	        for (var key in parameters) {
@@ -284,19 +261,49 @@
 		    }
 	        } // next parameter
 	    }
-            queryString = queryString.replace(/^&/,"?");
+            queryString = queryString.replace(/^&/,"");
+            return queryString;
+        }
+        
+        //
+        // Creates an http request.
+        // @param {string} call The name of the API function to call
+        // @param {object} parameters The arguments of the function, if any
+        // @param {resultCallback} onResult Invoked when the request has returned a result.
+        // @param {string} [url=this.storeUrl] The URL
+        // @param {string} [method=GET] The HTTP method e.g. "POST"
+        // @param {string} [storeUrl=null] The URL for the graph store.
+        // @param {string} [contentTypeHeader=null] The request content type e.g "application/x-www-form-urlencoded".
+        // @return {XMLHttpRequest} An open request.
+        //
+        createRequest(call, parameters, onResult, url, method, storeUrl, contentTypeHeader) {
+            if (exports.verbose)  {
+                console.log("createRequest "+method+" "+url + " "
+                            + call + " " + JSON.stringify(parameters));
+            }
+            method = method || "GET";
+            
+	    var xhr = new XMLHttpRequest();
+	    xhr.call = call;
+	    if (parameters && parameters.id) xhr.id = parameters.id;
+	    xhr.onResult = onResult;
+	    xhr.addEventListener("load", callComplete, false);
+	    xhr.addEventListener("error", callFailed, false);
+	    xhr.addEventListener("abort", callCancelled, false);
+	    var queryString = this.parametersToQueryString(parameters);
 	    if (!url) {
                 storeUrl = storeUrl || this.storeUrl;
                 if (exports.verbose) {
                     console.log(method + ": "+storeUrl + call + queryString + " as " + this.username);
                 }
-	        xhr.open(method, storeUrl + call + queryString, true);
+	        xhr.open(method, storeUrl + call + (queryString?"?"+queryString:""), true);
             } else { // explicit URL, so don't append call
                 if (exports.verbose) {
                     console.log(method + ": "+url + queryString + " as " + this.username);
                 }
-	        xhr.open(method, url + queryString, true);
+	        xhr.open(method, url + (queryString?"?"+queryString:""), true);
             }
+            if (contentTypeHeader) xhr.setRequestHeader("Content-Type", contentTypeHeader);
 	    if (this.username) {
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
@@ -995,9 +1002,10 @@
             if (transcriptTypes) parameters.transcript_type = transcriptTypes;
 
             this.createRequest(
-                "search", parameters, onResult, this.baseUrl+"search",
-                "POST") // not GET, because the number of parameters can make the URL too long
-                .send();
+                "search", null, onResult, this.baseUrl+"search",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString(parameters));
         }
         
         /**
