@@ -273,31 +273,8 @@
         get username() {
             return this._username;
         }
-        
-        //
-        // Creates an http request.
-        // @param {string} call The name of the API function to call
-        // @param {object} parameters The arguments of the function, if any
-        // @param {resultCallback} onResult Invoked when the request has returned a result.
-        // @param {string} [url=this.storeUrl] The URL
-        // @param {string} [method=GET] The HTTP method e.g. "POST"
-        // @param {string} [storeUrl=null] The URL for the graph store.
-        // @return {XMLHttpRequest} An open request.
-        //
-        createRequest(call, parameters, onResult, url, method, storeUrl) {
-            if (exports.verbose)  {
-                console.log("createRequest "+method+" "+url + " "
-                            + call + " " + JSON.stringify(parameters));
-            }
-            method = method || "GET";
-            
-	    var xhr = new XMLHttpRequest();
-	    xhr.call = call;
-	    if (parameters &amp;&amp; parameters.id) xhr.id = parameters.id;
-	    xhr.onResult = onResult;
-	    xhr.addEventListener("load", callComplete, false);
-	    xhr.addEventListener("error", callFailed, false);
-	    xhr.addEventListener("abort", callCancelled, false);
+
+        parametersToQueryString(parameters) {
 	    var queryString = "";
 	    if (parameters) {
 	        for (var key in parameters) {
@@ -312,19 +289,49 @@
 		    }
 	        } // next parameter
 	    }
-            queryString = queryString.replace(/^&amp;/,"?");
+            queryString = queryString.replace(/^&amp;/,"");
+            return queryString;
+        }
+        
+        //
+        // Creates an http request.
+        // @param {string} call The name of the API function to call
+        // @param {object} parameters The arguments of the function, if any
+        // @param {resultCallback} onResult Invoked when the request has returned a result.
+        // @param {string} [url=this.storeUrl] The URL
+        // @param {string} [method=GET] The HTTP method e.g. "POST"
+        // @param {string} [storeUrl=null] The URL for the graph store.
+        // @param {string} [contentTypeHeader=null] The request content type e.g "application/x-www-form-urlencoded".
+        // @return {XMLHttpRequest} An open request.
+        //
+        createRequest(call, parameters, onResult, url, method, storeUrl, contentTypeHeader) {
+            if (exports.verbose)  {
+                console.log("createRequest "+method+" "+url + " "
+                            + call + " " + JSON.stringify(parameters));
+            }
+            method = method || "GET";
+            
+	    var xhr = new XMLHttpRequest();
+	    xhr.call = call;
+	    if (parameters &amp;&amp; parameters.id) xhr.id = parameters.id;
+	    xhr.onResult = onResult;
+	    xhr.addEventListener("load", callComplete, false);
+	    xhr.addEventListener("error", callFailed, false);
+	    xhr.addEventListener("abort", callCancelled, false);
+	    var queryString = this.parametersToQueryString(parameters);
 	    if (!url) {
                 storeUrl = storeUrl || this.storeUrl;
                 if (exports.verbose) {
                     console.log(method + ": "+storeUrl + call + queryString + " as " + this.username);
                 }
-	        xhr.open(method, storeUrl + call + queryString, true);
+	        xhr.open(method, storeUrl + call + (queryString?"?"+queryString:""), true);
             } else { // explicit URL, so don't append call
                 if (exports.verbose) {
                     console.log(method + ": "+url + queryString + " as " + this.username);
                 }
-	        xhr.open(method, url + queryString, true);
+	        xhr.open(method, url + (queryString?"?"+queryString:""), true);
             }
+            if (contentTypeHeader) xhr.setRequestHeader("Content-Type", contentTypeHeader);
 	    if (this.username) {
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
@@ -1023,9 +1030,10 @@
             if (transcriptTypes) parameters.transcript_type = transcriptTypes;
 
             this.createRequest(
-                "search", parameters, onResult, this.baseUrl+"search",
-                "POST") // not GET, because the number of parameters can make the URL too long
-                .send();
+                "search", null, onResult, this.baseUrl+"search",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString(parameters));
         }
         
         /**
@@ -2169,6 +2177,46 @@
             super(baseUrl, username, password);
             this._storeAdminUrl = this.baseUrl + "api/admin/store/";
         }
+        
+        /**
+         * Saves changes to a layer, or adds a new layer.
+         * @param {string|object} layer The layer ID, if all the other attribute
+         * parameters are specified, or an object with all the layer attributes, in which case
+         * only &lt;var>onResult&lt;/var> need be specified.
+         * @param {string} parentId The layer's parent layer id.
+         * @param {string} description The description of the layer.
+         * @param {number} alignment The layer's alignment 
+         * - 0 for none, 1 for point alignment, 2 for interval alignment.
+         * @param {boolean} peers Whether children on this layer have peers or not.
+         * @param {boolean} peersOverlap Whether child peers on this layer can overlap or not.
+         * @param {boolean} parentIncludes Whether the parent temporally includes the child.
+         * @param {boolean} saturated Whether children must temporally fill the entire parent
+         * duration (true) or not (false).
+         * @param {string} type The type for labels on this layer, e.g. string, number,
+         * boolean, ipa. 
+         * @param {object} validLabels List of valid label values for this layer, or null 
+         * if the layer values are not restricted. The 'key' is the possible label value, and 
+         * each key is associated with a description of the value (e.g. for displaying to users). 
+         * @param {string} category Category for the layer, if any.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: The resulting layer definition.
+         */
+        saveLayer(layer, parentId, description, alignment,
+                  peers, peersOverlap, parentIncludes, saturated, type, validLabels, category,
+                  onResult) {
+            var layerDefinition = {
+                id: layer, parentId: parentId, description: description, alignment: alignment,
+                peers: peers, peersOverlap: peersOverlap, parentIncludes: parentIncludes,
+                saturated: saturated, type: type, validLabels: validLabels, category: category };
+            if (typeof parentId === "function") { // (layerObject, onResult)
+                onResult = parentId;
+                layerDefinition = layer;
+            }
+            this.createRequest(
+                "saveLayer", null, onResult, this.storeAdminUrl + "saveLayer", "POST",
+                null, "application/json")
+                .send(JSON.stringify(layerDefinition));
+        }
 
         /**
          * Creates a new corpus record.
@@ -2184,7 +2232,8 @@
          */
         createCorpus(corpus_name, corpus_language, corpus_description, onResult) {
             this.createRequest(
-                "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "POST")
+                "corpora", null, onResult, this.baseUrl+"api/admin/corpora", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     corpus_name : corpus_name,
                     corpus_language : corpus_language,
@@ -2277,7 +2326,8 @@
          */
         createProject(project, description, onResult) {
             this.createRequest(
-                "projects", null, onResult, this.baseUrl+"api/admin/projects", "POST")
+                "projects", null, onResult, this.baseUrl+"api/admin/projects", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     project : project,
                     description : description}));
@@ -2366,7 +2416,8 @@
          */
         createMediaTrack(suffix, description, display_order, onResult) {
             this.createRequest(
-                "mediaTracks", null, onResult, this.baseUrl+"api/admin/mediatracks", "POST")
+                "mediaTracks", null, onResult, this.baseUrl+"api/admin/mediatracks", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     suffix : suffix,
                     description : description,
@@ -2457,7 +2508,8 @@
          */
         createRole(role_id, description, onResult) {
             this.createRequest(
-                "roles", null, onResult, this.baseUrl+"api/admin/roles", "POST")
+                "roles", null, onResult, this.baseUrl+"api/admin/roles", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     role_id : role_id,
                     description : description}));
@@ -2560,7 +2612,8 @@
                         }
                     }
                     if (onResult) onResult(permission, errors, messages, call, id);
-                }, this.baseUrl+"api/admin/roles/permissions", "POST")
+                }, this.baseUrl+"api/admin/roles/permissions", "POST",
+                null, "application/json")
                 .send(JSON.stringify({
                     role_id : role_id,
                     entity : entity,
@@ -2866,7 +2919,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Aug 12 2020 14:24:21 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Tue Aug 18 2020 16:05:27 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
