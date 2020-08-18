@@ -646,4 +646,53 @@ describe("#LabbcatAdmin", function() {
         });
     });
     
+    it("implements saveLayer", (done)=>{
+
+        store.getLayer("transcript_type", (originalTranscriptType, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors))
+            assert.isNotNull(originalTranscriptType, "There is a transcript_type layer")
+            
+            const editedTranscriptType1 = JSON.parse(JSON.stringify(originalTranscriptType));
+            const newOption1 = "unit-test-1";
+            editedTranscriptType1.validLabels[newOption1] = newOption1;            
+            
+            const editedTranscriptType2 = JSON.parse(JSON.stringify(originalTranscriptType));
+            const newOption2 = "unit-test-2";
+            editedTranscriptType2.validLabels[newOption2] = newOption2;
+
+            // save with object
+            store.saveLayer(editedTranscriptType1, (updatedTranscriptType1, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
+                assert.isNotNull(updatedTranscriptType1);
+                assert.isTrue(newOption1 in updatedTranscriptType1.validLabels,
+                              "new option 1 is there: " + JSON.stringify(updatedTranscriptType1.validLabels));
+                assert.isFalse(newOption2 in updatedTranscriptType1.validLabels,
+                              "new option 2 is not there");
+
+                // save with attributes
+                store.saveLayer(editedTranscriptType2.id, editedTranscriptType2.parentId,
+                                editedTranscriptType2.description,
+                                editedTranscriptType2.alignment,
+                                editedTranscriptType2.peers, editedTranscriptType2.peersOverlap,
+                                editedTranscriptType2.parentIncludes,
+                                editedTranscriptType2.saturated, editedTranscriptType2.type,
+                                editedTranscriptType2.validLabels, editedTranscriptType2.category,
+                                (updatedTranscriptType2, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors))
+                    assert.isNotNull(updatedTranscriptType2);
+                    assert.isFalse(newOption1 in updatedTranscriptType2.validLabels,
+                                   "new option 1 is not there");
+                    assert.isTrue(newOption2 in updatedTranscriptType2.validLabels,
+                                  "new option 2 is there");
+                    // restore original value
+                    store.saveLayer(
+                        originalTranscriptType, (result, errors, messages)=>{
+                            assert.isNull(errors, JSON.stringify(errors))
+                            done();
+                        });
+                });
+            });
+        });
+    });
+    
 });
