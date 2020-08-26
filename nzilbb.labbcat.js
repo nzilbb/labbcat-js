@@ -1729,7 +1729,7 @@
          */
         getUserInfo(onResult) {
             this.createRequest(
-                "systemattributes", null, onResult, this.baseUrl+"api/user")
+                "user", null, onResult, this.baseUrl+"api/user")
                 .send();
         }
 
