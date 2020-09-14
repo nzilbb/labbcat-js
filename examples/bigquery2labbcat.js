@@ -21,7 +21,7 @@ var startAtRow = process.argv[7];
 
 // LaBB-CAT
 var labbcat = require("./nzilbb.labbcat");
-var local = new labbcat.Labbcat(labbcatUrl, userName, password);
+var local = new labbcat.LabbcatEdit(labbcatUrl, userName, password);
 
 // iss? 540818136778-compute@developer.gserviceaccount.com
 // API key file e6a02be83549.json

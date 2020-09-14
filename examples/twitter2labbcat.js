@@ -45,7 +45,7 @@ var password = "some-password";
 var corpus = "twitter";
 var transcriptType = "tweet";
 var labbcat = require("@nzilbb/labbcat");
-var local = new labbcat.Labbcat(labbcatUrl, userName, password);
+var local = new labbcat.LabbcatEdit(labbcatUrl, userName, password);
 
 // Emoji converter
 var emoji = require('emoji');

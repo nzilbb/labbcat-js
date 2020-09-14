@@ -17,7 +17,7 @@ var fs = require("fs");
 var path = require('path');
 var labbcat = require("@nzilbb/labbcat");
 
-var local = new labbcat.Labbcat(labbcatUrl, userName, password);
+var local = new labbcat.LabbcatEdit(labbcatUrl, userName, password);
 
 function recursivelyFindTranscriptFiles(pathPrefix, directory) {
     var dirPath = (pathPrefix?pathPrefix+"/":"")+directory;
@@ -48,7 +48,7 @@ function uploadNextTranscript() {
 function deleteTranscript(transcript) {
     console.log(transcript + " ...");
     var transcriptName = path.basename(transcript);
-    local.deleteGraph(
+    local.deleteTranscript(
         transcriptName,
 	function(result, errors, messages, call, id) {
 	    console.log("Deleted " + transcriptName);
