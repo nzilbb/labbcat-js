@@ -1468,7 +1468,7 @@
             
             // get fragments individually to ensure elements in result map 1:1 to element
             // in transcriptIds
-	    let url = this.baseUrl + "convertfragment?mimeType="+encodeURIComponent(mimeType);
+	    let url = this.baseUrl + "api/serialize/fragment?mimeType="+encodeURIComponent(mimeType);
             for (let layerId of layerIds) url += "&layerId=" + layerId;
             const lc = this;
             const nextFragment = function(i) {
