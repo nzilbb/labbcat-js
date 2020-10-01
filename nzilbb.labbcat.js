@@ -1709,6 +1709,17 @@
         }
 
         /**
+         * Lists the descriptors of all registered annotators.
+         * <p> Annotators are modules that perform automated annotation of transcripts.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: A list of the descriptors of all registered
+         * annotators. 
+         */
+        getAnnotatorDescriptors(onResult) {
+	    this.createRequest("getAnnotatorDescriptors", null, onResult).send();
+        }
+
+        /**
          * Gets the value of the given system attribute.
          * @param {string} attribute Name of the attribute.
          * @param {resultCallback} onResult Invoked when the request has returned a
@@ -2740,6 +2751,259 @@
                 .send(JSON.stringify({
                     attribute : attribute,
                     value : value}));
+        }
+        
+        /**
+         * Uploads an annotator module in preparation for installing it.
+         * @param {string|file} jarFile Annotator .jar file.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An object describing the attributes of the
+         * annotator found in the jar file:
+         * <dl>
+         *  <dt> jar </dt><dd> The name of the file uploaded. </dd>
+         *  <dt> annotatorId </dt><dd> The ID of the annotator. </dd>
+         *  <dt> version </dt><dd> The version of the annotator implementation. </dd>
+         *  <dt> installedVersion </dt><dd> The version of the annotator that this one will 
+         *         replace, if the annotator ID has already been installed. </dd> 
+         *  <dt> hasConfigWebapp </dt><dd> Whether the annotator has a
+         *         installation/configuration web-app. </dd>
+         *  <dt> hasTaskWebapp </dt><dd> Whether the annotator has a task definition
+         *         web-app. </dd>
+         *  <dt> hasExtWebapp </dt><dd> Whether the annotator has an 'extensions' web-app. </dd>
+         *  <dt> info </dt><dd> HTML document describing the annotator. </dd>
+         * </dl>
+         * @param onProgress Invoked on XMLHttpRequest progress.
+         */
+        uploadAnnotator(jarFile, onResult, onProgress) {
+
+            // create form
+            var fd = new FormData();
+
+            // TODO nzibb/labbcat-server/user-interface thinks it's running on Node when actually
+            // it's running in a browser, so we need a better test for runningOnNode
+            if (runningOnNode || true) {                
+                
+	        fd.append("jarFile", jarFile);
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "uploadAnnotator";
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);
+	        xhr.upload.addEventListener("progress", onProgress, false);
+	        
+	        xhr.open("POST", this.baseUrl + "admin/annotator");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+
+	        var jarName = jarFile.replace(/.*\//g, "");
+                if (exports.verbose) console.log("jarName: " + jarName);
+            	fd.append(
+                    "jarFile", 
+		    fs.createReadStream(jarFile).on('error', function(){
+		        onResult(null, ["Invalid jar: " + jarFile], [], "uploadAnnotator", jarFile);
+		    }), jarName);
+                
+	        var urlParts = parseUrl(this.baseUrl + "admin/annotator");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username && password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+                                // for this call, the result is an object with one key, whose
+                                // value is the threadId - so just return that
+			        onResult(
+                                    result[jarName], errors, messages, "uploadAnnotator", jarName);
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadAnnotator", jarName);
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
+        
+        /**
+         * Uploads an annotator module in preparation for installing it.
+         * @param {string} jar Name of the annotator .jar file already uploaded, as
+         * specified by the "jar" attribute of the uploadAnnotator() response. 
+         * @param {boolean} install true to install the annotator, false to cancel the
+         * installation. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: the annotator ID if it was installed, and null 
+         * otherwise.
+         */
+        installAnnotator(jar, install, onResult) {
+            this.createRequest(
+                "installAnnotator", null, onResult, this.baseUrl+"admin/annotator",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    jar : jar,
+                    action : install?"install":"cancel"
+                }));
+        }
+
+        /**
+         * Uploads an annotator module in preparation for installing it.
+         * @param {string} annotatorId ID of the annotator to uninstall.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>.
+         */
+        uninstallAnnotator(annotatorId, onResult) {
+            this.createRequest(
+                "uninstallAnnotator", null, onResult, this.baseUrl+"admin/annotator",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    annotatorId : annotatorId,
+                    action : "uninstall"
+                }));
+        }
+
+        /**
+         * Create a new annotator task with the given ID and description.
+         * @param {string} annotatorId The ID of the annotator that will perform the task.
+         * @param {string} taskId The ID of the task, which must not already exist.
+         * @param {string} description The description of the task.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>.
+         */
+        newAnnotatorTask(annotatorId, taskId, description, onResult) {
+            this.createRequest(
+                "newAnnotatorTask", null, onResult, null, "POST",
+                this.storeAdminUrl+"newAnnotatorTask", "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    annotatorId: annotatorId,
+                    taskId: taskId,
+                    description: description
+                }));
+        }
+        
+        /**
+         * Supplies a list of automation tasks for the identified annotator.
+         * @param {string} annotatorId The ID of the annotator that will perform the task.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>, which is a map of task IDs to descriptions.
+         */
+        getAnnotatorTasks(annotatorId, onResult) {
+            this.createRequest(
+                "getAnnotatorTasks", {
+                    annotatorId: annotatorId
+                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTasks")
+                .send();
+        }
+        
+        /**
+         * Supplies the given task's parameter string.
+         * @param {string} taskId The ID of the task, which must not already exist.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>, which is the task parameters, serialized as a string.
+         */
+        getAnnotatorTaskParameters(taskId, onResult) {
+            this.createRequest(
+                "getAnnotatorTaskParameters", {
+                    taskId: taskId
+                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTaskParameters")
+                .send();
+        }
+                
+        /**
+         * Update the annotator task description.
+         * @param {string} taskId The ID of the task, which must not already exist.
+         * @param {string} description The description of the task.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>.
+         */
+        saveAnnotatorTaskDescription(taskId, description, onResult) {
+            this.createRequest(
+                "saveAnnotatorTaskDescription", null, onResult, null, "POST",
+                this.storeAdminUrl+"saveAnnotatorTaskDescription", "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    taskId: taskId,
+                    description: description
+                }));
+        }
+        
+        /**
+         * Update the annotator task parameters.
+         * @param {string} taskId The ID of the task, which must not already exist.
+         * @param {string} parameters The task parameters, serialized as a string.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>.
+         */
+        saveAnnotatorTaskParameters(taskId, parameters, onResult) {
+            this.createRequest(
+                "saveAnnotatorTaskParameters", null, onResult, null, "POST",
+                this.storeAdminUrl+"saveAnnotatorTaskParameters", "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    taskId: taskId,
+                    parameters: parameters
+                }));
+        }
+        
+        /**
+         * Delete the identified automation task.
+         * @param {string} taskId The ID of the task, which must not already exist.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>.
+         */
+        deleteAnnotatorTask(taskId, onResult) {
+            this.createRequest(
+                "deleteAnnotatorTask", null, onResult, null, "POST",
+                this.storeAdminUrl+"deleteAnnotatorTask", "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    taskId: taskId
+                }));
         }
         
     }
