@@ -654,7 +654,6 @@ describe("#LabbcatAdmin", function() {
 
             // update it
             const changedInfo = originalInfo + " <div>unit-test</div>";
-            labbcat.verbose = true;
             store.updateInfo(
                 changedInfo, (result, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors))
