@@ -325,6 +325,33 @@
         }
         
         /**
+         * Gets the store's information document.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: {string} An HTML document providing
+         * information about the corpus.
+         */
+        getInfo(onResult) {
+	    var xhr = new XMLHttpRequest();
+	    xhr.onResult = onResult;
+	    xhr.addEventListener("load", function(evt) {
+                onResult(this.responseText, null, null, "getInfo")
+            }, false);
+	    xhr.addEventListener("error", callFailed, false);
+	    xhr.addEventListener("abort", callCancelled, false);
+            xhr.open("GET", this.baseUrl + "api/info");
+	    if (this.username) {
+	        xhr.setRequestHeader(
+                    "Authorization", "Basic " + btoa(this.username + ":" + this._password))
+ 	    }
+            if (exports.language) {
+	        xhr.setRequestHeader("Accept-Language", exports.language);
+            }
+	    xhr.setRequestHeader("Accept-Language", exports.language);
+	    xhr.setRequestHeader("Accept", "text/html");
+            xhr.send();
+        }
+        
+        /**
          * Gets a list of layer IDs (annotation 'types').
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:  {string[]} A list of layer IDs.
@@ -3004,6 +3031,19 @@
                 .send(this.parametersToQueryString({
                     taskId: taskId
                 }));
+        }
+        
+        /**
+         * Saves the store's information document.
+         * @param {string} info An HTML document with information about the corpus as a whole.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var>.
+         */
+        updateInfo(html, onResult) {
+            this.createRequest(
+                "saveInfo", null, onResult, this.baseUrl + "api/admin/info", "PUT",
+                null, "text/html")
+                .send(html);
         }
         
     }

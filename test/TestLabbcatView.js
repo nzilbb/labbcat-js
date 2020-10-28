@@ -59,6 +59,15 @@ describe("#LabbcatView", function() {
         });
     });
     
+    it("implements getInfo", (done)=>{
+        store.getInfo((info, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotNull(info);
+            console.log("Corpus Info: " + info);
+            done();
+        });
+    });
+    
     it("implements getLayerIds", (done)=>{
         //labbcat.verbose = true;
         store.getLayerIds((ids, errors, messages)=>{
