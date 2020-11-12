@@ -724,4 +724,125 @@ describe("#LabbcatAdmin", function() {
         });
     });
     
+    it("implements user CRUD operations", (done)=>{
+
+        const role_id = "unit-test";
+        const description = "Temporary user for unit testing";
+        // create role for testing
+        store.createRole(
+            role_id, description, (role, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors));
+                assert.isNotNull(role);
+
+                const userId = "unit-test";
+                const email = "unit-test@tld.org";
+                const resetPassword = true;
+                const roles = [ role_id ];
+        
+                // ensure the record doesn't exist to start with
+                store.deleteUser(userId, (result, errors, messages)=>{
+            
+                    // create the user
+                    store.createUser(
+                        userId, email, resetPassword, roles, (user, errors, messages)=>{
+                            assert.isNull(errors, JSON.stringify(errors));
+                            assert.isNotNull(user);
+                            assert.equal(user.user, userId, "user saved");
+                            assert.equal(user.email, email, "email saved");
+                            assert.equal(user.resetPassword, resetPassword, "resetPassword saved");
+                            assert.deepEqual(user.roles, roles, "roles saved");
+                    
+                            // ensure the user exists
+                            store.readUsers((users, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors))
+                                assert.isNotNull(users, "The users are returned")
+                                assert.isAtLeast(users.length, 1, "There is at least one user");
+                        
+                                const matchedUsers = users.filter(c => {
+                                    return c.user == userId;});
+                                assert.equal(matchedUsers.length, 1,
+                                             "The new user is present: " + JSON.stringify(users));
+                                assert.equal(matchedUsers[0].email, email,
+                                             "email correct");
+                                assert.equal(matchedUsers[0].resetPassword, resetPassword,
+                                             "resetPassword correct");
+                                assert.deepEqual(matchedUsers[0].roles, roles,
+                                             "roles correct");
+                        
+                                // update it
+                                const new_email = "new@tld.org";
+                                const new_resetPassword = false;
+                                const new_roles = [ "view" ];
+                                store.updateUser(
+                                    userId, new_email, new_resetPassword, new_roles,
+                                    (updatedUser, errors, messages)=>{
+                                        assert.isNull(errors, JSON.stringify(errors))
+                                        assert.isNotNull(updatedUser);
+                                        assert.equal(updatedUser.user, userId,
+                                                     "user name unchanged");
+                                        assert.equal(updatedUser.email, new_email,
+                                                     "email changed");
+                                        assert.equal(updatedUser.resetPassword, new_resetPassword,
+                                                     "resetPassword changed");
+                                        assert.deepEqual(updatedUser.roles, new_roles,
+                                                     "roles changed");
+                                        
+                                        // ensure the user updated
+                                        store.readUsers((users, errors, messages)=>{
+                                            assert.isNull(errors, JSON.stringify(errors))
+                                            assert.isNotNull(users, "The users are returned")
+                                            assert.isAtLeast(users.length, 1,
+                                                             "There is at least one user");
+                                    
+                                            const newMatchedUsers = users.filter(c => {
+                                                return c.user == userId;});
+                                            assert.equal(
+                                                newMatchedUsers.length, 1,
+                                                "The updated user is present");
+                                            assert.equal(
+                                                newMatchedUsers[0].email, new_email,
+                                                "updated email correct");
+                                            assert.equal(
+                                                newMatchedUsers[0].resetPassword,
+                                                new_resetPassword,
+                                                "updated resetPassword correct");
+                                            assert.deepEqual(
+                                                newMatchedUsers[0].roles,
+                                                new_roles,
+                                                "updated roles correct");
+                                    
+                                            // delete it
+                                            store.deleteUser(
+                                                userId, (result, errors, messages)=>{
+                                                    assert.isNull(errors, JSON.stringify(errors))
+                                                    
+                                                    // ensure the transcript no longer exists
+                                                    store.readUsers((users, errors, messages)=>{
+                                                        assert.isNull(errors, JSON.stringify(errors))
+                                                        assert.isNotNull(users, "The users are returned")
+                                                        
+                                                        const finalMatchedUsers = users.filter(c => {
+                                                            return c.user == userId;});
+                                                        assert.equal(finalMatchedUsers.length, 0,
+                                                                     "The new user is gone");
+                                                        
+                                                        // delete the role
+                                                        store.deleteRole(
+                                                            role_id, (result, errors, messages) =>{
+                                                                assert.isNull(
+                                                                    errors,
+                                                                    "Test role deleted");
+                                                                done();
+                                                            });
+                                                    });
+                                                });
+                                        });
+                                    });
+                            });
+                        });
+                });
+            });
+    });
+
+    
 });

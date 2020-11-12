@@ -3035,7 +3035,7 @@
         
         /**
          * Saves the store's information document.
-         * @param {string} info An HTML document with information about the corpus as a whole.
+         * @param {string} html An HTML document with information about the corpus as a whole.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var>.
          */
@@ -3046,6 +3046,107 @@
                 .send(html);
         }
         
+        /**
+         * Creates a new user record.
+         * @see LabbcatAdmin#readUsers
+         * @see LabbcatAdmin#updateUser
+         * @see LabbcatAdmin#deleteUser
+         * @param {string} user The ID of the user.
+         * @param {string} email The email address of the user.
+         * @param {boolean} resetPassword Whether the user must reset their password when
+         * they next log in. 
+         * @param {string[]} roles Roles or groups the user belongs to.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the user record, 
+         * including <em> user </em> - The database key for the record. 
+         */
+        createUser(user, email, resetPassword, roles, onResult) {
+            this.createRequest(
+                "users", null, onResult, this.baseUrl+"api/admin/users", "POST",
+                null, "application/json")
+                .send(JSON.stringify({
+                    user : user,
+                    email : email,
+                    resetPassword : resetPassword?1:0,
+                    roles : roles}));
+        }
+        
+        /**
+         * Reads a list of user records.
+         * @see LabbcatAdmin#createUser
+         * @see LabbcatAdmin#updateUser
+         * @see LabbcatAdmin#deleteUser
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of user records with the following
+         * attributes:
+         * <dl>
+         *  <dt> user </dt> <dd> The name/id of the user. </dd>
+         *  <dt> email </dt> <dd> The email address of the user. </dd>
+         *  <dt> resetPassword </dt> <dd> Whether the user must reset their password when
+         * they next log in. </dd>
+         *  <dt> roles </dt> <dd> Roles or groups the user belongs to. </dd>
+         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. </dd>
+         * </dl>
+         */
+        readUsers(pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            this.createRequest(
+                "users", {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, this.baseUrl+"api/admin/users")
+                .send();
+        }
+        
+        /**
+         * Updates an existing user record.
+         * @see LabbcatAdmin#createUser
+         * @see LabbcatAdmin#readUsers
+         * @see LabbcatAdmin#deleteUser
+         * @param {string} user The ID of the user.
+         * @param {string} email The email address of the user.
+         * @param {boolean} resetPassword Whether the user must reset their password when
+         * they next log in. 
+         * @param {string[]} roles Roles or groups the user belongs to.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the user record. 
+         */
+        updateUser(user, email, resetPassword, roles, onResult) {
+            if (exports.verbose) console.log("updateUser("+user+", "+email+", "+resetPassword+", "+JSON.stringify(roles));
+            this.createRequest(
+                "users", null, onResult, this.baseUrl+"api/admin/users", "PUT")
+                .send(JSON.stringify({
+                    user : user,
+                    email : email,
+                    resetPassword : resetPassword?1:0,
+                    roles : roles}));
+        }
+        
+        /**
+         * Deletes an existing user record.
+         * @see LabbcatAdmin#createUser
+         * @see LabbcatAdmin#readUsers
+         * @see LabbcatAdmin#updateUser
+         * @param {string} user The name/ID of the user.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteUser(user, onResult) {
+            this.createRequest(
+                "users", null, onResult, `${this.baseUrl}api/admin/users/${user}`,
+                "DELETE").send();
+        }        
     }
     
     /**
