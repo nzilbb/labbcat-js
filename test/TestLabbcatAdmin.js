@@ -724,7 +724,7 @@ describe("#LabbcatAdmin", function() {
         });
     });
     
-    it("implements user CRUD operations", (done)=>{
+    it("implements user CRUD/password operations", (done)=>{
 
         const role_id = "unit-test";
         const description = "Temporary user for unit testing";
@@ -810,31 +810,38 @@ describe("#LabbcatAdmin", function() {
                                                 newMatchedUsers[0].roles,
                                                 new_roles,
                                                 "updated roles correct");
-                                    
-                                            // delete it
-                                            store.deleteUser(
-                                                userId, (result, errors, messages)=>{
-                                                    assert.isNull(errors, JSON.stringify(errors))
+
+                                            // can set password
+                                            var p = Math.random().toString(36).substring(7);
+                                            store.setPassword(
+                                                userId, p, true, (nothing, errors, messages)=>{
+                                                    assert.isNull(errors, JSON.stringify(errors));
                                                     
-                                                    // ensure the transcript no longer exists
-                                                    store.readUsers((users, errors, messages)=>{
-                                                        assert.isNull(errors, JSON.stringify(errors))
-                                                        assert.isNotNull(users, "The users are returned")
-                                                        
-                                                        const finalMatchedUsers = users.filter(c => {
-                                                            return c.user == userId;});
-                                                        assert.equal(finalMatchedUsers.length, 0,
-                                                                     "The new user is gone");
-                                                        
-                                                        // delete the role
-                                                        store.deleteRole(
-                                                            role_id, (result, errors, messages) =>{
-                                                                assert.isNull(
-                                                                    errors,
-                                                                    "Test role deleted");
-                                                                done();
+                                                    // delete it
+                                                    store.deleteUser(
+                                                        userId, (result, errors, messages)=>{
+                                                            assert.isNull(errors, JSON.stringify(errors))
+                                                            
+                                                            // ensure the transcript no longer exists
+                                                            store.readUsers((users, errors, messages)=>{
+                                                                assert.isNull(errors, JSON.stringify(errors))
+                                                                assert.isNotNull(users, "The users are returned")
+                                                                
+                                                                const finalMatchedUsers = users.filter(c => {
+                                                                    return c.user == userId;});
+                                                                assert.equal(finalMatchedUsers.length, 0,
+                                                                             "The new user is gone");
+                                                                
+                                                                // delete the role
+                                                                store.deleteRole(
+                                                                    role_id, (result, errors, messages) =>{
+                                                                        assert.isNull(
+                                                                            errors,
+                                                                            "Test role deleted");
+                                                                        done();
+                                                                    });
                                                             });
-                                                    });
+                                                        }); 
                                                 });
                                         });
                                     });

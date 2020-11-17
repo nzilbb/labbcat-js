@@ -3146,7 +3146,26 @@
             this.createRequest(
                 "users", null, onResult, `${this.baseUrl}api/admin/users/${user}`,
                 "DELETE").send();
-        }        
+        }
+        
+        /**
+         * Sets a given user's password.
+         * @param {string} user The ID of the user.
+         * @param {string} password The new password.
+         * @param {boolean} resetPassword Whether the user must reset their password when
+         * they next log in. 
+         * @param {resultCallback} onResult Invoked when the request has returned. 
+         */
+        setPassword(user, password, resetPassword, onResult) {
+            if (exports.verbose) console.log("updateUsersetP("+user+", ****, "+resetPassword);
+            this.createRequest(
+                "users", null, onResult, this.baseUrl+"api/admin/password", "PUT")
+                .send(JSON.stringify({
+                    user : user,
+                    password : password,
+                    resetPassword : resetPassword}));
+        }
+        
     }
     
     /**
