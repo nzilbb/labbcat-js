@@ -1759,6 +1759,33 @@
         }
         
         /**
+         * Gets a list of currently-installed layer managers.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: an array of objects with the following
+         * structure:
+         * <ul>
+         *  <li> <q> layer_manager_id </q> : ID of the layer manager. </li>
+         *  <li> <q> version </q> : The version of the installed implementation. </li>
+         *  <li> <q> name </q> : The name for the layer manager. </li>
+         *  <li> <q> description </q> : A brief description of what the layer manager does. </li>
+         *  <li> <q> layer_type </q> : What kinds of layers the layer manager can process - a
+         *           string composed of any of the following:
+         *            <ul>
+         *             <li><b> S </b> - segment layers </li>
+         *             <li><b> W </b> - word layers </li>
+         *             <li><b> M </b> - phrase (meta) layers </li>
+         *             <li><b> F </b> - span (freeform) layers </li>
+         *            </ul>
+         *  </li>
+         * </ul>
+         */
+        getLayerManagers(onResult) {
+            this.createRequest(
+                "layermanagers", null, onResult, this.baseUrl+"api/layers/managers")
+                .send();
+        }
+        
+        /**
          * Gets information about the current user, including the roles or groups they are
          * in.
          * @param {resultCallback} onResult Invoked when the request has returned a

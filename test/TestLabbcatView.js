@@ -1163,4 +1163,13 @@ describe("#LabbcatView", function() {
         });
     });
 
+    it("implements getLayerManagers", (done)=>{
+        store.getLayerManagers((managers, errors, messages)=> {
+            assert.isNull(errors);
+            assert.isArray(managers);
+            assert.isObject(managers[0]);
+            done();
+        });
+    });
+
 });
