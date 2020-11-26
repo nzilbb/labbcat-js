@@ -2216,7 +2216,56 @@
         }
         
         /**
-         * Saves changes to a layer, or adds a new layer.
+         * Adds a new layer.
+         * @param {string|object} layer The layer ID, if all the other attribute
+         * parameters are specified, or an object with all the layer attributes, in which case
+         * only <var>onResult</var> need be specified.
+         * @param {string} parentId The layer's parent layer id.
+         * @param {string} description The description of the layer.
+         * @param {number} alignment The layer's alignment 
+         * - 0 for none, 1 for point alignment, 2 for interval alignment.
+         * @param {boolean} peers Whether children on this layer have peers or not.
+         * @param {boolean} peersOverlap Whether child peers on this layer can overlap or not.
+         * @param {boolean} parentIncludes Whether the parent temporally includes the child.
+         * @param {boolean} saturated Whether children must temporally fill the entire parent
+         * duration (true) or not (false).
+         * @param {string} type The type for labels on this layer, e.g. string, number,
+         * boolean, ipa. 
+         * @param {object} validLabels List of valid label values for this layer, or null 
+         * if the layer values are not restricted. The 'key' is the possible label value, and 
+         * each key is associated with a description of the value (e.g. for displaying to users). 
+         * @param {string} category Category for the layer, if any.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: The resulting layer definition.
+         */
+        newLayer(layer, parentId, description, alignment,
+                  peers, peersOverlap, parentIncludes, saturated, type, validLabels, category,
+                  onResult) {
+            var layerDefinition = {
+                id: layer, parentId: parentId, description: description,
+                alignment: Number(alignment), // ensure a number is passed, not a string
+                peers: Boolean(peers), peersOverlap: Boolean(peersOverlap),
+                parentIncludes: Boolean(parentIncludes), saturated: Boolean(saturated),
+                type: type, validLabels: validLabels, category: category };
+            if (typeof parentId === "function") { // (layerObject, onResult)
+                onResult = parentId;
+                layerDefinition = layer;
+                // ensure important types are converted from strings
+                layerDefinition.alignment = Number(layerDefinition.alignment);
+                layerDefinition.peers = Boolean(layerDefinition.peers);
+                layerDefinition.peers = Boolean(layerDefinition.peers);
+                layerDefinition.peersOverlap = Boolean(layerDefinition.peersOverlap);
+                layerDefinition.parentIncludes = Boolean(layerDefinition.parentIncludes);
+                layerDefinition.saturated = Boolean(layerDefinition.saturated);
+            }
+            this.createRequest(
+                "newLayer", null, onResult, this.storeAdminUrl + "newLayer", "POST",
+                null, "application/json")
+                .send(JSON.stringify(layerDefinition));
+        }
+
+        /**
+         * Saves changes to a layer.
          * @param {string|object} layer The layer ID, if all the other attribute
          * parameters are specified, or an object with all the layer attributes, in which case
          * only <var>onResult</var> need be specified.
@@ -2242,17 +2291,40 @@
                   peers, peersOverlap, parentIncludes, saturated, type, validLabels, category,
                   onResult) {
             var layerDefinition = {
-                id: layer, parentId: parentId, description: description, alignment: alignment,
-                peers: peers, peersOverlap: peersOverlap, parentIncludes: parentIncludes,
-                saturated: saturated, type: type, validLabels: validLabels, category: category };
+                id: layer, parentId: parentId, description: description,
+                alignment: Number(alignment), // ensure a number is passed, not a string
+                peers: Boolean(peers), peersOverlap: Boolean(peersOverlap),
+                parentIncludes: Boolean(parentIncludes), saturated: Boolean(saturated),
+                type: type, validLabels: validLabels, category: category };
             if (typeof parentId === "function") { // (layerObject, onResult)
                 onResult = parentId;
                 layerDefinition = layer;
+                // ensure important types are converted from strings
+                layerDefinition.alignment = Number(layerDefinition.alignment);
+                layerDefinition.peers = Boolean(layerDefinition.peers);
+                layerDefinition.peers = Boolean(layerDefinition.peers);
+                layerDefinition.peersOverlap = Boolean(layerDefinition.peersOverlap);
+                layerDefinition.parentIncludes = Boolean(layerDefinition.parentIncludes);
+                layerDefinition.saturated = Boolean(layerDefinition.saturated);
             }
             this.createRequest(
                 "saveLayer", null, onResult, this.storeAdminUrl + "saveLayer", "POST",
                 null, "application/json")
                 .send(JSON.stringify(layerDefinition));
+        }
+
+        /**
+         * Deletes the given layer, and all associated annotations.
+         * @param {string|object} id The ID layer to delete.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteLayer(id, onResult) {
+            this.createRequest(
+                "deleteLayer", null, onResult, this.storeAdminUrl + "deleteLayer", "POST",
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    id : id
+                }));
         }
 
         /**

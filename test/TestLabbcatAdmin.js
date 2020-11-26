@@ -675,7 +675,7 @@ describe("#LabbcatAdmin", function() {
         });
     });
     
-    it("implements saveLayer", (done)=>{
+    it("implements saveLayer for transcript_type", (done)=>{
 
         store.getLayer("transcript_type", (originalTranscriptType, errors, messages)=>{
             assert.isNull(errors, JSON.stringify(errors))
@@ -719,6 +719,115 @@ describe("#LabbcatAdmin", function() {
                             assert.isNull(errors, JSON.stringify(errors))
                             done();
                         });
+                });
+            });
+        });
+    });
+    
+    it("implements newLayer/saveLayer/deleteLayer for temporal layers", (done)=>{
+
+        var testLayer = {
+            id: "unit-test",
+            description: "Unit test layer", 
+            parentId: "transcript", // TODO change to "word"
+            alignment: 0,
+            peers: true, peersOverlap: true, parentIncludes: true, saturated: true,
+            type: "string"
+            // TODO validLabels
+        };
+
+        // create layer
+        store.newLayer(testLayer, (newLayer, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors));
+            assert.isNotNull(newLayer, "Resulting layer is not null");
+            assert.equal(newLayer.id, testLayer.id, "created ID");
+            assert.equal(newLayer.description, testLayer.description, "created Description");
+            assert.equal(newLayer.parentId, testLayer.parentId, "created parent");
+            assert.equal(newLayer.alignment, testLayer.alignment, "created alignment");
+            assert.equal(newLayer.peers, testLayer.peers, "created peers");
+            assert.equal(newLayer.peersOverlap, testLayer.peersOverlap, "created peersOverlap");
+            assert.equal(newLayer.parentIncludes, testLayer.parentIncludes, "created parentIncl.");
+            assert.equal(newLayer.saturated, testLayer.saturated, "created saturated");
+            assert.equal(newLayer.type, testLayer.type, "created Type");
+            // TODO validLabels
+
+            // check it's really there
+            store.getLayer(testLayer.id, (retrievedLayer, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors));
+                assert.isNotNull(retrievedLayer, "Resulting layer is not null");
+                assert.equal(retrievedLayer.id, testLayer.id, "resulting ID");
+                assert.equal(retrievedLayer.description, testLayer.description,
+                             "resulting Description");
+                assert.equal(retrievedLayer.parentId, testLayer.parentId, "resulting parent");
+                assert.equal(retrievedLayer.alignment, testLayer.alignment, "resulting alignment");
+                assert.equal(retrievedLayer.peers, testLayer.peers, "resulting peers");
+                assert.equal(retrievedLayer.peersOverlap, testLayer.peersOverlap,
+                             "resulting peersOverlap");
+                assert.equal(retrievedLayer.parentIncludes, testLayer.parentIncludes,
+                             "resulting parentIncl.");
+                assert.equal(retrievedLayer.saturated, testLayer.saturated, "resulting saturated");
+                assert.equal(retrievedLayer.type, testLayer.type, "resulting Type");
+                // TODO validLabels
+            
+                // change the layer
+                testLayer.description = "Changed description";
+                testLayer.parentId = "turns"; // this shouldn't be updated
+                testLayer.alignment = "2"; // string alignment must be handled
+                testLayer.peers = "false"; // string booleans must be handled
+                testLayer.peersOverlap = false;
+                testLayer.parentIncludes = false;
+                testLayer.saturated = false;
+                testLayer.type = "number";
+
+                store.saveLayer(testLayer, (editedLayer, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    assert.isNotNull(editedLayer, "Resulting layer is not null");
+                    assert.equal(editedLayer.id, testLayer.id, "changed ID");
+                    assert.equal(editedLayer.description, testLayer.description, "changed Description");
+                    assert.equal(editedLayer.parentId, "transcript", "haven't changed parent"); // TODO change to "word"
+                    assert.equal(editedLayer.alignment, testLayer.alignment, "changed alignment");
+                    assert.equal(editedLayer.peers, testLayer.peers, "changed peers");
+                    assert.equal(editedLayer.peersOverlap, testLayer.peersOverlap,
+                                 "changed peersOverlap");
+                    assert.equal(editedLayer.parentIncludes, testLayer.parentIncludes,
+                                 "changed parentIncl.");
+                    assert.equal(editedLayer.saturated, testLayer.saturated,
+                                 "changed saturated");
+                    assert.equal(editedLayer.type, testLayer.type, "changed Type");
+                    // TODO validLabels
+
+                    // check it's really changed
+                    store.getLayer(testLayer.id, (finalLayer, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors));
+                        assert.isNotNull(finalLayer, "Resulting layer is not null");
+                        assert.equal(finalLayer.id, testLayer.id, "created ID");
+                        assert.equal(finalLayer.description, testLayer.description,
+                                     "final Description");
+                        assert.equal(finalLayer.parentId, "transcript", "final parent"); // TODO change to word
+                        assert.equal(finalLayer.alignment, testLayer.alignment, "final alignment");
+                        assert.equal(finalLayer.peers, testLayer.peers, "final peers");
+                        assert.equal(finalLayer.peersOverlap, testLayer.peersOverlap,
+                                     "final peersOverlap");
+                        assert.equal(finalLayer.parentIncludes, testLayer.parentIncludes,
+                                     "final parentIncl.");
+                        assert.equal(finalLayer.saturated, testLayer.saturated, "final saturated");
+                        assert.equal(finalLayer.type, testLayer.type, "final Type");
+                        // TODO validLabels
+                        
+                        // delete it
+                        store.deleteLayer(testLayer.id, (model, errors, messages)=>{
+                            assert.isNull(errors, JSON.stringify(errors));
+
+                            // ensure it's been deleted
+                            store.getLayer(testLayer.id, (finalLayer, errors, messages)=>{
+                                assert.isNotNull(
+                                    errors, JSON.stringify(errors),
+                                    "Should not be able to get layer that has been deleted: "
+                                        + testLayer.id);
+                                done();
+                            });
+                        });
+                    });
                 });
             });
         });
