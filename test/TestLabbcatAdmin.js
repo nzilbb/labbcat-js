@@ -729,7 +729,7 @@ describe("#LabbcatAdmin", function() {
         var testLayer = {
             id: "unit-test",
             description: "Unit test layer", 
-            parentId: "transcript", // TODO change to "word"
+            parentId: "word",
             alignment: 0,
             peers: true, peersOverlap: true, parentIncludes: true, saturated: true,
             type: "string"
@@ -784,7 +784,7 @@ describe("#LabbcatAdmin", function() {
                     assert.isNotNull(editedLayer, "Resulting layer is not null");
                     assert.equal(editedLayer.id, testLayer.id, "changed ID");
                     assert.equal(editedLayer.description, testLayer.description, "changed Description");
-                    assert.equal(editedLayer.parentId, "transcript", "haven't changed parent"); // TODO change to "word"
+                    assert.equal(editedLayer.parentId, "word", "haven't changed parent");
                     assert.equal(editedLayer.alignment, testLayer.alignment, "changed alignment");
                     assert.equal(editedLayer.peers, testLayer.peers, "changed peers");
                     assert.equal(editedLayer.peersOverlap, testLayer.peersOverlap,
@@ -803,7 +803,7 @@ describe("#LabbcatAdmin", function() {
                         assert.equal(finalLayer.id, testLayer.id, "created ID");
                         assert.equal(finalLayer.description, testLayer.description,
                                      "final Description");
-                        assert.equal(finalLayer.parentId, "transcript", "final parent"); // TODO change to word
+                        assert.equal(finalLayer.parentId, "word", "final parent");
                         assert.equal(finalLayer.alignment, testLayer.alignment, "final alignment");
                         assert.equal(finalLayer.peers, testLayer.peers, "final peers");
                         assert.equal(finalLayer.peersOverlap, testLayer.peersOverlap,

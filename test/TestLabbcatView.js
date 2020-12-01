@@ -75,9 +75,9 @@ describe("#LabbcatView", function() {
             assert.isArray(ids);
             //for (let id of ids) console.log("layer " + id);
             assert.isNotEmpty(ids, "Some IDs are returned");
-            assert.include(ids, "transcript", "Has transcript layer");
-            assert.include(ids, "turns", "Has turns layer");
-            assert.include(ids, "utterances", "Has utterances layer");
+            assert.include(ids, "word", "Has word layer");
+            assert.include(ids, "turn", "Has turn layer");
+            assert.include(ids, "utterance", "Has utterance layer");
             assert.include(ids, "transcript_type", "Has transcript_type layer");
             done();
         });
@@ -90,9 +90,9 @@ describe("#LabbcatView", function() {
             //for (let layer of layers) console.log("layer " + layer.id);
             assert.isNotEmpty(layers, "Some IDs are returned");
             const ids = layers.map(layer => layer.id);
-            assert.include(ids, "transcript", "Has transcript layer");
-            assert.include(ids, "turns", "Has turns layer");
-            assert.include(ids, "utterances", "Has utterances layer");
+            assert.include(ids, "word", "Has word layer");
+            assert.include(ids, "turn", "Has turn layer");
+            assert.include(ids, "utterance", "Has utterance layer");
             assert.include(ids, "transcript_type", "Has transcript_type layer");
             done();
         });
