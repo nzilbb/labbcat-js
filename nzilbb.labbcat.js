@@ -1798,6 +1798,71 @@
                 .send();
         }
 
+        /**
+         * For HTK dictionary-filling, this starts a task (returning it's threadId) that
+         * traverses the given utterances, looking for missing word pronunciations
+         * @param {string} seriesId search.search_id for identifying the utterances
+         * @param {string} tokenLayerId token layer ("orthography")
+         * @param {string} annotationLayerId tokens with missing annotations on this layer
+         * should be returned ("phonemes") the "model" returned is the threadId of the task
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: the threadId of the task.
+         * {@link LabbcatView#taskStatus} can be used to follow the progress of the task
+         * until it's finished. Once done, the resultUrl can be invoked, which returns a
+         * map from token labels to token IDs (one per type) i.e. the word that's missing,
+         * with an ID for finding its first occurance 
+         */
+        missingAnnotations(seriesId, tokenLayerId, annotationLayerId, onResult) {
+            this.createRequest(
+                "missingAnnotations", {
+                    seriesId : seriesId,
+                    tokenLayerId : tokenLayerId,
+                    annotationLayerId : annotationLayerId
+                }, onResult, this.baseUrl+"api/missingAnnotations").send();
+        }
+
+        /**
+         * For HTK dictionary-filling, this looks up some given words to get their entries.
+         * @param {string} layerId The dictionary of this layer will be used.
+         * @param {string} labels Space-separated list of words to look up.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: an object with the following structure:
+         * returned has the following structure:
+         * <ul>
+         *  <li><b> words </b> - object where each key is the word, and each value is an
+         *                       array of entries for that word 
+         *  <li><b> combined </b> - the first entry of each word, concatenated together
+         *                          with a hyphen separator
+         * </ul>
+         */
+        lookup(layerId, labels, onResult) {
+            this.createRequest(
+                "lookup", {
+                    layerId : layerId,
+                    labels : labels
+                }, onResult, this.baseUrl+"api/lookup").send();
+        }
+
+        /**
+         * For HTK dictionary-filling, this uses a layer dictionary to suggest missing entries.
+         * @param {string} layerId The dictionary of this layer will be used.
+         * @param {string} labels Space-separated list of words to suggest entries for.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be: an object with the following structure:
+         * returned has the following structure:
+         * <ul>
+         *  <li><b> words </b> - object where each key is the word, and each value is a
+         *                       array of suggestions for that word (with 0 or 1 elements)
+         * </ul>
+         */
+        suggest(layerId, labels, onResult) {
+            this.createRequest(
+                "suggest", {
+                    layerId : layerId,
+                    labels : labels
+                }, onResult, this.baseUrl+"api/suggest").send();
+        }
+
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
