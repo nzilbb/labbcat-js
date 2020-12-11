@@ -1835,12 +1835,12 @@
          *                          with a hyphen separator
          * </ul>
          */
-        lookup(layerId, labels, onResult) {
+        dictionaryLookup(layerId, labels, onResult) {
             this.createRequest(
                 "lookup", {
                     layerId : layerId,
                     labels : labels
-                }, onResult, this.baseUrl+"api/lookup").send();
+                }, onResult, this.baseUrl+"api/dictionary/lookup").send();
         }
 
         /**
@@ -1855,12 +1855,12 @@
          *                       array of suggestions for that word (with 0 or 1 elements)
          * </ul>
          */
-        suggest(layerId, labels, onResult) {
+        dictionarySuggest(layerId, labels, onResult) {
             this.createRequest(
                 "suggest", {
                     layerId : layerId,
                     labels : labels
-                }, onResult, this.baseUrl+"api/suggest").send();
+                }, onResult, this.baseUrl+"api/dictionary/suggest").send();
         }
 
     } // class LabbcatView
@@ -2230,6 +2230,23 @@
 	            if (res) res.resume();
 	        });
             }
+        }
+
+        /**
+         * For HTK dictionary-filling, this adds a new dictionary entry and updates all tokens.
+         * @param {string} layerId The dictionary of this layer will be used.
+         * @param {string} label The word label to add an entry for.
+         * @param {string} label The definition (pronunciation) of the word to add.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var>.
+         */
+        dictionaryAdd(layerId, label, entry, onResult) {
+            this.createRequest(
+                "add", {
+                    layerId : layerId,
+                    label : label,
+                    entry : entry
+                }, onResult, this.baseUrl+"api/edit/dictionary/add").send();
         }
 
     } // class LabbcatEdit
