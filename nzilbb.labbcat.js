@@ -1812,10 +1812,16 @@
          * map from token labels to token IDs (one per type) i.e. the word that's missing,
          * with an ID for finding its first occurance 
          */
-        missingAnnotations(seriesId, tokenLayerId, annotationLayerId, onResult) {
+        missingAnnotations(seriesId, tokenLayerId, annotationLayerId, fragmentIds, onResult) {
+            if (typeof fragmentIds === "function") {
+                // (seriesId, tokenLayerId, annotationLayerId, onResult)
+                onProgress = fragmentIds;
+                fragmentIds = null;
+            }
             this.createRequest(
                 "missingAnnotations", {
                     seriesId : seriesId,
+                    utterance : fragmentIds,
                     tokenLayerId : tokenLayerId,
                     annotationLayerId : annotationLayerId
                 }, onResult, this.baseUrl+"api/missingAnnotations").send();
