@@ -945,13 +945,16 @@
          * anchor confidence &ge; 50, false to search include un-aligned words as well. 
          * @param {int} [matchesPerTranscript=null] Optional maximum number of matches per
          * transcript to return. <tt>null</tt> means all matches.
+         * @param {int} [overlapThreshold=null] Optional percentage overlap with other
+         * utterances before simultaneous speech is excluded. <tt>null</tt> means include
+         * all overlapping utterances.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: An object with one attribute, "threadId",
          * which identifies the resulting task, which can be passed to 
          * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
          * {@link LabbcatView#waitForTask}, etc.
          */
-        search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, onResult) {
+        search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
             if (typeof participantIds === "function") { // (pattern, onResult)
                 onResult = participantIds;
                 participantIds = null;
@@ -959,6 +962,7 @@
                 mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
+                overlapThreshold = null;
             } else if (typeof transcriptTypes === "function") {
                 // (pattern, participantIds, onResult)
                 onResult = transcriptTypes;
@@ -966,6 +970,7 @@
                 mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
+                overlapThreshold = null;
             } else if (typeof transcriptTypes === "boolean") {
                 // (pattern, participantIds, mainParticipant, aligned,
                 // matchesPerTranscript, onResult) 
@@ -974,6 +979,7 @@
                 aligned = mainParticipant;
                 mainParticipant = transcriptTypes;
                 transcriptTypes = null;
+                overlapThreshold = null;
             }
             if (typeof aligned === "function") {
                 // (pattern, participantIds, mainParticipant, onResult)
@@ -981,14 +987,28 @@
                 onResult = aligned;
                 aligned = false;
                 matchesPerTranscript = null;
+                overlapThreshold = null;
+            }
+            if (typeof matchesPerTranscript === "function") {
+                // (pattern, participantIds, mainParticipant, aligned, onResult)
+                // i.e. the original signature of this function
+                onResult = matchesPerTranscript;
+                matchesPerTranscript = null;
+                overlapThreshold = null;
+            }
+            if (typeof overlapThreshold === "function") {
+                // (pattern, participantIds, mainParticipant, aligned, matchesPerTranscript, onResult)
+                onResult = overlapThreshold;
+                overlapThreshold = null;
             }
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
                             +", "+JSON.stringify(participantIds)
                             +", "+JSON.stringify(transcriptTypes)
-                            +", "+mainParticipant+")"
-                            +", "+aligned+")"
-                            +", "+matchesPerTranscript+")");
+                            +", "+mainParticipant
+                            +", "+aligned
+                            +", "+matchesPerTranscript
+                            +", "+overlapThreshold+")");
             }
 
             // first normalize the pattern...
@@ -1027,6 +1047,7 @@
             if (matchesPerTranscript) parameters.matches_per_transcript = matchesPerTranscript;
             if (participantIds) parameters.participant_id = participantIds;
             if (transcriptTypes) parameters.transcript_type = transcriptTypes;
+            if (overlapThreshold) parameters.overlap_threshold = overlapThreshold;
 
             this.createRequest(
                 "search", null, onResult, this.baseUrl+"search",
