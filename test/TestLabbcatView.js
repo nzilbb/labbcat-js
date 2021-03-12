@@ -326,12 +326,20 @@ describe("#LabbcatView", function() {
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
-            store.getParticipant(participantId, (participant, errorrs, messages)=>{
+            store.getParticipant(participantId, ["participant_gender"], (participant, errorrs, messages)=>{
                 assert.isNull(errors);
                 assert.equal(participant.label, participantId, "Correct participant"); // not getId()
                 assert.containsAllKeys(
                     participant, ["id", "label"],
                     "Looks like an annotation");
+                assert.isNotNull(participant.annotations, "Has child annotations");
+                assert.isNotNull(participant.annotations.participant_gender,
+                                 "Includes attribute");
+                assert.isNotEmpty(participant.annotations.participant_gender,
+                                 "Includes attribute value");
+                assert.containsAllKeys(
+                    participant.annotations.participant_gender[0], ["id", "label"],
+                    "Attribute looks like an annotation");
                 done();
             });
         });
