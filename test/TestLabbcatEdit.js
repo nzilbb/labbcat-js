@@ -58,95 +58,117 @@ describe("#LabbcatEdit", function() {
         });
     });
 
-    it("implements newTranscript, updateTranscript, and deleteTranscript", (done)=>{
-        const transcriptName = "labbcat-js.test.txt";
-        const transcriptPath = "test/" + transcriptName;
-        
-        // ensure the transcript doesn't exist to start with        
-        store.deleteTranscript(transcriptName);
-        
-        store.getCorpusIds((ids, errors, messages)=>{
-            assert.isNull(errors, JSON.stringify(errors))
-            assert.isAtLeast(ids.length, 1, "There's at least one corpus");
-            const corpusId = ids[0];
-            store.getLayer("transcript_type", (typeLayer, errors, messages)=>{
-                assert.isNull(errors, JSON.stringify(errors))
-                assert.isNotNull(typeLayer);
-                assert.isNotEmpty(typeLayer.validLabels, "There is at least one transcript type");
-                const transcriptType = Object.keys(typeLayer.validLabels)[0];
-
-                assert(fs.existsSync(transcriptPath), "Test transcript exists");
-                store.newTranscript(
-                    transcriptPath, null, null, transcriptType, corpusId, "test",
-                    (threadId, errors, messages)=>{
-                        assert.isNull(errors, JSON.stringify(errors));
-                        assert.isNotNull(threadId);
-                        
-                        store.waitForTask(threadId, 30, (task, errors, messages)=>{
-                            assert.isNull(errors, JSON.stringify(errors));
-                            assert.isFalse(task.running, "Upload task finished in a timely manner");
-                            
-                            store.releaseTask(threadId);
-                            
-                            // ensure the transcript exists
-                            store.countMatchingTranscriptIds(
-                                "id = '"+transcriptName+"'", (count, errors, messages)=>{
-                                    assert.isNull(errors, JSON.stringify(errors))
-                                    assert.isNumber(count);
-                                    assert.equal(count, 1, "Transcript is in the store");
-                                    
-                                    // re-upload it
-                                    store.updateTranscript(transcriptPath, (threadId, errors, messages)=>{
-                                        assert.isNull(errors, JSON.stringify(errors))
-                                        assert.isNotNull(threadId);
-                                        
-                                        store.waitForTask(threadId, 30, (task, errors, messages)=>{
-                                            assert.isNull(errors, JSON.stringify(errors));
-                                            assert.isFalse(
-                                                task.running,
-                                                "Upload task finished in a timely manner");
-                                            
-                                            store.releaseTask(threadId);
-                                            
-                                            // ensure the transcript exists
-                                            store.countMatchingTranscriptIds(
-                                                "id = '"+transcriptName+"'", (count, errors, messages)=>{
-                                                    assert.isNull(errors, JSON.stringify(errors))
-                                                    assert.isNumber(count);
-                                                    assert.equal(
-                                                        count, 1,
-                                                        "Transcript is still in the store");
-                                                    
-                                                    // delete it
-                                                    store.deleteTranscript(
-                                                        transcriptName, (result, errors, messages)=>{
-                                                            assert.isNull(
-                                                                errors, JSON.stringify(errors))
-                                                            
-                                                            // ensure the transcript no longer exists
-                                                            store.countMatchingParticipantIds(
-                                                                "id = '"+transcriptName+"'",
-                                                                (count, errors, messages)=>{
-                                                                    assert.isNull(
-                                                                        errors,
-                                                                        JSON.stringify(errors))
-                                                                    assert.isNumber(count);
-                                                                    assert.equal(
-                                                                        count, 0,
-                                                                        "Transcript is gone");
-                                                                    done();
-                                                                });
-                                                        });
-                                                });
-                                        });
-                                    });
-                                });
-                        });
-                    });
-            });
-        });
+    it("implements newTranscript, updateTranscript, deleteTranscript, and deleteParticipant", (done)=>{
+     const participantName = "UnitTester";
+     const transcriptName = "labbcat-js.test.txt";
+     const transcriptPath = "test/" + transcriptName;
+     
+     // ensure the transcript/participant dosn't exist to start with    
+     store.deleteTranscript(transcriptName, (nothing, errors, messages)=>{
+       store.deleteParticipant(participantName, (nothing, errors, messages)=>{
+         
+         store.getCorpusIds((ids, errors, messages)=>{
+           assert.isNull(errors, JSON.stringify(errors))
+           assert.isAtLeast(ids.length, 1, "There's at least one corpus");
+           const corpusId = ids[0];
+           store.getLayer("transcript_type", (typeLayer, errors, messages)=>{
+             assert.isNull(errors, JSON.stringify(errors))
+             assert.isNotNull(typeLayer);
+             assert.isNotEmpty(typeLayer.validLabels, "There is at least one transcript type");
+             const transcriptType = Object.keys(typeLayer.validLabels)[0];
+             
+             assert(fs.existsSync(transcriptPath), "Test transcript exists");
+             store.newTranscript(
+               transcriptPath, null, null, transcriptType, corpusId, "test",
+               (threadId, errors, messages)=>{
+                 assert.isNull(errors, JSON.stringify(errors));
+                 assert.isNotNull(threadId);
+                 
+                 store.waitForTask(threadId, 30, (task, errors, messages)=>{
+                   assert.isNull(errors, JSON.stringify(errors));
+                   assert.isFalse(task.running, "Upload task finished in a timely manner");
+                   
+                   store.releaseTask(threadId);
+                   
+                   // ensure the transcript exists
+                   store.countMatchingTranscriptIds(
+                     "id = '"+transcriptName+"'", (count, errors, messages)=>{
+                       assert.isNull(errors, JSON.stringify(errors))
+                       assert.isNumber(count);
+                       assert.equal(count, 1, "Transcript is in the store");
+                       
+                       // ensure participant exists
+                       store.countMatchingParticipantIds(
+                         "id = '"+participantName+"'", (count, errors, messages)=>{
+                           assert.isNull(errors, JSON.stringify(errors))
+                           assert.isNumber(count);
+                           assert.equal(count, 1, "Participant is in the store");
+                           
+                           // re-upload it
+                           store.updateTranscript(
+                             transcriptPath, (threadId, errors, messages)=>{
+                               assert.isNull(errors, JSON.stringify(errors))
+                               assert.isNotNull(threadId);
+                               
+                               store.waitForTask(
+                                 threadId, 30, (task, errors, messages)=>{
+                                   assert.isNull(errors, JSON.stringify(errors));
+                                   assert.isFalse(
+                                     task.running, "Upload task finished in a timely manner");
+                                   
+                                   store.releaseTask(threadId);
+                                   
+                                   // ensure the transcript exists
+                                   store.countMatchingTranscriptIds(
+                                     "id = '"+transcriptName+"'", (count, errors, messages)=>{
+                                       assert.isNull(errors, JSON.stringify(errors))
+                                       assert.isNumber(count);
+                                       assert.equal(count, 1, "Transcript is still in the store");
+                                       
+                                       // delete it
+                                       store.deleteTranscript(
+                                         transcriptName, (result, errors, messages)=>{
+                                           assert.isNull(errors, JSON.stringify(errors))
+                                           
+                                           // ensure the transcript no longer exists
+                                           store.countMatchingTranscriptIds(
+                                             "id = '"+transcriptName+"'",
+                                             (count, errors, messages)=>{
+                                               assert.isNull(errors, JSON.stringify(errors))
+                                               assert.isNumber(count);
+                                               assert.equal(count, 0, "Transcript is gone");
+                                               // delete participant
+                                               store.deleteParticipant(
+                                                 participantName, (result, errors, messages)=>{
+                                                   assert.isNull(errors, JSON.stringify(errors))
+                                                   
+                                                   // ensure the participant no longer exists
+                                                   store.countMatchingParticipantIds(
+                                                     "id = '"+transcriptName+"'",
+                                                     (count, errors, messages)=>{
+                                                       assert.isNull(
+                                                         errors, JSON.stringify(errors))
+                                                       assert.isNumber(count);
+                                                       assert.equal(
+                                                         count, 0, "Transcript is gone");
+                                                       done();
+                                                     });
+                                                 });
+                                             });
+                                         });
+                                     });
+                                 });
+                             });
+                         });
+                     });
+                 });
+               });
+           });
+         });
+       });
+     });    
     });
-
+ 
     it("supports optional newTranscript arguments", (done)=>{
         const transcriptName = "labbcat-js.test.txt";
         const transcriptPath = "test/" + transcriptName;
