@@ -710,7 +710,44 @@ describe("#LabbcatView", function() {
             });
         });
     });
-    
+
+    it("implements allUtterances", (done)=>{
+        // get a participant ID to use
+        store.getParticipantIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some participant IDs exist");
+            const participantId = ids[0];
+
+            store.allUtterances([ participantId ], (response, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
+                assert.isNotNull(response)
+                assert.isObject(response)
+                const threadId = response.threadId
+                
+                store.waitForTask(threadId, 30, (task, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    
+                    // if the task is still running, it's taking too long, so cancel it
+                    if (task.running) store.cancelTask(threadId);
+                    assert.isFalse(task.running, "Search finished in a timely manner");
+                    
+                    store.getMatches(threadId, 2, (result, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(result)
+                        assert.isNotNull(result.name)
+                        const matches = result.matches;
+                        assert.isArray(matches)
+
+                        // be tidy
+                        store.releaseTask(threadId); 
+                        
+                        done();
+                    });
+                });
+            });
+        });
+    });
+
     it("implements getSoundFragments", (done)=>{
         // get a participant ID to use
         store.getParticipantIds((ids, errors, messages)=>{

@@ -837,7 +837,7 @@
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         releaseTask(id, onResult) {
-            if (exports.verbose) console.log("releaseTask("+threadId+")");
+            if (exports.verbose) console.log("releaseTask("+id+")");
             this.createRequest("releaseTask", {
                 threadId : id,
                 command : "release"
@@ -1059,6 +1059,58 @@
 
             this.createRequest(
                 "search", null, onResult, this.baseUrl+"search",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString(parameters));
+        }
+        
+        /**
+         * Identifies all utterances by the given participants.
+         * @param {string[]} participantIds A list of participant IDs to identify
+         * the utterances of.
+         * @param {string[]} [transcriptTypes=null] An optional list of transcript types to limit
+         * the results to. If null, all transcript types will be searched. 
+         * @param {boolean} [mainParticipant=true] true to search only main-participant
+         * utterances, false to search all utterances. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An object with one attribute, "threadId",
+         * which identifies the resulting task, which can be passed to 
+         * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
+         * {@link LabbcatView#waitForTask}, etc.
+         */
+        allUtterances(participantIds, transcriptTypes, mainParticipant, onResult) {
+            if (typeof transcriptTypes === "function") { // (participantIds, onResult)
+                onResult = transcriptTypes;
+                transcriptTypes = null;
+                mainParticipant = true;
+            } else if (typeof mainParticipant === "function") {
+                // (participantIds, transcriptTypes, onResult)
+                onResult = mainParticipant;
+                mainParticipant = true;
+            } else if (typeof transcriptTypes === "boolean") {
+                // (participantIds, mainParticipant, onResult) 
+                onResult = mainParticipant;
+                mainParticipant = transcriptTypes;
+                transcriptTypes = null;
+            }
+            if (exports.verbose) {
+                console.log("allUtterances("+JSON.stringify(participantIds)
+                            +", "+JSON.stringify(transcriptTypes)
+                            +", "+mainParticipant+")");
+            }
+
+            // first normalize the pattern...
+
+            const parameters = {
+                list : "list",
+                id : participantIds,
+            }
+            if (mainParticipant) parameters.only_main_speaker = true;
+            if (transcriptTypes) parameters.transcript_type = transcriptTypes;
+            if (exports.verbose) console.log(JSON.stringify(parameters));
+
+            this.createRequest(
+                "allUtterances", null, onResult, this.baseUrl+"allUtterances",
                 "POST", // not GET, because the number of parameters can make the URL too long
                 null, "application/x-www-form-urlencoded")
                 .send(this.parametersToQueryString(parameters));
@@ -1414,7 +1466,7 @@
                             }
                         }
                         const filePath = path.join(dir, fileName);
-                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                        fs.writeFile(filePath, Buffer.from(this.response), function(err) {
                             if (err) {
                                 if (exports.verbose) {
                                     console.log("getSoundFragments "+i+" SAVE ERROR: "+err);
@@ -1572,7 +1624,7 @@
                             }
                         }
                         const filePath = path.join(dir, fileName);
-                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                        fs.writeFile(filePath, Buffer.from(this.response), function(err) {
                             if (err) {
                                 if (exports.verbose) {
                                     console.log("getFragments "+i+" SAVE ERROR: "+err);
@@ -1649,7 +1701,7 @@
                 if (exports.verbose) {
                     console.log("getTranscriptAttributes loaded. " + JSON.stringify(this.response));
                 }
-                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                fs.writeFile(fileName, Buffer.from(xhr.responseText), function(err) {
                     if (exports.verbose) {
                         console.log("getTranscriptAttributes wrote file " + fileName);
                     }
@@ -1721,7 +1773,7 @@
                 if (exports.verbose) {
                     console.log("getParticipantAttributes loaded. " + JSON.stringify(this.response));
                 }
-                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                fs.writeFile(fileName, Buffer.from(xhr.responseText), function(err) {
                     if (exports.verbose) {
                         console.log("getParticipantAttributes wrote file " + fileName);
                     }
