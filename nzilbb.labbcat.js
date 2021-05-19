@@ -709,13 +709,13 @@
         /**
          * Gets a transcript given its ID, containing only the given layers.
          * @param {string} id The given transcript ID.
-         * @param {string[]} layerId The IDs of the layers to load, or null for all
+         * @param {string[]} layerIds The IDs of the layers to load, or null for all
          * layers. If only transcript data is required, set this to ["graph"]. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:  The identified transcript.
          */
-        getTranscript (id, layerId, onResult) {
-	    this.createRequest("getTranscript", { id : id, layerId : layerId }, onResult).send();
+        getTranscript(id, layerIds, onResult) {
+	    this.createRequest("getTranscript", { id : id, layerIds : layerIds }, onResult).send();
         }
         
         /**
@@ -725,7 +725,7 @@
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:  The identified transcript.
          */
-        getAnchors (id, anchorIds, onResult) {
+        getAnchors(id, anchorIds, onResult) {
 	    this.createRequest("getAnchors", { id : id, anchorIds : anchorIds }, onResult).send();
         }
         
@@ -1672,8 +1672,8 @@
                             +JSON.stringify(layerIds)+")");
             }
 	    const xhr = new XMLHttpRequest();            
-            const url = this.baseUrl + "transcripts";            
-	    let queryString = "?todo=export&exportType=csv&layer=graph";
+            const url = this.baseUrl + "api/attributes";            
+	    let queryString = "?layer=transcript";
             for (let id of layerIds) queryString += "&layer="+encodeURIComponent(id);
             for (let id of transcriptIds) queryString += "&id="+encodeURIComponent(id);
             if (exports.verbose) {
@@ -1962,6 +1962,286 @@
                 }, onResult, this.baseUrl+"api/dictionary/suggest").send();
         }
 
+        /**
+         * Process with Praat.
+         * @param {file|string} csv The results file to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {int} transcriptColumn CSV column index of the transcript name. 
+         * @param {int} participantColumn CSV column index of the participant name. 
+         * @param {int} startTimeColumn CSV column index of the start time. 
+         * @param {int} endTimeColumn CSV column index of the end time name. 
+         * @param {number} windowOffset How much surrounsing context to include, in seconds.
+         * @param {boolean} passThroughData Whether to include all CSV columns from the
+         * input file in the output file. 
+         * @param {object} measurementParameters Parameters that define what to measure
+         * and output. All parameters are optional, and include:
+         * <dl>
+         *
+         * <dt> extractF1 (boolean) </dt><dd> Extract F1. (default: false) </dd>
+         * <dt> extractF2 (boolean) </dt><dd> Extract F2. (default: false) </dd>
+         * <dt> extractF3 (boolean) </dt><dd> Extract F3. (default: false) </dd>
+         * <dt> samplePoints (string) </dt><dd> Space-delimited series of real
+         *   numbers between 0 and 1, specifying the proportional time points to measure
+         *   formant at. e.g. "0.5" will measure only the mid-point, "0 0.2 0.4 0.6 0.8 1"
+         *   will measure six points evenly spread across the duration of the segment,
+         *   etc. (default: "0.5")</dd>
+         * <dt> formantCeilingDefault (int) </dt><dd> Maximum Formant by default. (default:
+         *   550) </dd>
+         * <dt> formantDifferentiationLayerId (string) </dt><dd> Participant attribute
+         *   layer ID for differentiating formant settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. </dd>
+         * <dt> formantOtherPattern (string[]) </dt><dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   <var>formantDifferentiationLayerId</var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   <var>formantCeilingOther</var> will be used for that participant. </dd>
+         * <dt> formantCeilingOther (int[]) </dt><dd> Values to use as the formant ceiling
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>formantOtherPattern</var></dd>
+         * <dt> scriptFormant (string) </dt><dd> Formant extraction script command.
+         *   (default: "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50") </dd>
+         * 
+         * <dt> useFastTrack (boolean) </dt><dd> Use the FastTrack plugin to generate
+         *   optimum, smoothed formant tracks. (default: false)</dd>
+         * <dt> fastTrackDifferentiationLayerId (string) </dt><dd> Participant attribute
+         *   layer ID for differentiating fastTrack settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. </dd>
+         * <dt> fastTrackOtherPattern (string[]) </dt><dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   <var>fastTrackDifferentiationLayerId</var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   <var>fastTrackCeilingOther</var> will be used for that participant. </dd>
+         * <dt> fastTrackLowestAnalysisFrequencyDefault (int) </dt><dd> Fast Track lowest
+         *   analysis frequency by default. </dd>
+         * <dt> fastTrackLowestAnalysisFrequencyOther (int[]) </dt><dd> Values to use as
+         *   the Fast Track lowest analysis frequency for participants who's attribute
+         *   value matches the corresponding regular expression in
+         *   <var>fastTrackOtherPattern</var>.</dd> 
+         * <dt> fastTrackHighestAnalysisFrequencyDefault (int) </dt><dd> Fast Track highest
+         *   analysis frequency by default. </dd>
+         * <dt> fastTrackHighestAnalysisFrequencyOther (int[]) </dt><dd> Values to use as
+         *   the Fast Track highest analysis frequency for participants who's attribute
+         *   value matches the corresponding regular expression in
+         *   <var>fastTrackOtherPattern</var>.</dd> 
+         * <dt> fastTrackTimeStep </dt>
+         *       <dd> Fast Track time_step global setting. </dd>
+         * <dt> fastTrackBasisFunctions </dt>
+         *       <dd> Fast Track basis_functions global setting - "dct". </dd>
+         * <dt> fastTrackErrorMethod </dt>
+         *       <dd> Fast Track error_method global setting - "mae". </dd>
+         * <dt> fastTrackTrackingMethod </dt>
+         *       <dd> Fast Track tracking_method parameter for trackAutoselectProcedure; "burg" or
+         *       "robust". </dd> 
+         * <dt> fastTrackEnableF1FrequencyHeuristic ("true" or "false") </dt>
+         *       <dd> Fast Track enable_F1_frequency_heuristic global setting. </dd>
+         * <dt> fastTrackMaximumF1FrequencyValue </dt>
+         *       <dd> Fast Track maximum_F1_frequency_value global setting. </dd>
+         * <dt> fastTrackEnableF1BandwidthHeuristic </dt>
+         *       <dd> Fast Track enable_F1_bandwidth_heuristic global setting. </dd>
+         * <dt> fastTrackMaximumF1BandwidthValue </dt>
+         *       <dd> Fast Track maximum_F1_bandwidth_value global setting. </dd>
+         * <dt> fastTrackEnableF2BandwidthHeuristic ("true" or "false") </dt>
+         *       <dd> Fast Track enable_F2_bandwidth_heuristic global setting. </dd>
+         * <dt> fastTrackMaximumF2BandwidthValue </dt>
+         *       <dd> Fast Track maximum_F2_bandwidth_value global setting. </dd>
+         * <dt> fastTrackEnableF3BandwidthHeuristic ("true" or "false") </dt>
+         *       <dd> Fast Track enable_F3_bandwidth_heuristic global setting.. </dd>
+         * <dt> fastTrackMaximumF3BandwidthValue </dt>
+         *       <dd> Fast Track maximum_F3_bandwidth_value global setting. </dd>
+         * <dt> fastTrackEnableF4FrequencyHeuristic ("true" or "false") </dt>
+         *       <dd> Fast Track enable_F4_frequency_heuristic global setting. </dd>
+         * <dt> fastTrackMinimumF4FrequencyValue </dt>
+         *       <dd> Fast Track minimum_F4_frequency_value global setting. </dd>
+         * <dt> fastTrackEnableRhoticHeuristic ("true" of "false") </dt>
+         *       <dd> Fast Track enable_rhotic_heuristic global setting. </dd>
+         * <dt> fastTrackEnableF3F4ProximityHeuristic </dt>
+         *       <dd> Fast Track enable_F3F4_proximity_heuristic global setting. </dd>
+         * <dt> fastTrackNumberOfSteps </dt>
+         *       <dd> Fast Track number of steps. </dd>
+         * <dt> fastTrackNumberOfCoefficients </dt>
+         *       <dd> Fast Track number of coefficients for the regression function. </dd>
+         * <dt> fastTrackNumberOfFormants </dt>
+         *       <dd> Fast Track number of formants. </dd>
+         * <dt> fastTrackCoefficients ("true" or "false") </dt>
+         *       <dd> Whether to return the regression coefficients from FastTrack. </dd>
+         * 
+         * <dt> extractMinimumPitch (boolean) </dt><dd> Extract minimum pitch. 
+         *   (default: false) </dd>
+         * <dt> extractMeanPitch (boolean) </dt><dd> Extract mean pitch. (default: false) </dd>
+         * <dt> extractMaximumPitch (boolean) </dt><dd> Extract maximum pitch. 
+         *   (default: false) </dd>
+         * <dt> pitchFloorDefault (int) </dt><dd> Pitch Floor by default. (default: 60) </dd>
+         * <dt> pitchCeilingDefault (int) </dt><dd> Pitch Ceiling by default. (default: 500) </dd>
+         * <dt> voicingThresholdDefault (number) </dt><dd> Voicing Threshold by default. 
+         *   (default: 0.5) </dd>
+         * <dt> pitchDifferentiationLayerId (string) </dt><dd> Participant attribute
+         *   layer ID for differentiating pitch settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. </dd>
+         * <dt> pitchOtherPattern (string[]) </dt><dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   <var>pitchDifferentiationLayerId</var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   <var>pitchFloorOther</var>, <var>pitchCeilingOther</var>, and
+         *   <var>voicingThresholdOther</var> will be used for that participant. </dd> 
+         * <dt> pitchFloorOther (int[]) </dt><dd> Values to use as the pitch floor
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>pitchOtherPattern</var></dd>
+         * <dt> pitchCeilingOther (int[]) </dt><dd> Values to use as the pitch ceiling
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>pitchOtherPattern</var></dd>
+         * <dt> voicingThresholdOther (int[]) </dt><dd> Values to use as the voicing threshold
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>pitchOtherPattern</var></dd>
+         * <dt> scriptPitch (string) </dt><dd> Pitch extraction script command.
+         *   (default: 
+         * "To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling") </dd>
+         * 
+         * <dt> extractMaximumIntensity (boolean) </dt><dd> Extract maximum intensity. 
+         *   (default: false) </dd>
+         * <dt> intensityPitchFloorDefault (int) </dt><dd> Pitch Floor by default. 
+         *   (default: 60) </dd>
+         * <dt> intensityDifferentiationLayerId (string) </dt><dd> Participant attribute
+         *   layer ID for differentiating intensity settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. </dd>
+         * <dt> intensityOtherPattern (string[]) </dt><dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   <var>intensityDifferentiationLayerId</var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   <var>intensityPitchFloorOther</var> will be used for that participant. </dd> 
+         * <dt> intensityPitchFloorOther (int[]) </dt><dd> Values to use as the pitch floor
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in <var>intensityPitchOtherPattern</var></dd>
+         * <dt> scriptIntensity (string) </dt><dd> Pitch extraction script command.
+         *   (default: "To Intensity... intensityPitchFloor 0 yes") </dd>
+         * 
+         * <dt> extractCOG1 (boolean) </dt><dd> Extract COG 1. (default: false) </dd>
+         * <dt> extractCOG2 (boolean) </dt><dd> Extract COG 2. (default: false) </dd>
+         * <dt> extractCOG23 (boolean) </dt><dd> Extract COG 2/3. (default: false) </dd>
+         *
+         * <dt> script (string) </dt><dd> A user-specified custom Praat script to execute
+         *   on each segment. </dd> 
+         * <dt> attributes (string[]) </dt><dd> A list of participant attribute layer IDs
+         *   to include as variables for the custom Praat <var>script</var>. </dd> 
+         * </dl>
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: An object with one attribute,
+         * <var>threadId</var>. 
+         * @param onProgress Invoked on XMLHttpRequest progress.
+         */
+        praat(
+            csv, transcriptColumn, participantColumn, startTimeColumn, endTimeColumn,
+            windowOffset, passThroughData, measurementParameters,
+            onResult, onProgress) {
+                        
+            if (exports.verbose) {
+                console.log(
+                    "praat("
+                        +csv+", "+transcriptColumn+", "+participantColumn+", "
+                        +startTimeColumn+", "+endTimeColumn+", "+windowOffset+", "
+                        +passThroughData+", "+JSON.stringify(measurementParameters)+")");
+            }
+
+            // create form
+            var fd = new FormData();
+            fd.append("transcriptColumn", transcriptColumn);
+            fd.append("participantColumn", participantColumn);
+            fd.append("startTimeColumn", startTimeColumn);
+            fd.append("endTimeColumn", endTimeColumn);
+            fd.append("windowOffset", windowOffset);
+            for (var parameter in measurementParameters) {
+                var value = measurementParameters[parameter];
+                if (Array.isArray(value)) {
+                    for (var element of value) {
+                        fd.append(parameter, element);
+                    } // next element
+                } else { // simple value
+                    fd.append(parameter, value);
+                }
+            } // next parameter
+
+            if (!runningOnNode) {	
+	        fd.append("csv", csv);
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "praat";
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);	        
+	        xhr.upload.addEventListener("progress", onProgress, false);
+	        xhr.open("POST", this.baseUrl + "api/praat");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+                var csvName = csv.replace(/.*\//g, "");
+                if (exports.verbose) console.log("csvName: " + csvName);
+	        fd.append("csv", 
+		          fs.createReadStream(csv).on('error', function(){
+		              onResult(null, ["Invalid file: " + csvName], [], "praat", csvName);
+		          }), csvName);
+
+	        var urlParts = parseUrl(this.baseUrl + "api/praat");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username && password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "api/praat");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+			        onResult(result, errors, messages, "getMatchAnnotations");
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "praat");
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
