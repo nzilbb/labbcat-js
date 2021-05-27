@@ -278,7 +278,9 @@
 	    var queryString = "";
 	    if (parameters) {
 	        for (var key in parameters) {
-		    if (parameters[key]) {
+		    if (parameters[key] // parameter is not false-ish
+                        || parameters[key] === "" // or it's an empty string
+                        || parameters[key] == 0) { // or it's 0
   		        if (parameters[key].constructor === Array) {
 			    for (var i in parameters[key]) {
 			        queryString += "&amp;"+key+"="+encodeURIComponent(parameters[key][i])
@@ -439,12 +441,18 @@
          * Gets the participant record specified by the given identifier.
          * @param id The ID of the participant, which could be their name or their
          * database annotation ID. 
+         * @param layerIds The IDs of the participant attribute layers to load, or null if only
+         * participant data is required. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be:   An annotation representing the participant,
          * or null if the participant was not found.
          */
-        getParticipant(id, onResult) {
-	    this.createRequest("getParticipant", {id : id}, onResult).send();
+        getParticipant(id, layerIds, onResult) {
+            if (typeof layerIds === "function") { // (id, onResult)
+                onResult = layerIds;
+                layerIds = null;
+            }
+	    this.createRequest("getParticipant", {id : id, layerIds : layerIds}, onResult).send();
         }
         
         /**
@@ -729,13 +737,13 @@
         /**
          * Gets a transcript given its ID, containing only the given layers.
          * @param {string} id The given transcript ID.
-         * @param {string[]} layerId The IDs of the layers to load, or null for all
+         * @param {string[]} layerIds The IDs of the layers to load, or null for all
          * layers. If only transcript data is required, set this to ["graph"]. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be:  The identified transcript.
          */
-        getTranscript (id, layerId, onResult) {
-	    this.createRequest("getTranscript", { id : id, layerId : layerId }, onResult).send();
+        getTranscript(id, layerIds, onResult) {
+	    this.createRequest("getTranscript", { id : id, layerIds : layerIds }, onResult).send();
         }
         
         /**
@@ -745,7 +753,7 @@
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be:  The identified transcript.
          */
-        getAnchors (id, anchorIds, onResult) {
+        getAnchors(id, anchorIds, onResult) {
 	    this.createRequest("getAnchors", { id : id, anchorIds : anchorIds }, onResult).send();
         }
         
@@ -857,7 +865,7 @@
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         releaseTask(id, onResult) {
-            if (exports.verbose) console.log("releaseTask("+threadId+")");
+            if (exports.verbose) console.log("releaseTask("+id+")");
             this.createRequest("releaseTask", {
                 threadId : id,
                 command : "release"
@@ -973,13 +981,16 @@
          * anchor confidence &amp;ge; 50, false to search include un-aligned words as well. 
          * @param {int} [matchesPerTranscript=null] Optional maximum number of matches per
          * transcript to return. &lt;tt>null&lt;/tt> means all matches.
+         * @param {int} [overlapThreshold=null] Optional percentage overlap with other
+         * utterances before simultaneous speech is excluded. &lt;tt>null&lt;/tt> means include
+         * all overlapping utterances.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * &lt;var>result&lt;/var> which will be: An object with one attribute, "threadId",
          * which identifies the resulting task, which can be passed to 
          * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
          * {@link LabbcatView#waitForTask}, etc.
          */
-        search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, onResult) {
+        search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
             if (typeof participantIds === "function") { // (pattern, onResult)
                 onResult = participantIds;
                 participantIds = null;
@@ -987,6 +998,7 @@
                 mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
+                overlapThreshold = null;
             } else if (typeof transcriptTypes === "function") {
                 // (pattern, participantIds, onResult)
                 onResult = transcriptTypes;
@@ -994,6 +1006,7 @@
                 mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
+                overlapThreshold = null;
             } else if (typeof transcriptTypes === "boolean") {
                 // (pattern, participantIds, mainParticipant, aligned,
                 // matchesPerTranscript, onResult) 
@@ -1002,6 +1015,7 @@
                 aligned = mainParticipant;
                 mainParticipant = transcriptTypes;
                 transcriptTypes = null;
+                overlapThreshold = null;
             }
             if (typeof aligned === "function") {
                 // (pattern, participantIds, mainParticipant, onResult)
@@ -1009,14 +1023,28 @@
                 onResult = aligned;
                 aligned = false;
                 matchesPerTranscript = null;
+                overlapThreshold = null;
+            }
+            if (typeof matchesPerTranscript === "function") {
+                // (pattern, participantIds, mainParticipant, aligned, onResult)
+                // i.e. the original signature of this function
+                onResult = matchesPerTranscript;
+                matchesPerTranscript = null;
+                overlapThreshold = null;
+            }
+            if (typeof overlapThreshold === "function") {
+                // (pattern, participantIds, mainParticipant, aligned, matchesPerTranscript, onResult)
+                onResult = overlapThreshold;
+                overlapThreshold = null;
             }
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
                             +", "+JSON.stringify(participantIds)
                             +", "+JSON.stringify(transcriptTypes)
-                            +", "+mainParticipant+")"
-                            +", "+aligned+")"
-                            +", "+matchesPerTranscript+")");
+                            +", "+mainParticipant
+                            +", "+aligned
+                            +", "+matchesPerTranscript
+                            +", "+overlapThreshold+")");
             }
 
             // first normalize the pattern...
@@ -1055,9 +1083,62 @@
             if (matchesPerTranscript) parameters.matches_per_transcript = matchesPerTranscript;
             if (participantIds) parameters.participant_id = participantIds;
             if (transcriptTypes) parameters.transcript_type = transcriptTypes;
+            if (overlapThreshold) parameters.overlap_threshold = overlapThreshold;
 
             this.createRequest(
                 "search", null, onResult, this.baseUrl+"search",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString(parameters));
+        }
+        
+        /**
+         * Identifies all utterances by the given participants.
+         * @param {string[]} participantIds A list of participant IDs to identify
+         * the utterances of.
+         * @param {string[]} [transcriptTypes=null] An optional list of transcript types to limit
+         * the results to. If null, all transcript types will be searched. 
+         * @param {boolean} [mainParticipant=true] true to search only main-participant
+         * utterances, false to search all utterances. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: An object with one attribute, "threadId",
+         * which identifies the resulting task, which can be passed to 
+         * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
+         * {@link LabbcatView#waitForTask}, etc.
+         */
+        allUtterances(participantIds, transcriptTypes, mainParticipant, onResult) {
+            if (typeof transcriptTypes === "function") { // (participantIds, onResult)
+                onResult = transcriptTypes;
+                transcriptTypes = null;
+                mainParticipant = true;
+            } else if (typeof mainParticipant === "function") {
+                // (participantIds, transcriptTypes, onResult)
+                onResult = mainParticipant;
+                mainParticipant = true;
+            } else if (typeof transcriptTypes === "boolean") {
+                // (participantIds, mainParticipant, onResult) 
+                onResult = mainParticipant;
+                mainParticipant = transcriptTypes;
+                transcriptTypes = null;
+            }
+            if (exports.verbose) {
+                console.log("allUtterances("+JSON.stringify(participantIds)
+                            +", "+JSON.stringify(transcriptTypes)
+                            +", "+mainParticipant+")");
+            }
+
+            // first normalize the pattern...
+
+            const parameters = {
+                list : "list",
+                id : participantIds,
+            }
+            if (mainParticipant) parameters.only_main_speaker = true;
+            if (transcriptTypes) parameters.transcript_type = transcriptTypes;
+            if (exports.verbose) console.log(JSON.stringify(parameters));
+
+            this.createRequest(
+                "allUtterances", null, onResult, this.baseUrl+"allUtterances",
                 "POST", // not GET, because the number of parameters can make the URL too long
                 null, "application/x-www-form-urlencoded")
                 .send(this.parametersToQueryString(parameters));
@@ -1413,7 +1494,7 @@
                             }
                         }
                         const filePath = path.join(dir, fileName);
-                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                        fs.writeFile(filePath, Buffer.from(this.response), function(err) {
                             if (err) {
                                 if (exports.verbose) {
                                     console.log("getSoundFragments "+i+" SAVE ERROR: "+err);
@@ -1571,7 +1652,7 @@
                             }
                         }
                         const filePath = path.join(dir, fileName);
-                        fs.writeFile(filePath, new Buffer(this.response), function(err) {
+                        fs.writeFile(filePath, Buffer.from(this.response), function(err) {
                             if (err) {
                                 if (exports.verbose) {
                                     console.log("getFragments "+i+" SAVE ERROR: "+err);
@@ -1619,8 +1700,8 @@
                             +JSON.stringify(layerIds)+")");
             }
 	    const xhr = new XMLHttpRequest();            
-            const url = this.baseUrl + "transcripts";            
-	    let queryString = "?todo=export&amp;exportType=csv&amp;layer=graph";
+            const url = this.baseUrl + "api/attributes";            
+	    let queryString = "?layer=transcript";
             for (let id of layerIds) queryString += "&amp;layer="+encodeURIComponent(id);
             for (let id of transcriptIds) queryString += "&amp;id="+encodeURIComponent(id);
             if (exports.verbose) {
@@ -1648,7 +1729,7 @@
                 if (exports.verbose) {
                     console.log("getTranscriptAttributes loaded. " + JSON.stringify(this.response));
                 }
-                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                fs.writeFile(fileName, Buffer.from(xhr.responseText), function(err) {
                     if (exports.verbose) {
                         console.log("getTranscriptAttributes wrote file " + fileName);
                     }
@@ -1720,7 +1801,7 @@
                 if (exports.verbose) {
                     console.log("getParticipantAttributes loaded. " + JSON.stringify(this.response));
                 }
-                fs.writeFile(fileName, new Buffer(xhr.responseText), function(err) {
+                fs.writeFile(fileName, Buffer.from(xhr.responseText), function(err) {
                     if (exports.verbose) {
                         console.log("getParticipantAttributes wrote file " + fileName);
                     }
@@ -1775,6 +1856,18 @@
         }
 
         /**
+         * Lists the descriptors of all registered transcribers.
+         * &lt;p> Transcribers are modules that perform automated transcription of recordings
+         * that have not alreadye been transcribed.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: A list of the descriptors of all registered
+         * transcribers. 
+         */
+        getTranscriberDescriptors(onResult) {
+	    this.createRequest("getTranscriberDescriptors", null, onResult).send();
+        }
+        
+        /**
          * Gets the value of the given system attribute.
          * @param {string} attribute Name of the attribute.
          * @param {resultCallback} onResult Invoked when the request has returned a
@@ -1783,6 +1876,33 @@
         getSystemAttribute(attribute, onResult) {
             this.createRequest(
                 "systemattributes", null, onResult, this.baseUrl+"api/systemattributes/" + attribute)
+                .send();
+        }
+        
+        /**
+         * Gets a list of currently-installed layer managers.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: an array of objects with the following
+         * structure:
+         * &lt;ul>
+         *  &lt;li> &lt;q> layer_manager_id &lt;/q> : ID of the layer manager. &lt;/li>
+         *  &lt;li> &lt;q> version &lt;/q> : The version of the installed implementation. &lt;/li>
+         *  &lt;li> &lt;q> name &lt;/q> : The name for the layer manager. &lt;/li>
+         *  &lt;li> &lt;q> description &lt;/q> : A brief description of what the layer manager does. &lt;/li>
+         *  &lt;li> &lt;q> layer_type &lt;/q> : What kinds of layers the layer manager can process - a
+         *           string composed of any of the following:
+         *            &lt;ul>
+         *             &lt;li>&lt;b> S &lt;/b> - segment layers &lt;/li>
+         *             &lt;li>&lt;b> W &lt;/b> - word layers &lt;/li>
+         *             &lt;li>&lt;b> M &lt;/b> - phrase (meta) layers &lt;/li>
+         *             &lt;li>&lt;b> F &lt;/b> - span (freeform) layers &lt;/li>
+         *            &lt;/ul>
+         *  &lt;/li>
+         * &lt;/ul>
+         */
+        getLayerManagers(onResult) {
+            this.createRequest(
+                "layermanagers", null, onResult, this.baseUrl+"api/layers/managers")
                 .send();
         }
         
@@ -1799,6 +1919,357 @@
                 .send();
         }
 
+        /**
+         * For HTK dictionary-filling, this starts a task (returning it's threadId) that
+         * traverses the given utterances, looking for missing word pronunciations
+         * @param {string} seriesId search.search_id for identifying the utterances
+         * @param {string} tokenLayerId token layer ("orthography")
+         * @param {string} annotationLayerId tokens with missing annotations on this layer
+         * should be returned ("phonemes") the "model" returned is the threadId of the task
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: the threadId of the task.
+         * {@link LabbcatView#taskStatus} can be used to follow the progress of the task
+         * until it's finished. Once done, the resultUrl can be invoked, which returns a
+         * map from token labels to token IDs (one per type) i.e. the word that's missing,
+         * with an ID for finding its first occurance 
+         */
+        missingAnnotations(seriesId, tokenLayerId, annotationLayerId, fragmentIds, onResult) {
+            if (typeof fragmentIds === "function") {
+                // (seriesId, tokenLayerId, annotationLayerId, onResult)
+                onProgress = fragmentIds;
+                fragmentIds = null;
+            }
+            this.createRequest(
+                "missingAnnotations", {
+                    seriesId : seriesId,
+                    utterance : fragmentIds,
+                    tokenLayerId : tokenLayerId,
+                    annotationLayerId : annotationLayerId
+                }, onResult, this.baseUrl+"api/missingAnnotations").send();
+        }
+
+        /**
+         * For HTK dictionary-filling, this looks up some given words to get their entries.
+         * @param {string} layerId The dictionary of this layer will be used.
+         * @param {string} labels Space-separated list of words to look up.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: an object with the following structure:
+         * returned has the following structure:
+         * &lt;ul>
+         *  &lt;li>&lt;b> words &lt;/b> - object where each key is the word, and each value is an
+         *                       array of entries for that word 
+         *  &lt;li>&lt;b> combined &lt;/b> - the first entry of each word, concatenated together
+         *                          with a hyphen separator
+         * &lt;/ul>
+         */
+        dictionaryLookup(layerId, labels, onResult) {
+            this.createRequest(
+                "lookup", {
+                    layerId : layerId,
+                    labels : labels
+                }, onResult, this.baseUrl+"api/dictionary/lookup").send();
+        }
+
+        /**
+         * For HTK dictionary-filling, this uses a layer dictionary to suggest missing entries.
+         * @param {string} layerId The dictionary of this layer will be used.
+         * @param {string} labels Space-separated list of words to suggest entries for.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var> which will be: an object with the following structure:
+         * returned has the following structure:
+         * &lt;ul>
+         *  &lt;li>&lt;b> words &lt;/b> - object where each key is the word, and each value is a
+         *                       array of suggestions for that word (with 0 or 1 elements)
+         * &lt;/ul>
+         */
+        dictionarySuggest(layerId, labels, onResult) {
+            this.createRequest(
+                "suggest", {
+                    layerId : layerId,
+                    labels : labels
+                }, onResult, this.baseUrl+"api/dictionary/suggest").send();
+        }
+
+        /**
+         * Process with Praat.
+         * @param {file|string} csv The results file to upload. In a browser, this
+         * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {int} transcriptColumn CSV column index of the transcript name. 
+         * @param {int} participantColumn CSV column index of the participant name. 
+         * @param {int} startTimeColumn CSV column index of the start time. 
+         * @param {int} endTimeColumn CSV column index of the end time name. 
+         * @param {number} windowOffset How much surrounsing context to include, in seconds.
+         * @param {boolean} passThroughData Whether to include all CSV columns from the
+         * input file in the output file. 
+         * @param {object} measurementParameters Parameters that define what to measure
+         * and output. All parameters are optional, and include:
+         * &lt;dl>
+         *
+         * &lt;dt> extractF1 (boolean) &lt;/dt>&lt;dd> Extract F1. (default: false) &lt;/dd>
+         * &lt;dt> extractF2 (boolean) &lt;/dt>&lt;dd> Extract F2. (default: false) &lt;/dd>
+         * &lt;dt> extractF3 (boolean) &lt;/dt>&lt;dd> Extract F3. (default: false) &lt;/dd>
+         * &lt;dt> samplePoints (string) &lt;/dt>&lt;dd> Space-delimited series of real
+         *   numbers between 0 and 1, specifying the proportional time points to measure
+         *   formant at. e.g. "0.5" will measure only the mid-point, "0 0.2 0.4 0.6 0.8 1"
+         *   will measure six points evenly spread across the duration of the segment,
+         *   etc. (default: "0.5")&lt;/dd>
+         * &lt;dt> formantCeilingDefault (int) &lt;/dt>&lt;dd> Maximum Formant by default. (default:
+         *   550) &lt;/dd>
+         * &lt;dt> formantDifferentiationLayerId (string) &lt;/dt>&lt;dd> Participant attribute
+         *   layer ID for differentiating formant settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. &lt;/dd>
+         * &lt;dt> formantOtherPattern (string[]) &lt;/dt>&lt;dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   &lt;var>formantDifferentiationLayerId&lt;/var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   &lt;var>formantCeilingOther&lt;/var> will be used for that participant. &lt;/dd>
+         * &lt;dt> formantCeilingOther (int[]) &lt;/dt>&lt;dd> Values to use as the formant ceiling
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in &lt;var>formantOtherPattern&lt;/var>&lt;/dd>
+         * &lt;dt> scriptFormant (string) &lt;/dt>&lt;dd> Formant extraction script command.
+         *   (default: "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50") &lt;/dd>
+         * 
+         * &lt;dt> useFastTrack (boolean) &lt;/dt>&lt;dd> Use the FastTrack plugin to generate
+         *   optimum, smoothed formant tracks. (default: false)&lt;/dd>
+         * &lt;dt> fastTrackDifferentiationLayerId (string) &lt;/dt>&lt;dd> Participant attribute
+         *   layer ID for differentiating fastTrack settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. &lt;/dd>
+         * &lt;dt> fastTrackOtherPattern (string[]) &lt;/dt>&lt;dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   &lt;var>fastTrackDifferentiationLayerId&lt;/var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   &lt;var>fastTrackCeilingOther&lt;/var> will be used for that participant. &lt;/dd>
+         * &lt;dt> fastTrackLowestAnalysisFrequencyDefault (int) &lt;/dt>&lt;dd> Fast Track lowest
+         *   analysis frequency by default. &lt;/dd>
+         * &lt;dt> fastTrackLowestAnalysisFrequencyOther (int[]) &lt;/dt>&lt;dd> Values to use as
+         *   the Fast Track lowest analysis frequency for participants who's attribute
+         *   value matches the corresponding regular expression in
+         *   &lt;var>fastTrackOtherPattern&lt;/var>.&lt;/dd> 
+         * &lt;dt> fastTrackHighestAnalysisFrequencyDefault (int) &lt;/dt>&lt;dd> Fast Track highest
+         *   analysis frequency by default. &lt;/dd>
+         * &lt;dt> fastTrackHighestAnalysisFrequencyOther (int[]) &lt;/dt>&lt;dd> Values to use as
+         *   the Fast Track highest analysis frequency for participants who's attribute
+         *   value matches the corresponding regular expression in
+         *   &lt;var>fastTrackOtherPattern&lt;/var>.&lt;/dd> 
+         * &lt;dt> fastTrackTimeStep &lt;/dt>
+         *       &lt;dd> Fast Track time_step global setting. &lt;/dd>
+         * &lt;dt> fastTrackBasisFunctions &lt;/dt>
+         *       &lt;dd> Fast Track basis_functions global setting - "dct". &lt;/dd>
+         * &lt;dt> fastTrackErrorMethod &lt;/dt>
+         *       &lt;dd> Fast Track error_method global setting - "mae". &lt;/dd>
+         * &lt;dt> fastTrackTrackingMethod &lt;/dt>
+         *       &lt;dd> Fast Track tracking_method parameter for trackAutoselectProcedure; "burg" or
+         *       "robust". &lt;/dd> 
+         * &lt;dt> fastTrackEnableF1FrequencyHeuristic ("true" or "false") &lt;/dt>
+         *       &lt;dd> Fast Track enable_F1_frequency_heuristic global setting. &lt;/dd>
+         * &lt;dt> fastTrackMaximumF1FrequencyValue &lt;/dt>
+         *       &lt;dd> Fast Track maximum_F1_frequency_value global setting. &lt;/dd>
+         * &lt;dt> fastTrackEnableF1BandwidthHeuristic &lt;/dt>
+         *       &lt;dd> Fast Track enable_F1_bandwidth_heuristic global setting. &lt;/dd>
+         * &lt;dt> fastTrackMaximumF1BandwidthValue &lt;/dt>
+         *       &lt;dd> Fast Track maximum_F1_bandwidth_value global setting. &lt;/dd>
+         * &lt;dt> fastTrackEnableF2BandwidthHeuristic ("true" or "false") &lt;/dt>
+         *       &lt;dd> Fast Track enable_F2_bandwidth_heuristic global setting. &lt;/dd>
+         * &lt;dt> fastTrackMaximumF2BandwidthValue &lt;/dt>
+         *       &lt;dd> Fast Track maximum_F2_bandwidth_value global setting. &lt;/dd>
+         * &lt;dt> fastTrackEnableF3BandwidthHeuristic ("true" or "false") &lt;/dt>
+         *       &lt;dd> Fast Track enable_F3_bandwidth_heuristic global setting.. &lt;/dd>
+         * &lt;dt> fastTrackMaximumF3BandwidthValue &lt;/dt>
+         *       &lt;dd> Fast Track maximum_F3_bandwidth_value global setting. &lt;/dd>
+         * &lt;dt> fastTrackEnableF4FrequencyHeuristic ("true" or "false") &lt;/dt>
+         *       &lt;dd> Fast Track enable_F4_frequency_heuristic global setting. &lt;/dd>
+         * &lt;dt> fastTrackMinimumF4FrequencyValue &lt;/dt>
+         *       &lt;dd> Fast Track minimum_F4_frequency_value global setting. &lt;/dd>
+         * &lt;dt> fastTrackEnableRhoticHeuristic ("true" of "false") &lt;/dt>
+         *       &lt;dd> Fast Track enable_rhotic_heuristic global setting. &lt;/dd>
+         * &lt;dt> fastTrackEnableF3F4ProximityHeuristic &lt;/dt>
+         *       &lt;dd> Fast Track enable_F3F4_proximity_heuristic global setting. &lt;/dd>
+         * &lt;dt> fastTrackNumberOfSteps &lt;/dt>
+         *       &lt;dd> Fast Track number of steps. &lt;/dd>
+         * &lt;dt> fastTrackNumberOfCoefficients &lt;/dt>
+         *       &lt;dd> Fast Track number of coefficients for the regression function. &lt;/dd>
+         * &lt;dt> fastTrackNumberOfFormants &lt;/dt>
+         *       &lt;dd> Fast Track number of formants. &lt;/dd>
+         * &lt;dt> fastTrackCoefficients ("true" or "false") &lt;/dt>
+         *       &lt;dd> Whether to return the regression coefficients from FastTrack. &lt;/dd>
+         * 
+         * &lt;dt> extractMinimumPitch (boolean) &lt;/dt>&lt;dd> Extract minimum pitch. 
+         *   (default: false) &lt;/dd>
+         * &lt;dt> extractMeanPitch (boolean) &lt;/dt>&lt;dd> Extract mean pitch. (default: false) &lt;/dd>
+         * &lt;dt> extractMaximumPitch (boolean) &lt;/dt>&lt;dd> Extract maximum pitch. 
+         *   (default: false) &lt;/dd>
+         * &lt;dt> pitchFloorDefault (int) &lt;/dt>&lt;dd> Pitch Floor by default. (default: 60) &lt;/dd>
+         * &lt;dt> pitchCeilingDefault (int) &lt;/dt>&lt;dd> Pitch Ceiling by default. (default: 500) &lt;/dd>
+         * &lt;dt> voicingThresholdDefault (number) &lt;/dt>&lt;dd> Voicing Threshold by default. 
+         *   (default: 0.5) &lt;/dd>
+         * &lt;dt> pitchDifferentiationLayerId (string) &lt;/dt>&lt;dd> Participant attribute
+         *   layer ID for differentiating pitch settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. &lt;/dd>
+         * &lt;dt> pitchOtherPattern (string[]) &lt;/dt>&lt;dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   &lt;var>pitchDifferentiationLayerId&lt;/var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   &lt;var>pitchFloorOther&lt;/var>, &lt;var>pitchCeilingOther&lt;/var>, and
+         *   &lt;var>voicingThresholdOther&lt;/var> will be used for that participant. &lt;/dd> 
+         * &lt;dt> pitchFloorOther (int[]) &lt;/dt>&lt;dd> Values to use as the pitch floor
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in &lt;var>pitchOtherPattern&lt;/var>&lt;/dd>
+         * &lt;dt> pitchCeilingOther (int[]) &lt;/dt>&lt;dd> Values to use as the pitch ceiling
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in &lt;var>pitchOtherPattern&lt;/var>&lt;/dd>
+         * &lt;dt> voicingThresholdOther (int[]) &lt;/dt>&lt;dd> Values to use as the voicing threshold
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in &lt;var>pitchOtherPattern&lt;/var>&lt;/dd>
+         * &lt;dt> scriptPitch (string) &lt;/dt>&lt;dd> Pitch extraction script command.
+         *   (default: 
+         * "To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling") &lt;/dd>
+         * 
+         * &lt;dt> extractMaximumIntensity (boolean) &lt;/dt>&lt;dd> Extract maximum intensity. 
+         *   (default: false) &lt;/dd>
+         * &lt;dt> intensityPitchFloorDefault (int) &lt;/dt>&lt;dd> Pitch Floor by default. 
+         *   (default: 60) &lt;/dd>
+         * &lt;dt> intensityDifferentiationLayerId (string) &lt;/dt>&lt;dd> Participant attribute
+         *   layer ID for differentiating intensity settings; this will typically be
+         *   "participant_gender" but can be any participant attribute layer. &lt;/dd>
+         * &lt;dt> intensityOtherPattern (string[]) &lt;/dt>&lt;dd> Array of regular expression
+         *   strings to match against the value of that attribute identified by
+         *   &lt;var>intensityDifferentiationLayerId&lt;/var>. If the participant's attribute value
+         *   matches the pattern for an element in this array, the corresponding element in
+         *   &lt;var>intensityPitchFloorOther&lt;/var> will be used for that participant. &lt;/dd> 
+         * &lt;dt> intensityPitchFloorOther (int[]) &lt;/dt>&lt;dd> Values to use as the pitch floor
+         *   for participants who's attribute value matches the corresponding regular
+         *   expression in &lt;var>intensityPitchOtherPattern&lt;/var>&lt;/dd>
+         * &lt;dt> scriptIntensity (string) &lt;/dt>&lt;dd> Pitch extraction script command.
+         *   (default: "To Intensity... intensityPitchFloor 0 yes") &lt;/dd>
+         * 
+         * &lt;dt> extractCOG1 (boolean) &lt;/dt>&lt;dd> Extract COG 1. (default: false) &lt;/dd>
+         * &lt;dt> extractCOG2 (boolean) &lt;/dt>&lt;dd> Extract COG 2. (default: false) &lt;/dd>
+         * &lt;dt> extractCOG23 (boolean) &lt;/dt>&lt;dd> Extract COG 2/3. (default: false) &lt;/dd>
+         *
+         * &lt;dt> script (string) &lt;/dt>&lt;dd> A user-specified custom Praat script to execute
+         *   on each segment. &lt;/dd> 
+         * &lt;dt> attributes (string[]) &lt;/dt>&lt;dd> A list of participant attribute layer IDs
+         *   to include as variables for the custom Praat &lt;var>script&lt;/var>. &lt;/dd> 
+         * &lt;/dl>
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: An object with one attribute,
+         * &lt;var>threadId&lt;/var>. 
+         * @param onProgress Invoked on XMLHttpRequest progress.
+         */
+        praat(
+            csv, transcriptColumn, participantColumn, startTimeColumn, endTimeColumn,
+            windowOffset, passThroughData, measurementParameters,
+            onResult, onProgress) {
+                        
+            if (exports.verbose) {
+                console.log(
+                    "praat("
+                        +csv+", "+transcriptColumn+", "+participantColumn+", "
+                        +startTimeColumn+", "+endTimeColumn+", "+windowOffset+", "
+                        +passThroughData+", "+JSON.stringify(measurementParameters)+")");
+            }
+
+            // create form
+            var fd = new FormData();
+            fd.append("transcriptColumn", transcriptColumn);
+            fd.append("participantColumn", participantColumn);
+            fd.append("startTimeColumn", startTimeColumn);
+            fd.append("endTimeColumn", endTimeColumn);
+            fd.append("windowOffset", windowOffset);
+            for (var parameter in measurementParameters) {
+                var value = measurementParameters[parameter];
+                if (Array.isArray(value)) {
+                    for (var element of value) {
+                        fd.append(parameter, element);
+                    } // next element
+                } else { // simple value
+                    fd.append(parameter, value);
+                }
+            } // next parameter
+
+            if (!runningOnNode) {	
+	        fd.append("csv", csv);
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "praat";
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);	        
+	        xhr.upload.addEventListener("progress", onProgress, false);
+	        xhr.open("POST", this.baseUrl + "api/praat");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+                var csvName = csv.replace(/.*\//g, "");
+                if (exports.verbose) console.log("csvName: " + csvName);
+	        fd.append("csv", 
+		          fs.createReadStream(csv).on('error', function(){
+		              onResult(null, ["Invalid file: " + csvName], [], "praat", csvName);
+		          }), csvName);
+
+	        var urlParts = parseUrl(this.baseUrl + "api/praat");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username &amp;&amp; password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "api/praat");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+			        onResult(result, errors, messages, "getMatchAnnotations");
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "praat");
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
@@ -1886,12 +2357,27 @@
         }
         
         /**
-         * Deletes the given transcript, and all assciated media, from the graph store.
+         * Deletes the given transcript, and all associated media, from the graph store.
          * @param {string} id The transcript ID
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         deleteTranscript(id, onResult) {
-	    this.createRequest("deleteTranscript", {id : id}, onResult, null, "POST", this.storeEditUrl).send();
+	    this.createRequest(
+                "deleteTranscript", null, onResult, null, "POST",
+                this.storeEditUrl, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({id : id}));
+        }
+
+        /**
+         * Deletes the given participan, and all assciated meta-data, from the graph store.
+         * @param {string} id The participant ID
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteParticipant(id, onResult) {
+	    this.createRequest(
+                "deleteParticipant", null, onResult, null, "POST",
+                this.storeEditUrl, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({id : id}));
         }
 
         /**
@@ -2168,6 +2654,23 @@
             }
         }
 
+        /**
+         * For HTK dictionary-filling, this adds a new dictionary entry and updates all tokens.
+         * @param {string} layerId The dictionary of this layer will be used.
+         * @param {string} label The word label to add an entry for.
+         * @param {string} label The definition (pronunciation) of the word to add.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * &lt;var>result&lt;/var>.
+         */
+        dictionaryAdd(layerId, label, entry, onResult) {
+            this.createRequest(
+                "add", {
+                    layerId : layerId,
+                    label : label,
+                    entry : entry
+                }, onResult, this.baseUrl+"api/edit/dictionary/add").send();
+        }
+
     } // class LabbcatEdit
     
     // LabbcatAdmin class - read/write "admin" access
@@ -2217,7 +2720,56 @@
         }
         
         /**
-         * Saves changes to a layer, or adds a new layer.
+         * Adds a new layer.
+         * @param {string|object} layer The layer ID, if all the other attribute
+         * parameters are specified, or an object with all the layer attributes, in which case
+         * only &lt;var>onResult&lt;/var> need be specified.
+         * @param {string} parentId The layer's parent layer id.
+         * @param {string} description The description of the layer.
+         * @param {number} alignment The layer's alignment 
+         * - 0 for none, 1 for point alignment, 2 for interval alignment.
+         * @param {boolean} peers Whether children on this layer have peers or not.
+         * @param {boolean} peersOverlap Whether child peers on this layer can overlap or not.
+         * @param {boolean} parentIncludes Whether the parent temporally includes the child.
+         * @param {boolean} saturated Whether children must temporally fill the entire parent
+         * duration (true) or not (false).
+         * @param {string} type The type for labels on this layer, e.g. string, number,
+         * boolean, ipa. 
+         * @param {object} validLabels List of valid label values for this layer, or null 
+         * if the layer values are not restricted. The 'key' is the possible label value, and 
+         * each key is associated with a description of the value (e.g. for displaying to users). 
+         * @param {string} category Category for the layer, if any.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: The resulting layer definition.
+         */
+        newLayer(layer, parentId, description, alignment,
+                  peers, peersOverlap, parentIncludes, saturated, type, validLabels, category,
+                  onResult) {
+            var layerDefinition = {
+                id: layer, parentId: parentId, description: description,
+                alignment: Number(alignment), // ensure a number is passed, not a string
+                peers: Boolean(peers), peersOverlap: Boolean(peersOverlap),
+                parentIncludes: Boolean(parentIncludes), saturated: Boolean(saturated),
+                type: type, validLabels: validLabels, category: category };
+            if (typeof parentId === "function") { // (layerObject, onResult)
+                onResult = parentId;
+                layerDefinition = layer;
+                // ensure important types are converted from strings
+                layerDefinition.alignment = Number(layerDefinition.alignment);
+                layerDefinition.peers = Boolean(layerDefinition.peers);
+                layerDefinition.peers = Boolean(layerDefinition.peers);
+                layerDefinition.peersOverlap = Boolean(layerDefinition.peersOverlap);
+                layerDefinition.parentIncludes = Boolean(layerDefinition.parentIncludes);
+                layerDefinition.saturated = Boolean(layerDefinition.saturated);
+            }
+            this.createRequest(
+                "newLayer", null, onResult, this.storeAdminUrl + "newLayer", "POST",
+                null, "application/json")
+                .send(JSON.stringify(layerDefinition));
+        }
+
+        /**
+         * Saves changes to a layer.
          * @param {string|object} layer The layer ID, if all the other attribute
          * parameters are specified, or an object with all the layer attributes, in which case
          * only &lt;var>onResult&lt;/var> need be specified.
@@ -2243,17 +2795,40 @@
                   peers, peersOverlap, parentIncludes, saturated, type, validLabels, category,
                   onResult) {
             var layerDefinition = {
-                id: layer, parentId: parentId, description: description, alignment: alignment,
-                peers: peers, peersOverlap: peersOverlap, parentIncludes: parentIncludes,
-                saturated: saturated, type: type, validLabels: validLabels, category: category };
+                id: layer, parentId: parentId, description: description,
+                alignment: Number(alignment), // ensure a number is passed, not a string
+                peers: Boolean(peers), peersOverlap: Boolean(peersOverlap),
+                parentIncludes: Boolean(parentIncludes), saturated: Boolean(saturated),
+                type: type, validLabels: validLabels, category: category };
             if (typeof parentId === "function") { // (layerObject, onResult)
                 onResult = parentId;
                 layerDefinition = layer;
+                // ensure important types are converted from strings
+                layerDefinition.alignment = Number(layerDefinition.alignment);
+                layerDefinition.peers = Boolean(layerDefinition.peers);
+                layerDefinition.peers = Boolean(layerDefinition.peers);
+                layerDefinition.peersOverlap = Boolean(layerDefinition.peersOverlap);
+                layerDefinition.parentIncludes = Boolean(layerDefinition.parentIncludes);
+                layerDefinition.saturated = Boolean(layerDefinition.saturated);
             }
             this.createRequest(
                 "saveLayer", null, onResult, this.storeAdminUrl + "saveLayer", "POST",
                 null, "application/json")
                 .send(JSON.stringify(layerDefinition));
+        }
+
+        /**
+         * Deletes the given layer, and all associated annotations.
+         * @param {string|object} id The ID layer to delete.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteLayer(id, onResult) {
+            this.createRequest(
+                "deleteLayer", null, onResult, this.storeAdminUrl + "deleteLayer", "POST",
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    id : id
+                }));
         }
 
         /**
@@ -3062,6 +3637,160 @@
         }
         
         /**
+         * Uploads an transcriber module in preparation for installing it.
+         * @param {string|file} jarFile Transcriber .jar file.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: An object describing the attributes of the
+         * transcriber found in the jar file:
+         * &lt;dl>
+         *  &lt;dt> jar &lt;/dt>&lt;dd> The name of the file uploaded. &lt;/dd>
+         *  &lt;dt> transcriberId &lt;/dt>&lt;dd> The ID of the transcriber. &lt;/dd>
+         *  &lt;dt> version &lt;/dt>&lt;dd> The version of the transcriber implementation. &lt;/dd>
+         *  &lt;dt> installedVersion &lt;/dt>&lt;dd> The version of the transcriber that this one will 
+         *         replace, if the transcriber ID has already been installed. &lt;/dd> 
+         *  &lt;dt> hasConfigWebapp &lt;/dt>&lt;dd> Whether the transcriber has a
+         *         installation/configuration web-app. &lt;/dd>
+         *  &lt;dt> info &lt;/dt>&lt;dd> HTML document describing the transcriber. &lt;/dd>
+         * &lt;/dl>
+         * @param onProgress Invoked on XMLHttpRequest progress.
+         */
+        uploadTranscriber(jarFile, onResult, onProgress) {
+
+            // create form
+            var fd = new FormData();
+
+            // TODO nzibb/labbcat-server/user-interface thinks it's running on Node when actually
+            // it's running in a browser, so we need a better test for runningOnNode
+            if (runningOnNode || true) {                
+                
+	        fd.append("jarFile", jarFile);
+	        // create HTTP request
+	        var xhr = new XMLHttpRequest();
+	        xhr.call = "uploadTranscriber";
+	        xhr.onResult = onResult;
+	        xhr.addEventListener("load", callComplete, false);
+	        xhr.addEventListener("error", callFailed, false);
+	        xhr.addEventListener("abort", callCancelled, false);
+	        xhr.upload.addEventListener("progress", onProgress, false);
+	        
+	        xhr.open("POST", this.baseUrl + "admin/transcriber");
+	        if (this.username) {
+	            xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	        }
+	        xhr.setRequestHeader("Accept", "application/json");
+	        xhr.send(fd);
+            } else { // runningOnNode
+
+	        var jarName = jarFile.replace(/.*\//g, "");
+                if (exports.verbose) console.log("jarName: " + jarName);
+            	fd.append(
+                    "jarFile", 
+		    fs.createReadStream(jarFile).on('error', function(){
+		        onResult(null, ["Invalid jar: " + jarFile], [], "uploadTranscriber", jarFile);
+		    }), jarName);
+                
+	        var urlParts = parseUrl(this.baseUrl + "admin/transcriber");
+	        // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	        var labbcat = this;
+                var password = this._password;
+	        fd.getLength(function(something, contentLength) {
+	            var requestParameters = {
+		        port: urlParts.port,
+		        path: urlParts.pathname,
+		        host: urlParts.hostname,
+		        headers: {
+		            "Accept" : "application/json",
+		            "content-length" : contentLength,
+		            "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		        }
+	            };
+	            if (labbcat.username &amp;&amp; password) {
+		        requestParameters.auth = labbcat.username+':'+password;
+	            }
+	            if (/^https.*/.test(labbcat.baseUrl)) {
+		        requestParameters.protocol = "https:";
+	            }
+                    if (exports.verbose) {
+                        console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+                    }
+	            fd.submit(requestParameters, function(err, res) {
+		        var responseText = "";
+		        if (!err) {
+		            res.on('data',function(buffer) {
+			        //console.log('data ' + buffer);
+			        responseText += buffer;
+		            });
+		            res.on('end',function(){
+                                if (exports.verbose) console.log("response: " + responseText);
+	                        var result = null;
+	                        var errors = null;
+	                        var messages = null;
+			        try {
+			            var response = JSON.parse(responseText);
+			            result = response.model.result || response.model;
+			            errors = response.errors;
+			            if (errors.length == 0) errors = null
+			            messages = response.messages;
+			            if (messages.length == 0) messages = null
+			        } catch(exception) {
+			            result = null
+                                    errors = ["" +exception+ ": " + labbcat.responseText];
+                                    messages = [];
+			        }
+                                // for this call, the result is an object with one key, whose
+                                // value is the threadId - so just return that
+			        onResult(
+                                    result[jarName], errors, messages, "uploadTranscriber", jarName);
+		            });
+		        } else {
+		            onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadTranscriber", jarName);
+		        }
+		        
+		        if (res) res.resume();
+	            });
+	        }); // got length
+            } // runningOnNode
+        }
+        
+        /**
+         * Uploads an transcriber module in preparation for installing it.
+         * @param {string} jar Name of the transcriber .jar file already uploaded, as
+         * specified by the "jar" attribute of the uploadTranscriber() response. 
+         * @param {boolean} install true to install the transcriber, false to cancel the
+         * installation. 
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var> which will be: the transcriber ID if it was installed, and null 
+         * otherwise.
+         */
+        installTranscriber(jar, install, onResult) {
+            this.createRequest(
+                "installTranscriber", null, onResult, this.baseUrl+"admin/transcriber",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    jar : jar,
+                    action : install?"install":"cancel"
+                }));
+        }
+
+        /**
+         * Uploads an transcriber module in preparation for installing it.
+         * @param {string} transcriberId ID of the transcriber to uninstall.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var>.
+         */
+        uninstallTranscriber(transcriberId, onResult) {
+            this.createRequest(
+                "uninstallTranscriber", null, onResult, this.baseUrl+"admin/transcriber",
+                "POST", // not GET, because the number of parameters can make the URL too long
+                null, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString({
+                    transcriberId : transcriberId,
+                    action : "uninstall"
+                }));
+        }
+
+        /**
          * Saves the store's information document.
          * @param {string} html An HTML document with information about the corpus as a whole.
          * @param {resultCallback} onResult Invoked when the request has returned a 
@@ -3174,7 +3903,26 @@
             this.createRequest(
                 "users", null, onResult, `${this.baseUrl}api/admin/users/${user}`,
                 "DELETE").send();
-        }        
+        }
+        
+        /**
+         * Sets a given user's password.
+         * @param {string} user The ID of the user.
+         * @param {string} password The new password.
+         * @param {boolean} resetPassword Whether the user must reset their password when
+         * they next log in. 
+         * @param {resultCallback} onResult Invoked when the request has returned. 
+         */
+        setPassword(user, password, resetPassword, onResult) {
+            if (exports.verbose) console.log("updateUsersetP("+user+", ****, "+resetPassword);
+            this.createRequest(
+                "users", null, onResult, this.baseUrl+"api/admin/password", "PUT")
+                .send(JSON.stringify({
+                    user : user,
+                    password : password,
+                    resetPassword : resetPassword}));
+        }
+        
     }
     
     /**
@@ -3324,7 +4072,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Nov 12 2020 17:21:34 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu May 27 2021 18:11:18 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

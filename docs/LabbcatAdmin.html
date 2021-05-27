@@ -201,7 +201,7 @@ and adds some administration functions.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2186">line 2186</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2689">line 2689</a>
     </li></ul></dd>
     
 
@@ -394,7 +394,7 @@ store.readCorpora((corpora, errors, messages, call)=>{
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2177">line 2177</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2680">line 2680</a>
     </li></ul></dd>
     
 
@@ -556,6 +556,284 @@ store.readCorpora((corpora, errors, messages, call)=>{
     
 
     
+    <h4 class="name" id="allUtterances"><span class="type-signature"></span>allUtterances<span class="signature">(participantIds, transcriptTypes<span class="signature-attributes">opt</span>, mainParticipant<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Identifies all utterances by the given participants.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>participantIds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A list of participant IDs to identify
+the utterances of.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>transcriptTypes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">An optional list of transcript types to limit
+the results to. If null, all transcript types will be searched.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mainParticipant</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">true to search only main-participant
+utterances, false to search all utterances.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: An object with one attribute, "threadId",
+which identifies the resulting task, which can be passed to 
+<a href="LabbcatView.html#getMatches">LabbcatView#getMatches</a>, <a href="LabbcatView.html#taskStatus">LabbcatView#taskStatus</a>, 
+<a href="LabbcatView.html#waitForTask">LabbcatView#waitForTask</a>, etc.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#allUtterances">LabbcatView#allUtterances</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1081">line 1081</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="cancelTask"><span class="type-signature"></span>cancelTask<span class="signature">(threadId, onResult)</span><span class="type-signature"></span></h4>
     
 
@@ -680,7 +958,7 @@ store.readCorpora((corpora, errors, messages, call)=>{
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line844">line 844</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line852">line 852</a>
     </li></ul></dd>
     
 
@@ -869,7 +1147,7 @@ store.readCorpora((corpora, errors, messages, call)=>{
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line580">line 580</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line588">line 588</a>
     </li></ul></dd>
     
 
@@ -1048,7 +1326,7 @@ the following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line630">line 630</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line638">line 638</a>
     </li></ul></dd>
     
 
@@ -1227,7 +1505,7 @@ following can be used:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line441">line 441</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line449">line 449</a>
     </li></ul></dd>
     
 
@@ -1413,7 +1691,7 @@ labels('participant').includes('Robert')</code></li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line508">line 508</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line516">line 516</a>
     </li></ul></dd>
     
 
@@ -1621,7 +1899,7 @@ including <em> corpus_id </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2243">line 2243</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2818">line 2818</a>
     </li></ul></dd>
     
 
@@ -1839,7 +2117,7 @@ including <em> corpus_id </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2427">line 2427</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3002">line 3002</a>
     </li></ul></dd>
     
 
@@ -2035,7 +2313,7 @@ including <em> project_id </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2337">line 2337</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2912">line 2912</a>
     </li></ul></dd>
     
 
@@ -2231,7 +2509,7 @@ including <em> role_id </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2519">line 2519</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3094">line 3094</a>
     </li></ul></dd>
     
 
@@ -2477,7 +2755,7 @@ including <em> rolePermission_id </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2613">line 2613</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3188">line 3188</a>
     </li></ul></dd>
     
 
@@ -2720,7 +2998,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3063">line 3063</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3792">line 3792</a>
     </li></ul></dd>
     
 
@@ -2892,7 +3170,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3027">line 3027</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3602">line 3602</a>
     </li></ul></dd>
     
 
@@ -3052,7 +3330,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2320">line 2320</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2895">line 2895</a>
     </li></ul></dd>
     
 
@@ -3069,6 +3347,169 @@ including <em> user </em> - The database key for the record.</td>
             <li><a href="LabbcatAdmin.html#updateCorpus">LabbcatAdmin#updateCorpus</a></li>
         </ul>
     </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="deleteLayer"><span class="type-signature"></span>deleteLayer<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Deletes the given layer, and all associated annotations.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The ID layer to delete.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has completed.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2797">line 2797</a>
+    </li></ul></dd>
+    
+
+    
+
     
 
     
@@ -3223,7 +3664,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2502">line 2502</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3077">line 3077</a>
     </li></ul></dd>
     
 
@@ -3394,7 +3835,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2410">line 2410</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2985">line 2985</a>
     </li></ul></dd>
     
 
@@ -3565,7 +4006,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2590">line 2590</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3165">line 3165</a>
     </li></ul></dd>
     
 
@@ -3736,7 +4177,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2733">line 2733</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3308">line 3308</a>
     </li></ul></dd>
     
 
@@ -3907,7 +4348,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3145">line 3145</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3874">line 3874</a>
     </li></ul></dd>
     
 
@@ -3924,6 +4365,396 @@ including <em> user </em> - The database key for the record.</td>
             <li><a href="LabbcatAdmin.html#updateUser">LabbcatAdmin#updateUser</a></li>
         </ul>
     </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="dictionaryLookup"><span class="type-signature"></span>dictionaryLookup<span class="signature">(layerId, labels, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    For HTK dictionary-filling, this looks up some given words to get their entries.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>layerId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The dictionary of this layer will be used.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>labels</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Space-separated list of words to look up.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: an object with the following structure:
+returned has the following structure:
+<ul>
+ <li><b> words </b> - object where each key is the word, and each value is an
+                      array of entries for that word 
+ <li><b> combined </b> - the first entry of each word, concatenated together
+                         with a hyphen separator
+</ul></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#dictionaryLookup">LabbcatView#dictionaryLookup</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1937">line 1937</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="dictionarySuggest"><span class="type-signature"></span>dictionarySuggest<span class="signature">(layerId, labels, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    For HTK dictionary-filling, this uses a layer dictionary to suggest missing entries.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>layerId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The dictionary of this layer will be used.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>labels</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Space-separated list of words to suggest entries for.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: an object with the following structure:
+returned has the following structure:
+<ul>
+ <li><b> words </b> - object where each key is the word, and each value is a
+                      array of suggestions for that word (with 0 or 1 elements)
+</ul></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#dictionarySuggest">LabbcatView#dictionarySuggest</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1957">line 1957</a>
+    </li></ul></dd>
+    
+
+    
+
     
 
     
@@ -4107,7 +4938,7 @@ including <em> user </em> - The database key for the record.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line720">line 720</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line728">line 728</a>
     </li></ul></dd>
     
 
@@ -4389,7 +5220,7 @@ the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line597">line 597</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line605">line 605</a>
     </li></ul></dd>
     
 
@@ -4534,7 +5365,7 @@ annotators.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1745">line 1745</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1826">line 1826</a>
     </li></ul></dd>
     
 
@@ -4695,7 +5526,7 @@ annotators.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2979">line 2979</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3554">line 3554</a>
     </li></ul></dd>
     
 
@@ -4856,7 +5687,7 @@ annotators.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2965">line 2965</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3540">line 3540</a>
     </li></ul></dd>
     
 
@@ -5022,7 +5853,7 @@ annotators.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line739">line 739</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line747">line 747</a>
     </li></ul></dd>
     
 
@@ -5165,7 +5996,7 @@ annotators.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line397">line 397</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line399">line 399</a>
     </li></ul></dd>
     
 
@@ -5311,7 +6142,7 @@ deserializers.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1734">line 1734</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1815">line 1815</a>
     </li></ul></dd>
     
 
@@ -5477,7 +6308,7 @@ deserializers.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line749">line 749</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line757">line 757</a>
     </li></ul></dd>
     
 
@@ -5836,7 +6667,7 @@ more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1441">line 1441</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1522">line 1522</a>
     </li></ul></dd>
     
 
@@ -5979,7 +6810,7 @@ more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line323">line 323</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line325">line 325</a>
     </li></ul></dd>
     
 
@@ -6123,7 +6954,7 @@ information about the corpus.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line333">line 333</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line335">line 335</a>
     </li></ul></dd>
     
 
@@ -6289,7 +7120,7 @@ information about the corpus.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line388">line 388</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line390">line 390</a>
     </li></ul></dd>
     
 
@@ -6432,7 +7263,166 @@ information about the corpus.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line359">line 359</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line361">line 361</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getLayerManagers"><span class="type-signature"></span>getLayerManagers<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Gets a list of currently-installed layer managers.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: an array of objects with the following
+structure:
+<ul>
+ <li> <q> layer_manager_id </q> : ID of the layer manager. </li>
+ <li> <q> version </q> : The version of the installed implementation. </li>
+ <li> <q> name </q> : The name for the layer manager. </li>
+ <li> <q> description </q> : A brief description of what the layer manager does. </li>
+ <li> <q> layer_type </q> : What kinds of layers the layer manager can process - a
+          string composed of any of the following:
+           <ul>
+            <li><b> S </b> - segment layers </li>
+            <li><b> W </b> - word layers </li>
+            <li><b> M </b> - phrase (meta) layers </li>
+            <li><b> F </b> - span (freeform) layers </li>
+           </ul>
+ </li>
+</ul></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#getLayerManagers">LabbcatView#getLayerManagers</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1875">line 1875</a>
     </li></ul></dd>
     
 
@@ -6575,7 +7565,7 @@ information about the corpus.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line368">line 368</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line370">line 370</a>
     </li></ul></dd>
     
 
@@ -6899,7 +7889,7 @@ index in <var>matchIds</var>.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1130">line 1130</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1211">line 1211</a>
     </li></ul></dd>
     
 
@@ -7235,7 +8225,7 @@ return the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1076">line 1076</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1157">line 1157</a>
     </li></ul></dd>
     
 
@@ -7499,7 +8489,7 @@ return the first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line658">line 658</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line666">line 666</a>
     </li></ul></dd>
     
 
@@ -7763,7 +8753,7 @@ first page.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line469">line 469</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line477">line 477</a>
     </li></ul></dd>
     
 
@@ -8073,7 +9063,7 @@ expressions, which may be appended by " ASC" or " DESC", or null for transcript 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line550">line 550</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line558">line 558</a>
     </li></ul></dd>
     
 
@@ -8386,7 +9376,7 @@ transcript, or null if the given media doesn't exist.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line766">line 766</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line774">line 774</a>
     </li></ul></dd>
     
 
@@ -8529,7 +9519,7 @@ transcript, or null if the given media doesn't exist.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line729">line 729</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line737">line 737</a>
     </li></ul></dd>
     
 
@@ -8565,7 +9555,7 @@ transcript, or null if the given media doesn't exist.</td>
     
 
     
-    <h4 class="name" id="getParticipant"><span class="type-signature"></span>getParticipant<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getParticipant"><span class="type-signature"></span>getParticipant<span class="signature">(id, layerIds, onResult)</span><span class="type-signature"></span></h4>
     
 
     
@@ -8622,6 +9612,25 @@ transcript, or null if the given media doesn't exist.</td>
 
             <td class="description last">The ID of the participant, which could be their name or their
 database annotation ID.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>layerIds</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The IDs of the participant attribute layers to load, or null if only
+participant data is required.</td>
         </tr>
 
     
@@ -8692,7 +9701,7 @@ or null if the participant was not found.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line418">line 418</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line422">line 422</a>
     </li></ul></dd>
     
 
@@ -8909,7 +9918,7 @@ or null if the request failed.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1654">line 1654</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1735">line 1735</a>
     </li></ul></dd>
     
 
@@ -9052,7 +10061,7 @@ or null if the request failed.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line406">line 406</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line408">line 408</a>
     </li></ul></dd>
     
 
@@ -9196,7 +10205,7 @@ relate to each other.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line378">line 378</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line380">line 380</a>
     </li></ul></dd>
     
 
@@ -9343,7 +10352,7 @@ serializers.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1722">line 1722</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1803">line 1803</a>
     </li></ul></dd>
     
 
@@ -9671,7 +10680,7 @@ a more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1274">line 1274</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1355">line 1355</a>
     </li></ul></dd>
     
 
@@ -9837,7 +10846,7 @@ a more permanent location.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1755">line 1755</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1848">line 1848</a>
     </li></ul></dd>
     
 
@@ -9980,7 +10989,7 @@ result, which is an map of task IDs to statuses.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line786">line 786</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line794">line 794</a>
     </li></ul></dd>
     
 
@@ -10016,7 +11025,153 @@ result, which is an map of task IDs to statuses.</td>
     
 
     
-    <h4 class="name" id="getTranscript"><span class="type-signature"></span>getTranscript<span class="signature">(id, layerId, onResult)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getTranscriberDescriptors"><span class="type-signature"></span>getTranscriberDescriptors<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Lists the descriptors of all registered transcribers.
+<p> Transcribers are modules that perform automated transcription of recordings
+that have not alreadye been transcribed.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: A list of the descriptors of all registered
+transcribers.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#getTranscriberDescriptors">LabbcatView#getTranscriberDescriptors</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1838">line 1838</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getTranscript"><span class="type-signature"></span>getTranscript<span class="signature">(id, layerIds, onResult)</span><span class="type-signature"></span></h4>
     
 
     
@@ -10083,7 +11238,7 @@ result, which is an map of task IDs to statuses.</td>
 
         <tr>
             
-                <td class="name"><code>layerId</code></td>
+                <td class="name"><code>layerIds</code></td>
             
 
             <td class="type">
@@ -10170,7 +11325,7 @@ layers. If only transcript data is required, set this to ["graph"].</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line709">line 709</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line717">line 717</a>
     </li></ul></dd>
     
 
@@ -10387,7 +11542,7 @@ or null if the request failed.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1582">line 1582</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1663">line 1663</a>
     </li></ul></dd>
     
 
@@ -10530,7 +11685,7 @@ or null if the request failed.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line677">line 677</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line685">line 685</a>
     </li></ul></dd>
     
 
@@ -10696,7 +11851,7 @@ or null if the request failed.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line687">line 687</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line695">line 695</a>
     </li></ul></dd>
     
 
@@ -10862,7 +12017,7 @@ or null if the request failed.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line697">line 697</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line705">line 705</a>
     </li></ul></dd>
     
 
@@ -11007,7 +12162,7 @@ in.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1768">line 1768</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1888">line 1888</a>
     </li></ul></dd>
     
 
@@ -11194,7 +12349,412 @@ otherwise.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2912">line 2912</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3487">line 3487</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="installTranscriber"><span class="type-signature"></span>installTranscriber<span class="signature">(jar, install, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Uploads an transcriber module in preparation for installing it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>jar</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Name of the transcriber .jar file already uploaded, as
+specified by the "jar" attribute of the uploadTranscriber() response.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>install</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">true to install the transcriber, false to cancel the
+installation.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: the transcriber ID if it was installed, and null 
+otherwise.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3737">line 3737</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="missingAnnotations"><span class="type-signature"></span>missingAnnotations<span class="signature">(seriesId, tokenLayerId, annotationLayerId, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    For HTK dictionary-filling, this starts a task (returning it's threadId) that
+traverses the given utterances, looking for missing word pronunciations
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>seriesId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">search.search_id for identifying the utterances</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tokenLayerId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">token layer ("orthography")</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>annotationLayerId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">tokens with missing annotations on this layer
+should be returned ("phonemes") the "model" returned is the threadId of the task</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+<var>result</var> which will be: the threadId of the task.
+<a href="LabbcatView.html#taskStatus">LabbcatView#taskStatus</a> can be used to follow the progress of the task
+until it's finished. Once done, the resultUrl can be invoked, which returns a
+map from token labels to token IDs (one per type) i.e. the word that's missing,
+with an ID for finding its first occurance</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#missingAnnotations">LabbcatView#missingAnnotations</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line1908">line 1908</a>
     </li></ul></dd>
     
 
@@ -11401,7 +12961,7 @@ otherwise.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2948">line 2948</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3523">line 3523</a>
     </li></ul></dd>
     
 
@@ -11437,7 +12997,7 @@ otherwise.</td>
     
 
     
-    <h4 class="name" id="readCorpora"><span class="type-signature"></span>readCorpora<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="newLayer"><span class="type-signature"></span>newLayer<span class="signature">(layer, parentId, description, alignment, peers, peersOverlap, parentIncludes, saturated, type, validLabels, category, onResult)</span><span class="type-signature"></span></h4>
     
 
     
@@ -11445,2149 +13005,7 @@ otherwise.</td>
 
 
 <div class="description">
-    Reads a list of corpus records.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>pageNumber</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The zero-based  page of records to return (if null, all
-records will be returned).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageLength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The length of pages (if null, the default page length is 20).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be: A list of corpus records with the following
-attributes:
-<dl>
- <dt> corpus_id </dt> <dd> The database key for the record. </dd>
- <dt> corpus_name </dt> <dd> The name/id of the corpus. </dd>
- <dt> corpus_language </dt> <dd> The ISO 639-1 code for the default language. </dd>
- <dt> corpus_description </dt> <dd> The description of the corpus. </dd>
- <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
-   records returned from the server that can not currently be deleted; 
-   a string representing the reason the record can't be deleted. </dd>
-</dl></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2274">line 2274</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="LabbcatAdmin.html#createCorpus">LabbcatAdmin#createCorpus</a></li>
-        
-            <li><a href="LabbcatAdmin.html#updateCorpus">LabbcatAdmin#updateCorpus</a></li>
-        
-            <li><a href="LabbcatAdmin.html#deleteCorpus">LabbcatAdmin#deleteCorpus</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="readMediaTracks"><span class="type-signature"></span>readMediaTracks<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Reads a list of media track records.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>pageNumber</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The zero-based  page of records to return (if null, all
-records will be returned).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageLength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The length of pages (if null, the default page length is 20).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be: A list of mediaTrack records with the following
-attributes:
-<dl>
- <dt> suffix </dt> <dd> The suffix of the mediaTrack. </dd>
- <dt> description </dt> <dd> The description of the mediaTrack. </dd>
- <dt> display_order </dt> <dd> The position of the mediaTrack relative to other mediaTracks. </dd>
- <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
-   records returned from the server that can not currently be deleted; 
-   a string representing the reason the record can't be deleted. </dd>
-</dl></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2457">line 2457</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="LabbcatAdmin.html#createMediaTrack">LabbcatAdmin#createMediaTrack</a></li>
-        
-            <li>LabbcatAdmin#updateTask</li>
-        
-            <li>LabbcatAdmin#deleteTask</li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="readProjects"><span class="type-signature"></span>readProjects<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Reads a list of project records.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>pageNumber</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The zero-based  page of records to return (if null, all
-records will be returned).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageLength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The length of pages (if null, the default page length is 20).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be: A list of project records with the following
-attributes:
-<dl>
- <dt> project_id </dt> <dd> The database key for the record. </dd>
- <dt> project </dt> <dd> The name/id of the project. </dd>
- <dt> description </dt> <dd> The description of the project. </dd>
- <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
-   records returned from the server that can not currently be deleted; 
-   a string representing the reason the record can't be deleted. </dd>
-</dl></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2366">line 2366</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="LabbcatAdmin.html#createProject">LabbcatAdmin#createProject</a></li>
-        
-            <li><a href="LabbcatAdmin.html#updateProject">LabbcatAdmin#updateProject</a></li>
-        
-            <li><a href="LabbcatAdmin.html#deleteProject">LabbcatAdmin#deleteProject</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="readRolePermissions"><span class="type-signature"></span>readRolePermissions<span class="signature">(role_id, pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Reads a list of role permission records for a given user role.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>role_id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The name/ID of the role.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageNumber</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The zero-based  page of records to return (if null, all
-records will be returned).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageLength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The length of pages (if null, the default page length is 20).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be: A list of role permission records with the following
-attributes:
-<dl>
- <dt> role_id </dt> <dd> The name/id of the rolePermission. </dd>
- <dt> entity </dt> <dd> A string indentifying the entities the permission
-   applies to. </dd>
- <dt> layer </dt> <dd> The ID of a  a transcript attribute layer (or "corpus")
-   the label of which determines the access. </dd>
- <dt> value_pattern </dt> <dd> A regular expression; if the value of the
-   label identified by <var> layer </var> matches this pattern, then
-   access to the entities identfied by <var> entity </var> is granted. </dd>
- <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
-   records returned from the server that can not currently be deleted; 
-   a string representing the reason the record can't be deleted. </dd>
-</dl></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2660">line 2660</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="LabbcatAdmin.html#createRolePermission">LabbcatAdmin#createRolePermission</a></li>
-        
-            <li><a href="LabbcatAdmin.html#updateRolePermission">LabbcatAdmin#updateRolePermission</a></li>
-        
-            <li><a href="LabbcatAdmin.html#deleteRolePermission">LabbcatAdmin#deleteRolePermission</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="readRoles"><span class="type-signature"></span>readRoles<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Reads a list of role records.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>pageNumber</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The zero-based  page of records to return (if null, all
-records will be returned).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageLength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The length of pages (if null, the default page length is 20).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be: A list of role records with the following
-attributes:
-<dl>
- <dt> role_id </dt> <dd> The name/id of the role. </dd>
- <dt> description </dt> <dd> The description of the role. </dd>
- <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
-   records returned from the server that can not currently be deleted; 
-   a string representing the reason the record can't be deleted. </dd>
-</dl></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2547">line 2547</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="LabbcatAdmin.html#createRole">LabbcatAdmin#createRole</a></li>
-        
-            <li><a href="LabbcatAdmin.html#updateRole">LabbcatAdmin#updateRole</a></li>
-        
-            <li><a href="LabbcatAdmin.html#deleteRole">LabbcatAdmin#deleteRole</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="readSystemAttributes"><span class="type-signature"></span>readSystemAttributes<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Reads a list of system attribute records.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be: A list of system attribute records with the following
-attributes:
-<dl>
- <dt> attribute </dt> <dd> ID of the attribute. </dd>
- <dt> type </dt> <dd> The type of the attribute - "string", "integer",
-                      "boolean", "select", etc. </dd>
- <dt> style </dt> <dd> Style definition which depends on <var> type </var> -
-                       e.g. whether the "boolean" is shown as a checkbox or
-                       radio buttons, etc. </dd>
- <dt> label </dt> <dd> User-facing label for the attribute. </dd>
- <dt> description </dt> <dd> User-facing (long) description for the attribute. </dd>
- <dt> options </dt> <dd> If <var> type </var> is "select", this is an object
-                         defining the valid options for the attribute, where
-                         the attribute key is the attribute value and the attribute
-                         value is the user-facing label for the option. </dd>
- <dt> value </dt> <dd> The value of the attribute. </dd>
-</dl></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2761">line 2761</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="LabbcatAdmin.html#updateSystemAttribute">LabbcatAdmin#updateSystemAttribute</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="readUsers"><span class="type-signature"></span>readUsers<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Reads a list of user records.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>pageNumber</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The zero-based  page of records to return (if null, all
-records will be returned).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pageLength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The length of pages (if null, the default page length is 20).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var> which will be: A list of user records with the following
-attributes:
-<dl>
- <dt> user </dt> <dd> The name/id of the user. </dd>
- <dt> email </dt> <dd> The email address of the user. </dd>
- <dt> resetPassword </dt> <dd> Whether the user must reset their password when
-they next log in. </dd>
- <dt> roles </dt> <dd> Roles or groups the user belongs to. </dd>
- <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
-   records returned from the server that can not currently be deleted; 
-   a string representing the reason the record can't be deleted. </dd>
-</dl></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3096">line 3096</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="LabbcatAdmin.html#createUser">LabbcatAdmin#createUser</a></li>
-        
-            <li><a href="LabbcatAdmin.html#updateUser">LabbcatAdmin#updateUser</a></li>
-        
-            <li><a href="LabbcatAdmin.html#deleteUser">LabbcatAdmin#deleteUser</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="releaseTask"><span class="type-signature"></span>releaseTask<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Releases a finished task so it no longer uses resources on the server.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">ID of the task.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has completed.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="LabbcatView.html#releaseTask">LabbcatView#releaseTask</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line831">line 831</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="saveAnnotatorTaskDescription"><span class="type-signature"></span>saveAnnotatorTaskDescription<span class="signature">(taskId, description, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Update the annotator task description.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>taskId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The ID of the task, which must not already exist.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>description</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The description of the task.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var>.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2994">line 2994</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="saveAnnotatorTaskParameters"><span class="type-signature"></span>saveAnnotatorTaskParameters<span class="signature">(taskId, parameters, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Update the annotator task parameters.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>taskId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The ID of the task, which must not already exist.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>parameters</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The task parameters, serialized as a string.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onResult</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Invoked when the request has returned a 
-<var>result</var>.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3011">line 3011</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="saveLayer"><span class="type-signature"></span>saveLayer<span class="signature">(layer, parentId, description, alignment, peers, peersOverlap, parentIncludes, saturated, type, validLabels, category, onResult)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Saves changes to a layer, or adds a new layer.
+    Adds a new layer.
 </div>
 
 
@@ -13944,7 +13362,7 @@ each key is associated with a description of the value (e.g. for displaying to u
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2214">line 2214</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2717">line 2717</a>
     </li></ul></dd>
     
 
@@ -13980,7 +13398,3050 @@ each key is associated with a description of the value (e.g. for displaying to u
     
 
     
-    <h4 class="name" id="search"><span class="type-signature"></span>search<span class="signature">(pattern, participantIds<span class="signature-attributes">opt</span>, transcriptTypes<span class="signature-attributes">opt</span>, mainParticipant<span class="signature-attributes">opt</span>, aligned<span class="signature-attributes">opt</span>, matchesPerTranscript<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="praat"><span class="type-signature"></span>praat<span class="signature">(csv, transcriptColumn, participantColumn, startTimeColumn, endTimeColumn, windowOffset, passThroughData, measurementParameters, onResult, onProgress)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Process with Praat.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>csv</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">file</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The results file to upload. In a browser, this
+must be a file object, and in Node, it must be the full path to the file.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>transcriptColumn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">CSV column index of the transcript name.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>participantColumn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">CSV column index of the participant name.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>startTimeColumn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">CSV column index of the start time.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>endTimeColumn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">CSV column index of the end time name.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>windowOffset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">How much surrounsing context to include, in seconds.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>passThroughData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether to include all CSV columns from the
+input file in the output file.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>measurementParameters</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Parameters that define what to measure
+and output. All parameters are optional, and include:
+<dl>
+
+<dt> extractF1 (boolean) </dt><dd> Extract F1. (default: false) </dd>
+<dt> extractF2 (boolean) </dt><dd> Extract F2. (default: false) </dd>
+<dt> extractF3 (boolean) </dt><dd> Extract F3. (default: false) </dd>
+<dt> samplePoints (string) </dt><dd> Space-delimited series of real
+  numbers between 0 and 1, specifying the proportional time points to measure
+  formant at. e.g. "0.5" will measure only the mid-point, "0 0.2 0.4 0.6 0.8 1"
+  will measure six points evenly spread across the duration of the segment,
+  etc. (default: "0.5")</dd>
+<dt> formantCeilingDefault (int) </dt><dd> Maximum Formant by default. (default:
+  550) </dd>
+<dt> formantDifferentiationLayerId (string) </dt><dd> Participant attribute
+  layer ID for differentiating formant settings; this will typically be
+  "participant_gender" but can be any participant attribute layer. </dd>
+<dt> formantOtherPattern (string[]) </dt><dd> Array of regular expression
+  strings to match against the value of that attribute identified by
+  <var>formantDifferentiationLayerId</var>. If the participant's attribute value
+  matches the pattern for an element in this array, the corresponding element in
+  <var>formantCeilingOther</var> will be used for that participant. </dd>
+<dt> formantCeilingOther (int[]) </dt><dd> Values to use as the formant ceiling
+  for participants who's attribute value matches the corresponding regular
+  expression in <var>formantOtherPattern</var></dd>
+<dt> scriptFormant (string) </dt><dd> Formant extraction script command.
+  (default: "To Formant (burg)... 0.0025 5 formantCeiling 0.025 50") </dd>
+
+<dt> useFastTrack (boolean) </dt><dd> Use the FastTrack plugin to generate
+  optimum, smoothed formant tracks. (default: false)</dd>
+<dt> fastTrackDifferentiationLayerId (string) </dt><dd> Participant attribute
+  layer ID for differentiating fastTrack settings; this will typically be
+  "participant_gender" but can be any participant attribute layer. </dd>
+<dt> fastTrackOtherPattern (string[]) </dt><dd> Array of regular expression
+  strings to match against the value of that attribute identified by
+  <var>fastTrackDifferentiationLayerId</var>. If the participant's attribute value
+  matches the pattern for an element in this array, the corresponding element in
+  <var>fastTrackCeilingOther</var> will be used for that participant. </dd>
+<dt> fastTrackLowestAnalysisFrequencyDefault (int) </dt><dd> Fast Track lowest
+  analysis frequency by default. </dd>
+<dt> fastTrackLowestAnalysisFrequencyOther (int[]) </dt><dd> Values to use as
+  the Fast Track lowest analysis frequency for participants who's attribute
+  value matches the corresponding regular expression in
+  <var>fastTrackOtherPattern</var>.</dd> 
+<dt> fastTrackHighestAnalysisFrequencyDefault (int) </dt><dd> Fast Track highest
+  analysis frequency by default. </dd>
+<dt> fastTrackHighestAnalysisFrequencyOther (int[]) </dt><dd> Values to use as
+  the Fast Track highest analysis frequency for participants who's attribute
+  value matches the corresponding regular expression in
+  <var>fastTrackOtherPattern</var>.</dd> 
+<dt> fastTrackTimeStep </dt>
+      <dd> Fast Track time_step global setting. </dd>
+<dt> fastTrackBasisFunctions </dt>
+      <dd> Fast Track basis_functions global setting - "dct". </dd>
+<dt> fastTrackErrorMethod </dt>
+      <dd> Fast Track error_method global setting - "mae". </dd>
+<dt> fastTrackTrackingMethod </dt>
+      <dd> Fast Track tracking_method parameter for trackAutoselectProcedure; "burg" or
+      "robust". </dd> 
+<dt> fastTrackEnableF1FrequencyHeuristic ("true" or "false") </dt>
+      <dd> Fast Track enable_F1_frequency_heuristic global setting. </dd>
+<dt> fastTrackMaximumF1FrequencyValue </dt>
+      <dd> Fast Track maximum_F1_frequency_value global setting. </dd>
+<dt> fastTrackEnableF1BandwidthHeuristic </dt>
+      <dd> Fast Track enable_F1_bandwidth_heuristic global setting. </dd>
+<dt> fastTrackMaximumF1BandwidthValue </dt>
+      <dd> Fast Track maximum_F1_bandwidth_value global setting. </dd>
+<dt> fastTrackEnableF2BandwidthHeuristic ("true" or "false") </dt>
+      <dd> Fast Track enable_F2_bandwidth_heuristic global setting. </dd>
+<dt> fastTrackMaximumF2BandwidthValue </dt>
+      <dd> Fast Track maximum_F2_bandwidth_value global setting. </dd>
+<dt> fastTrackEnableF3BandwidthHeuristic ("true" or "false") </dt>
+      <dd> Fast Track enable_F3_bandwidth_heuristic global setting.. </dd>
+<dt> fastTrackMaximumF3BandwidthValue </dt>
+      <dd> Fast Track maximum_F3_bandwidth_value global setting. </dd>
+<dt> fastTrackEnableF4FrequencyHeuristic ("true" or "false") </dt>
+      <dd> Fast Track enable_F4_frequency_heuristic global setting. </dd>
+<dt> fastTrackMinimumF4FrequencyValue </dt>
+      <dd> Fast Track minimum_F4_frequency_value global setting. </dd>
+<dt> fastTrackEnableRhoticHeuristic ("true" of "false") </dt>
+      <dd> Fast Track enable_rhotic_heuristic global setting. </dd>
+<dt> fastTrackEnableF3F4ProximityHeuristic </dt>
+      <dd> Fast Track enable_F3F4_proximity_heuristic global setting. </dd>
+<dt> fastTrackNumberOfSteps </dt>
+      <dd> Fast Track number of steps. </dd>
+<dt> fastTrackNumberOfCoefficients </dt>
+      <dd> Fast Track number of coefficients for the regression function. </dd>
+<dt> fastTrackNumberOfFormants </dt>
+      <dd> Fast Track number of formants. </dd>
+<dt> fastTrackCoefficients ("true" or "false") </dt>
+      <dd> Whether to return the regression coefficients from FastTrack. </dd>
+
+<dt> extractMinimumPitch (boolean) </dt><dd> Extract minimum pitch. 
+  (default: false) </dd>
+<dt> extractMeanPitch (boolean) </dt><dd> Extract mean pitch. (default: false) </dd>
+<dt> extractMaximumPitch (boolean) </dt><dd> Extract maximum pitch. 
+  (default: false) </dd>
+<dt> pitchFloorDefault (int) </dt><dd> Pitch Floor by default. (default: 60) </dd>
+<dt> pitchCeilingDefault (int) </dt><dd> Pitch Ceiling by default. (default: 500) </dd>
+<dt> voicingThresholdDefault (number) </dt><dd> Voicing Threshold by default. 
+  (default: 0.5) </dd>
+<dt> pitchDifferentiationLayerId (string) </dt><dd> Participant attribute
+  layer ID for differentiating pitch settings; this will typically be
+  "participant_gender" but can be any participant attribute layer. </dd>
+<dt> pitchOtherPattern (string[]) </dt><dd> Array of regular expression
+  strings to match against the value of that attribute identified by
+  <var>pitchDifferentiationLayerId</var>. If the participant's attribute value
+  matches the pattern for an element in this array, the corresponding element in
+  <var>pitchFloorOther</var>, <var>pitchCeilingOther</var>, and
+  <var>voicingThresholdOther</var> will be used for that participant. </dd> 
+<dt> pitchFloorOther (int[]) </dt><dd> Values to use as the pitch floor
+  for participants who's attribute value matches the corresponding regular
+  expression in <var>pitchOtherPattern</var></dd>
+<dt> pitchCeilingOther (int[]) </dt><dd> Values to use as the pitch ceiling
+  for participants who's attribute value matches the corresponding regular
+  expression in <var>pitchOtherPattern</var></dd>
+<dt> voicingThresholdOther (int[]) </dt><dd> Values to use as the voicing threshold
+  for participants who's attribute value matches the corresponding regular
+  expression in <var>pitchOtherPattern</var></dd>
+<dt> scriptPitch (string) </dt><dd> Pitch extraction script command.
+  (default: 
+"To Pitch (ac)...  0 pitchFloor 15 no 0.03 voicingThreshold 0.01 0.35 0.14 pitchCeiling") </dd>
+
+<dt> extractMaximumIntensity (boolean) </dt><dd> Extract maximum intensity. 
+  (default: false) </dd>
+<dt> intensityPitchFloorDefault (int) </dt><dd> Pitch Floor by default. 
+  (default: 60) </dd>
+<dt> intensityDifferentiationLayerId (string) </dt><dd> Participant attribute
+  layer ID for differentiating intensity settings; this will typically be
+  "participant_gender" but can be any participant attribute layer. </dd>
+<dt> intensityOtherPattern (string[]) </dt><dd> Array of regular expression
+  strings to match against the value of that attribute identified by
+  <var>intensityDifferentiationLayerId</var>. If the participant's attribute value
+  matches the pattern for an element in this array, the corresponding element in
+  <var>intensityPitchFloorOther</var> will be used for that participant. </dd> 
+<dt> intensityPitchFloorOther (int[]) </dt><dd> Values to use as the pitch floor
+  for participants who's attribute value matches the corresponding regular
+  expression in <var>intensityPitchOtherPattern</var></dd>
+<dt> scriptIntensity (string) </dt><dd> Pitch extraction script command.
+  (default: "To Intensity... intensityPitchFloor 0 yes") </dd>
+
+<dt> extractCOG1 (boolean) </dt><dd> Extract COG 1. (default: false) </dd>
+<dt> extractCOG2 (boolean) </dt><dd> Extract COG 2. (default: false) </dd>
+<dt> extractCOG23 (boolean) </dt><dd> Extract COG 2/3. (default: false) </dd>
+
+<dt> script (string) </dt><dd> A user-specified custom Praat script to execute
+  on each segment. </dd> 
+<dt> attributes (string[]) </dt><dd> A list of participant attribute layer IDs
+  to include as variables for the custom Praat <var>script</var>. </dd> 
+</dl></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: An object with one attribute,
+<var>threadId</var>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onProgress</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked on XMLHttpRequest progress.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#praat">LabbcatView#praat</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2131">line 2131</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readCorpora"><span class="type-signature"></span>readCorpora<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of corpus records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based  page of records to return (if null, all
+records will be returned).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The length of pages (if null, the default page length is 20).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of corpus records with the following
+attributes:
+<dl>
+ <dt> corpus_id </dt> <dd> The database key for the record. </dd>
+ <dt> corpus_name </dt> <dd> The name/id of the corpus. </dd>
+ <dt> corpus_language </dt> <dd> The ISO 639-1 code for the default language. </dd>
+ <dt> corpus_description </dt> <dd> The description of the corpus. </dd>
+ <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+   records returned from the server that can not currently be deleted; 
+   a string representing the reason the record can't be deleted. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2849">line 2849</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createCorpus">LabbcatAdmin#createCorpus</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateCorpus">LabbcatAdmin#updateCorpus</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteCorpus">LabbcatAdmin#deleteCorpus</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readMediaTracks"><span class="type-signature"></span>readMediaTracks<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of media track records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based  page of records to return (if null, all
+records will be returned).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The length of pages (if null, the default page length is 20).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of mediaTrack records with the following
+attributes:
+<dl>
+ <dt> suffix </dt> <dd> The suffix of the mediaTrack. </dd>
+ <dt> description </dt> <dd> The description of the mediaTrack. </dd>
+ <dt> display_order </dt> <dd> The position of the mediaTrack relative to other mediaTracks. </dd>
+ <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+   records returned from the server that can not currently be deleted; 
+   a string representing the reason the record can't be deleted. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3032">line 3032</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createMediaTrack">LabbcatAdmin#createMediaTrack</a></li>
+        
+            <li>LabbcatAdmin#updateTask</li>
+        
+            <li>LabbcatAdmin#deleteTask</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readProjects"><span class="type-signature"></span>readProjects<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of project records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based  page of records to return (if null, all
+records will be returned).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The length of pages (if null, the default page length is 20).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of project records with the following
+attributes:
+<dl>
+ <dt> project_id </dt> <dd> The database key for the record. </dd>
+ <dt> project </dt> <dd> The name/id of the project. </dd>
+ <dt> description </dt> <dd> The description of the project. </dd>
+ <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+   records returned from the server that can not currently be deleted; 
+   a string representing the reason the record can't be deleted. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2941">line 2941</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createProject">LabbcatAdmin#createProject</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateProject">LabbcatAdmin#updateProject</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteProject">LabbcatAdmin#deleteProject</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readRolePermissions"><span class="type-signature"></span>readRolePermissions<span class="signature">(role_id, pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of role permission records for a given user role.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>role_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The name/ID of the role.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based  page of records to return (if null, all
+records will be returned).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The length of pages (if null, the default page length is 20).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of role permission records with the following
+attributes:
+<dl>
+ <dt> role_id </dt> <dd> The name/id of the rolePermission. </dd>
+ <dt> entity </dt> <dd> A string indentifying the entities the permission
+   applies to. </dd>
+ <dt> layer </dt> <dd> The ID of a  a transcript attribute layer (or "corpus")
+   the label of which determines the access. </dd>
+ <dt> value_pattern </dt> <dd> A regular expression; if the value of the
+   label identified by <var> layer </var> matches this pattern, then
+   access to the entities identfied by <var> entity </var> is granted. </dd>
+ <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+   records returned from the server that can not currently be deleted; 
+   a string representing the reason the record can't be deleted. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3235">line 3235</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createRolePermission">LabbcatAdmin#createRolePermission</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateRolePermission">LabbcatAdmin#updateRolePermission</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteRolePermission">LabbcatAdmin#deleteRolePermission</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readRoles"><span class="type-signature"></span>readRoles<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of role records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based  page of records to return (if null, all
+records will be returned).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The length of pages (if null, the default page length is 20).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of role records with the following
+attributes:
+<dl>
+ <dt> role_id </dt> <dd> The name/id of the role. </dd>
+ <dt> description </dt> <dd> The description of the role. </dd>
+ <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+   records returned from the server that can not currently be deleted; 
+   a string representing the reason the record can't be deleted. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3122">line 3122</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createRole">LabbcatAdmin#createRole</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateRole">LabbcatAdmin#updateRole</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteRole">LabbcatAdmin#deleteRole</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readSystemAttributes"><span class="type-signature"></span>readSystemAttributes<span class="signature">(onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of system attribute records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of system attribute records with the following
+attributes:
+<dl>
+ <dt> attribute </dt> <dd> ID of the attribute. </dd>
+ <dt> type </dt> <dd> The type of the attribute - "string", "integer",
+                      "boolean", "select", etc. </dd>
+ <dt> style </dt> <dd> Style definition which depends on <var> type </var> -
+                       e.g. whether the "boolean" is shown as a checkbox or
+                       radio buttons, etc. </dd>
+ <dt> label </dt> <dd> User-facing label for the attribute. </dd>
+ <dt> description </dt> <dd> User-facing (long) description for the attribute. </dd>
+ <dt> options </dt> <dd> If <var> type </var> is "select", this is an object
+                         defining the valid options for the attribute, where
+                         the attribute key is the attribute value and the attribute
+                         value is the user-facing label for the option. </dd>
+ <dt> value </dt> <dd> The value of the attribute. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3336">line 3336</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#updateSystemAttribute">LabbcatAdmin#updateSystemAttribute</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="readUsers"><span class="type-signature"></span>readUsers<span class="signature">(pageNumber<span class="signature-attributes">opt</span>, pageLength<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Reads a list of user records.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The zero-based  page of records to return (if null, all
+records will be returned).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The length of pages (if null, the default page length is 20).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: A list of user records with the following
+attributes:
+<dl>
+ <dt> user </dt> <dd> The name/id of the user. </dd>
+ <dt> email </dt> <dd> The email address of the user. </dd>
+ <dt> resetPassword </dt> <dd> Whether the user must reset their password when
+they next log in. </dd>
+ <dt> roles </dt> <dd> Roles or groups the user belongs to. </dd>
+ <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+   records returned from the server that can not currently be deleted; 
+   a string representing the reason the record can't be deleted. </dd>
+</dl></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3825">line 3825</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LabbcatAdmin.html#createUser">LabbcatAdmin#createUser</a></li>
+        
+            <li><a href="LabbcatAdmin.html#updateUser">LabbcatAdmin#updateUser</a></li>
+        
+            <li><a href="LabbcatAdmin.html#deleteUser">LabbcatAdmin#deleteUser</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="releaseTask"><span class="type-signature"></span>releaseTask<span class="signature">(id, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Releases a finished task so it no longer uses resources on the server.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">ID of the task.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has completed.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LabbcatView.html#releaseTask">LabbcatView#releaseTask</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line839">line 839</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="saveAnnotatorTaskDescription"><span class="type-signature"></span>saveAnnotatorTaskDescription<span class="signature">(taskId, description, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Update the annotator task description.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>taskId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The ID of the task, which must not already exist.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The description of the task.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var>.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3569">line 3569</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="saveAnnotatorTaskParameters"><span class="type-signature"></span>saveAnnotatorTaskParameters<span class="signature">(taskId, parameters, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Update the annotator task parameters.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>taskId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The ID of the task, which must not already exist.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parameters</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The task parameters, serialized as a string.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var>.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3586">line 3586</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="saveLayer"><span class="type-signature"></span>saveLayer<span class="signature">(layer, parentId, description, alignment, peers, peersOverlap, parentIncludes, saturated, type, validLabels, category, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Saves changes to a layer.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>layer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The layer ID, if all the other attribute
+parameters are specified, or an object with all the layer attributes, in which case
+only <var>onResult</var> need be specified.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parentId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The layer's parent layer id.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The description of the layer.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>alignment</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The layer's alignment 
+- 0 for none, 1 for point alignment, 2 for interval alignment.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>peers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether children on this layer have peers or not.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>peersOverlap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether child peers on this layer can overlap or not.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parentIncludes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether the parent temporally includes the child.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>saturated</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether children must temporally fill the entire parent
+duration (true) or not (false).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The type for labels on this layer, e.g. string, number,
+boolean, ipa.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>validLabels</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">List of valid label values for this layer, or null 
+if the layer values are not restricted. The 'key' is the possible label value, and 
+each key is associated with a description of the value (e.g. for displaying to users).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>category</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Category for the layer, if any.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: The resulting layer definition.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2766">line 2766</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="search"><span class="type-signature"></span>search<span class="signature">(pattern, participantIds<span class="signature-attributes">opt</span>, transcriptTypes<span class="signature-attributes">opt</span>, mainParticipant<span class="signature-attributes">opt</span>, aligned<span class="signature-attributes">opt</span>, matchesPerTranscript<span class="signature-attributes">opt</span>, overlapThreshold<span class="signature-attributes">opt</span>, onResult)</span><span class="type-signature"></span></h4>
     
 
     
@@ -14346,6 +16807,47 @@ transcript to return. <tt>null</tt> means all matches.</td>
 
         <tr>
             
+                <td class="name"><code>overlapThreshold</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">Optional percentage overlap with other
+utterances before simultaneous speech is excluded. <tt>null</tt> means include
+all overlapping utterances.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>onResult</code></td>
             
 
@@ -14424,7 +16926,214 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line954">line 954</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line965">line 965</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setPassword"><span class="type-signature"></span>setPassword<span class="signature">(user, password, resetPassword, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Sets a given user's password.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>user</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The ID of the user.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The new password.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>resetPassword</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether the user must reset their password when
+they next log in.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3888">line 3888</a>
     </li></ul></dd>
     
 
@@ -14589,7 +17298,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line796">line 796</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line804">line 804</a>
     </li></ul></dd>
     
 
@@ -14750,7 +17459,168 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2929">line 2929</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3504">line 3504</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="uninstallTranscriber"><span class="type-signature"></span>uninstallTranscriber<span class="signature">(transcriberId, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Uploads an transcriber module in preparation for installing it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>transcriberId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">ID of the transcriber to uninstall.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var>.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3754">line 3754</a>
     </li></ul></dd>
     
 
@@ -14980,7 +17850,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2303">line 2303</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2878">line 2878</a>
     </li></ul></dd>
     
 
@@ -15152,7 +18022,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3042">line 3042</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3771">line 3771</a>
     </li></ul></dd>
     
 
@@ -15359,7 +18229,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2485">line 2485</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3060">line 3060</a>
     </li></ul></dd>
     
 
@@ -15577,7 +18447,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2394">line 2394</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2969">line 2969</a>
     </li></ul></dd>
     
 
@@ -15772,7 +18642,7 @@ which identifies the resulting task, which can be passed to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2574">line 2574</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3149">line 3149</a>
     </li></ul></dd>
     
 
@@ -16017,7 +18887,7 @@ access to the entities identfied by <var> entity </var> is granted.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2705">line 2705</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3280">line 3280</a>
     </li></ul></dd>
     
 
@@ -16212,7 +19082,7 @@ access to the entities identfied by <var> entity </var> is granted.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2775">line 2775</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3350">line 3350</a>
     </li></ul></dd>
     
 
@@ -16450,7 +19320,7 @@ they next log in.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3126">line 3126</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3855">line 3855</a>
     </li></ul></dd>
     
 
@@ -16657,7 +19527,200 @@ annotator found in the jar file:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2804">line 2804</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3379">line 3379</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="uploadTranscriber"><span class="type-signature"></span>uploadTranscriber<span class="signature">(jarFile, onResult, onProgress)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Uploads an transcriber module in preparation for installing it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>jarFile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">file</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Transcriber .jar file.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a 
+<var>result</var> which will be: An object describing the attributes of the
+transcriber found in the jar file:
+<dl>
+ <dt> jar </dt><dd> The name of the file uploaded. </dd>
+ <dt> transcriberId </dt><dd> The ID of the transcriber. </dd>
+ <dt> version </dt><dd> The version of the transcriber implementation. </dd>
+ <dt> installedVersion </dt><dd> The version of the transcriber that this one will 
+        replace, if the transcriber ID has already been installed. </dd> 
+ <dt> hasConfigWebapp </dt><dd> Whether the transcriber has a
+        installation/configuration web-app. </dd>
+ <dt> info </dt><dd> HTML document describing the transcriber. </dd>
+</dl></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onProgress</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked on XMLHttpRequest progress.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3629">line 3629</a>
     </li></ul></dd>
     
 
@@ -16848,7 +19911,7 @@ will be false if the task finished.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line809">line 809</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line817">line 817</a>
     </li></ul></dd>
     
 
@@ -16900,7 +19963,7 @@ will be false if the task finished.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Nov 12 2020 17:21:34 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu May 27 2021 18:11:18 GMT-0300 (Uruguay Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
