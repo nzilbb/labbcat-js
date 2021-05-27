@@ -1,3 +1,9 @@
+# v1.3.0
+
+- New LabbcatView functions
+  + *praat* - Process with Praat functionality, including formants with FastTrack.
+  + *allUtterances* - Gets all utterances of given participants.
+  
 # v1.2.0
 
 - Add LabbcatAdmin class with CRUD functions for
@@ -6,7 +12,7 @@
   + roles
   + system attributes (RU operations only)
   + *saveLayer* (CU operations)
-- New LabbcatView function
+- New LabbcatView functions
   + *getSerializerDescriptors*
   + *getDeserializerDescriptors*
   + *getSystemAttribute*
