@@ -646,32 +646,13 @@ describe("#LabbcatAdmin", function() {
         });
     });
     
-    it("implements info RU operations", (done)=>{
+    it("implements getInfo", (done)=>{
 
         store.getInfo((originalInfo, errors, messages)=>{
             assert.isNull(errors);
             assert.isNotNull(originalInfo);
 
-            // update it
-            const changedInfo = originalInfo + " <div>unit-test</div>";
-            store.updateInfo(
-                changedInfo, (result, errors, messages)=>{
-                    assert.isNull(errors, JSON.stringify(errors))
-                                
-                    // ensure it was updated
-                    store.getInfo((newInfo, errors, messages)=>{
-                        assert.isNull(errors);
-                        console.log("newInfo " + newInfo);
-                        assert.equal(newInfo, changedInfo, "Information was updated");
-                        
-                        // restore original value
-                        store.updateInfo(
-                            originalInfo, (result, errors, messages)=>{
-                                assert.isNull(errors, JSON.stringify(errors))
-                                done();
-                            });
-                    });
-                });
+            done();
         });
     });
     
