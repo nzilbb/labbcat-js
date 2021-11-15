@@ -12,7 +12,7 @@ if (!process.argv[2]) {
     console.log("This script deletes all transcripts in a selected corpus.");
     console.log("Please specify a corpus to delete from.");
     console.log("Usage:");
-    console.log(process.argv[2] + " <corpus>");
+    console.log(process.argv[1] + " <corpus>");
 } else {
     var fs = require("fs");
     var path = require('path');
