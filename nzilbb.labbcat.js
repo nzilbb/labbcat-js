@@ -942,12 +942,15 @@
          * </pre>
          * @param {object} pattern An object representing the pattern to search for, which
          * mirrors the Search Matrix in the browser interface.
-         * @param {string[]} [participantIds=null] An optional list of participant IDs to search
-         * the utterances of. If not null, all utterances in the corpus will be searched.
-         * @param {string[]} [corpora=null] An optional list of transcript corpora to limit
-         * the results to. If null, all corpora will be searched. 
-         * @param {string[]} [transcriptTypes=null] An optional list of transcript types to limit
-         * the results to. If null, all transcript types will be searched. 
+         * @param {string[]} [participantExpression=null] An optional expression for
+         * identifying participants to search the utterances of. This can be any
+         * expression of the kind used with {@link LabbcatView#getMatchingParticipantIds}
+         * e.g. "['AP2505_Nelson','AP2512_MattBlack','AP2515_ErrolHitt'].includes(id)"
+         * @param {string[]} [transcriptExpression=null] An optional expression for
+         * identifying transcripts to search the utterances of. This can be any
+         * expression of the kind used with {@link LabbcatView#getMatchingTranscriptIds} 
+         * e.g. "['CC','ID'].includes(first('corpus').label)
+         *       && first('transcript_type').label == 'wordlist'"
          * @param {boolean} [mainParticipant=true] true to search only main-participant
          * utterances, false to search all utterances. 
          * @param {boolean} [aligned=false] true to include only words that are aligned (i.e. have
@@ -963,55 +966,42 @@
          * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
          * {@link LabbcatView#waitForTask}, etc.
          */
-        search(pattern, participantIds, corpora, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
-            if (typeof participantIds === "function") { // (pattern, onResult)
-                onResult = participantIds;
-                participantIds = null;
-                transcriptTypes = null;
+        search(pattern, participantExpression, transcriptExpression, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
+            if (typeof participantExpression === "function") { // (pattern, onResult)
+                onResult = participantExpression;
+                participantExpression = null;
+                transcriptExpression = null;
                 mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof corpora === "function") {
-                // (pattern, participantIds, onResult)
-                onResult = corpora;
-                corpora = null;
-                transcriptTypes = null;
+            } else if (typeof transcriptExpression === "function") {
+                // (pattern, participantExpression, onResult)
+                onResult = transcriptExpression;
+                transcriptExpression = null;
                 mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof corpora === "boolean") {
-                // (pattern, participantIds, mainParticipant, aligned,
+            } else if (typeof transcriptExpression === "boolean") {
+                // (pattern, participantExpression, mainParticipant, aligned,
                 // matchesPerTranscript, onResult) 
-                onResult = matchesPerTranscript;
-                overlapThreshold = aligned
-                matchesPerTranscript = mainParticipant;
-                aligned = transcriptTypes;
-                mainParticipant = corpora;
-                corpora = null;
-                transcriptTypes = null;
-                overlapThreshold = null;
-            } else if (typeof transcriptTypes === "function") {
-                // (pattern, participantIds, corpora, onResult)
-                onResult = transcriptTypes;
-                transcriptTypes = null;
-                mainParticipant = true;
-                aligned = false;
-                matchesPerTranscript = null;
-                overlapThreshold = null;
-            } else if (typeof transcriptTypes === "boolean") {
-                // (pattern, participantIds, corpora, mainParticipant, aligned,
-                // matchesPerTranscript, onResult) 
-                onResult = matchesPerTranscript;
+                onResult = overlapThreshold;
+                overlapThreshold = matchesPerTranscript
                 matchesPerTranscript = aligned;
                 aligned = mainParticipant;
-                mainParticipant = transcriptTypes;
-                transcriptTypes = null;
+                mainParticipant = transcriptExpression;
+                overlapThreshold = null;
+            } else if (typeof mainParticipant === "function") {
+                // (pattern, participantExpression, transcriptExpression, onResult)
+                onResult = mainParticipant;
+                mainParticipant = true;
+                aligned = false;
+                matchesPerTranscript = null;
                 overlapThreshold = null;
             }
             if (typeof aligned === "function") {
-                // (pattern, participantIds, corpora, transcriptTypes, mainParticipant, onResult)
+                // (pattern, participantIds, transcriptExpression, mainParticipant, onResult)
                 // i.e. the original signature of this function
                 onResult = aligned;
                 aligned = false;
@@ -1032,13 +1022,28 @@
             }
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
-                            +", "+JSON.stringify(participantIds)
-                            +", "+JSON.stringify(corpora)
-                            +", "+JSON.stringify(transcriptTypes)
+                            +", "+participantExpression
+                            +", "+transcriptExpression
                             +", "+mainParticipant
                             +", "+aligned
                             +", "+matchesPerTranscript
                             +", "+overlapThreshold+")");
+            }
+
+            // for backwards compatibility, convert arrays of IDs to expressions
+            if (Array.isArray(participantExpression)) {
+                participantExpression = "["
+                    +participantExpression
+                    .map(s=>"'"+s.replace(/'/,"\\'")+"'")
+                    .join(",")
+                    +"].includes(id)";
+            }
+            if (Array.isArray(transcriptExpression)) {
+                transcriptExpression = "["
+                    +transcriptExpression
+                    .map(s=>"'"+s.replace(/'/,"\\'")+"'")
+                    .join(",")
+                    +"].includes(first('transcript_type').label)";
             }
 
             // first normalize the pattern...
@@ -1075,9 +1080,8 @@
             if (mainParticipant) parameters.only_main_speaker = true;
             if (aligned) parameters.only_aligned = true;
             if (matchesPerTranscript) parameters.matches_per_transcript = matchesPerTranscript;
-            if (participantIds) parameters.participant_id = participantIds;
-            if (transcriptTypes) parameters.corpus = corpora;
-            if (transcriptTypes) parameters.transcript_type = transcriptTypes;
+            if (participantExpression) parameters.participant_expression = participantExpression;
+            if (transcriptExpression) parameters.transcript_expression = transcriptExpression;
             if (overlapThreshold) parameters.overlap_threshold = overlapThreshold;
 
             this.createRequest(
@@ -1451,6 +1455,7 @@
                         +"&start="+encodeURIComponent(startOffsets[i])
                         +"&end="+encodeURIComponent(endOffsets[i]);
                     if (sampleRate) queryString += "&sampleRate="+sampleRate;
+                    queryString += "&prefix=true"; // TODO add function parameter for this
                     
                     if (exports.verbose) {
                         console.log("GET: "+url + "?" + queryString + " as " + lc.username);
@@ -1609,6 +1614,7 @@
 	            let queryString = "&id="+encodeURIComponent(transcriptIds[i])
                         +"&start="+encodeURIComponent(startOffsets[i])
                         +"&end="+encodeURIComponent(endOffsets[i]);
+                    queryString += "&prefix=true"; // TODO add a function parameter for this
                     
                     if (exports.verbose) {
                         console.log("GET: "+url + queryString + " as " + lc.username);
@@ -2682,7 +2688,7 @@
          * For HTK dictionary-filling, this adds a new dictionary entry and updates all tokens.
          * @param {string} layerId The dictionary of this layer will be used.
          * @param {string} label The word label to add an entry for.
-         * @param {string} label The definition (pronunciation) of the word to add.
+         * @param {string} entry The definition (pronunciation) of the word to add.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var>.
          */
