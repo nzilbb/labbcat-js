@@ -2282,7 +2282,7 @@
             this.createRequest(
                 "getAnnotatorTasks", {
                     annotatorId: annotatorId
-                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTasks")
+                }, onResult)
                 .send();
         }
         
@@ -2296,7 +2296,7 @@
             this.createRequest(
                 "getAnnotatorTaskParameters", {
                     taskId: taskId
-                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTaskParameters")
+                }, onResult)
                 .send();
         }
                 
