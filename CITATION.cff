@@ -1,0 +1,23 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: @nzilbb/labbcat JavaScript package
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Robert
+    family-names: Fromont
+    email: robert.fromont@canterbury.ac.nz
+    affiliation: NZILBB
+    orcid: 'https://orcid.org/0000-0001-5271-5487'
+repository-code: 'https://github.com/nzilbb/labbcat-js/'
+url: 'https://www.npmjs.com/package/@nzilbb/labbcat'
+abstract: >-
+  Client library for communicating with LaBB-CAT
+  servers using JavaScript.
+license: AGPL-3.0-or-later
+version: 1.3.0
+date-released: '2021-05-27'
