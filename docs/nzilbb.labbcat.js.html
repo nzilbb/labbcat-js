@@ -172,12 +172,6 @@
             if (response.model != null) {
                 if (response.model.result) {
                     result = response.model.result;
-                    if (evt.target.call == "newTranscript"
-                        || evt.target.call == "updateTranscript") {
-                        // for these calls, the result is an object with one key, whose
-                        // value is the threadId - so just return that
-                        result = result[evt.target.id];
-                    }
                 }
 	        if (!result &amp;&amp; result != 0) result = response.model;
             }
@@ -368,7 +362,7 @@
             }, false);
 	    xhr.addEventListener("error", callFailed, false);
 	    xhr.addEventListener("abort", callCancelled, false);
-            xhr.open("GET", this.baseUrl + "api/info");
+            xhr.open("GET", this.baseUrl + "doc/");
 	    if (this.username) {
 	        xhr.setRequestHeader(
                     "Authorization", "Basic " + btoa(this.username + ":" + this._password))
@@ -465,11 +459,11 @@
          *  &lt;li>&lt;code>labels('corpus').includes('CC')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('participant_languages').includes('en')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('transcript_language').includes('en')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript_rating').length &amp;gt; 2&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('participant_rating').length = 0&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; first('corpus').label == 'CC'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('transcript_rating').length &amp;gt; 2&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('participant_rating').length = 0&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>!annotators('transcript_rating').includes('labbcat')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant_gender').label == 'NA'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('participant_gender').label == 'NA'&lt;/code>&lt;/li>
          * &lt;/ul>
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be: The number of matching participants.
@@ -490,11 +484,11 @@
          *  &lt;li>&lt;code>labels('corpus').includes('CC')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('participant_languages').includes('en')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('transcript_language').includes('en')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript_rating').length &amp;gt; 2&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('participant_rating').length = 0&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; first('corpus').label == 'CC'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('transcript_rating').length &amp;gt; 2&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('participant_rating').length = 0&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>!annotators('transcript_rating').includes('labbcat')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant_gender').label == 'NA'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('participant_gender').label == 'NA'&lt;/code>&lt;/li>
          * &lt;/ul>
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
          * @param {int} [pageNumber] The zero-based page number to return, or null to return the
@@ -523,19 +517,19 @@
          * &lt;ul>
          *  &lt;li>&lt;code>/Ada.+/.test(id)&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('participant').includes('Robert')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>('CC', 'IA', 'MU').includes(my('corpus').label)&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('episode').label == 'Ada Aitcheson'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('transcript_scribe').label == 'Robert'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant_languages').label == 'en'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('noise').label == 'bell'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>('CC', 'IA', 'MU').includes(first('corpus').label)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('episode').label == 'Ada Aitcheson'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('transcript_scribe').label == 'Robert'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('participant_languages').label == 'en'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('noise').label == 'bell'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('transcript_languages').includes('en')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('participant_languages').includes('en')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('noise').includes('bell')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript_languages').length gt; 1&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('participant_languages').length gt; 1&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript').length gt; 100&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('transcript_languages').length gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('participant_languages').length gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('transcript').length gt; 100&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>annotators('transcript_rating').includes('Robert')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC' &amp;amp;&amp;amp;
+         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; first('corpus').label == 'CC' &amp;amp;&amp;amp;
          * labels('participant').includes('Robert')&lt;/code>&lt;/li> 
          * &lt;/ul>
          * @param {resultCallback} onResult Invoked when the request has returned a
@@ -559,19 +553,19 @@
          * &lt;ul>
          *  &lt;li>&lt;code>/Ada.+/.test(id)&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('participant').includes('Robert')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>('CC', 'IA', 'MU').includes(my('corpus').label)&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('episode').label == 'Ada Aitcheson'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('transcript_scribe').label == 'Robert'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant_languages').label == 'en'&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('noise').label == 'bell'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>('CC', 'IA', 'MU').includes(first('corpus').label)&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('episode').label == 'Ada Aitcheson'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('transcript_scribe').label == 'Robert'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('participant_languages').label == 'en'&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>first('noise').label == 'bell'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('transcript_languages').includes('en')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('participant_languages').includes('en')&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>labels('noise').includes('bell')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript_languages').length gt; 1&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('participant_languages').length gt; 1&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>list('transcript').length gt; 100&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('transcript_languages').length gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('participant_languages').length gt; 1&lt;/code>&lt;/li>
+         *  &lt;li>&lt;code>all('transcript').length gt; 100&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>annotators('transcript_rating').includes('Robert')&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; my('corpus').label == 'CC' &amp;amp;&amp;amp;
+         *  &lt;li>&lt;code>!/Ada.+/.test(id) &amp;amp;&amp;amp; first('corpus').label == 'CC' &amp;amp;&amp;amp;
          * labels('participant').includes('Robert')&lt;/code>&lt;/li> 
          * &lt;/ul>
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
@@ -609,14 +603,23 @@
         /**
          * Gets the number of annotations on the given layer of the given transcript.
          * @param {string} id The ID of the transcript.
-         * @param {layerId} The ID of the layer.
+         * @param {string} layerId The ID of the layer.
+         * @param {int} [maxOrdinal] The maximum ordinal for the counted annotations.
+         * e.g. a &lt;var>maxOrdinal&lt;/var> of 1 will ensure that only the first annotation for each
+         * parent is counted. If &lt;var>maxOrdinal&lt;/var> is null, then all annotations are
+         * counted, regardless of their ordinal.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be: A (possibly empty) array of annotations.
          */
-        countAnnotations(id, layerId, onResult) {
+        countAnnotations(id, layerId, maxOrdinal, onResult) {
+            if (typeof maxOrdinal === "function") { // (id, layerId, onResult)
+                onResult = maxOrdinal;
+                maxOrdinal = null;
+            }
 	    this.createRequest("countAnnotations", {
                 id : id,
-                layerId : layerId
+                layerId : layerId,
+                maxOrdinal : maxOrdinal
             }, onResult).send();
         }
         
@@ -624,21 +627,36 @@
          * Gets the annotations on the given layer of the given transcript.
          * @param {string} id The ID of the transcript.
          * @param {string} layerId The ID of the layer.
+         * @param {int} [maxOrdinal] The maximum ordinal for the returned annotations.
+         * e.g. a &lt;var>maxOrdinal&lt;/var> of 1 will ensure that only the first annotation for each
+         * parent is returned. If &lt;var>maxOrdinal&lt;/var> is null, then all annotations are
+         * returned, regardless of their ordinal.
          * @param {int} [pageLength] The maximum number of IDs to return, or null to return all.
          * @param {int} [pageNumber] The zero-based page number to return, or null to return 
          * the first page. 
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var> which will be: A (possibly empty) array of annotations.
          */
-        getAnnotations(id, layerId, pageLength, pageNumber, onResult) {
-            if (typeof pageLength === "function") { // (id, layerId, onResult)
+        getAnnotations(id, layerId, maxOrdinal, pageLength, pageNumber, onResult) {
+            if (typeof maxOrdinal === "function") { // (id, layerId, onResult)
+                onResult = maxOrdinal;
+                maxOrdinal = null;
+                pageLength = null;
+                pageNumber = null;
+            } else if (typeof pageLength === "function") { // (id, layerId, maxOrdinal, onResult)
                 onResult = pageLength;
                 pageLength = null;
                 pageNumber = null;
+            } else if (typeof pageNumber === "function") { // (id, layerId, pageLength, pageNumber, onResult)
+                onResult = pageNumber;
+                pageNumber = pageLength;
+                pageLength = maxOrdinal;
+                maxOrdinal = null;
             }
 	    this.createRequest("getAnnotations", {
                 id : id,
                 layerId : layerId,
+                maxOrdinal : maxOrdinal,
                 pageLength : pageLength,
                 pageNumber : pageNumber
             }, onResult).send();
@@ -652,7 +670,7 @@
          * &lt;ul>
          *  &lt;li>&lt;code>id == 'ew_0_456'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>!/th[aeiou].&amp;#47;/.test(label)&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant').label == 'Robert' &amp;amp;&amp;amp; my('utterances').start.offset ==
+         *  &lt;li>&lt;code>first('participant').label == 'Robert' &amp;amp;&amp;amp; first('utterances').start.offset ==
          * 12.345&lt;/code>&lt;/li> 
          *  &lt;li>&lt;code>graph.id == 'AdaAicheson-01.trs' &amp;amp;&amp;amp; layer.id == 'orthography'
          * &amp;amp;&amp;amp; start.offset &amp;gt; 10.5&lt;/code>&lt;/li> 
@@ -677,7 +695,7 @@
          * &lt;ul>
          *  &lt;li>&lt;code>id == 'ew_0_456'&lt;/code>&lt;/li>
          *  &lt;li>&lt;code>!/th[aeiou].&amp;#47;/.test(label)&lt;/code>&lt;/li>
-         *  &lt;li>&lt;code>my('participant').label == 'Robert' &amp;amp;&amp;amp; my('utterances').start.offset ==
+         *  &lt;li>&lt;code>first('participant').label == 'Robert' &amp;amp;&amp;amp; first('utterances').start.offset ==
          * 12.345&lt;/code>&lt;/li> 
          *  &lt;li>&lt;code>graph.id == 'AdaAicheson-01.trs' &amp;amp;&amp;amp; layer.id == 'orthography'
          * &amp;amp;&amp;amp; start.offset &amp;gt; 10.5&lt;/code>&lt;/li> 
@@ -696,7 +714,6 @@
                 onResult = pageLength;
                 pageLength = null;
                 pageNumber = null;
-                order = null;
             }
 	    this.createRequest("getMatchingAnnotations", {
                 expression : expression,
@@ -971,10 +988,15 @@
          * &lt;/pre>
          * @param {object} pattern An object representing the pattern to search for, which
          * mirrors the Search Matrix in the browser interface.
-         * @param {string[]} [participantIds=null] An optional list of participant IDs to search
-         * the utterances of. If not null, all utterances in the corpus will be searched.
-         * @param {string[]} [transcriptTypes=null] An optional list of transcript types to limit
-         * the results to. If null, all transcript types will be searched. 
+         * @param {string[]} [participantExpression=null] An optional expression for
+         * identifying participants to search the utterances of. This can be any
+         * expression of the kind used with {@link LabbcatView#getMatchingParticipantIds}
+         * e.g. "['AP2505_Nelson','AP2512_MattBlack','AP2515_ErrolHitt'].includes(id)"
+         * @param {string[]} [transcriptExpression=null] An optional expression for
+         * identifying transcripts to search the utterances of. This can be any
+         * expression of the kind used with {@link LabbcatView#getMatchingTranscriptIds} 
+         * e.g. "['CC','ID'].includes(first('corpus').label)
+         *       &amp;&amp; first('transcript_type').label == 'wordlist'"
          * @param {boolean} [mainParticipant=true] true to search only main-participant
          * utterances, false to search all utterances. 
          * @param {boolean} [aligned=false] true to include only words that are aligned (i.e. have
@@ -990,35 +1012,42 @@
          * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
          * {@link LabbcatView#waitForTask}, etc.
          */
-        search(pattern, participantIds, transcriptTypes, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
-            if (typeof participantIds === "function") { // (pattern, onResult)
-                onResult = participantIds;
-                participantIds = null;
-                transcriptTypes = null;
+        search(pattern, participantExpression, transcriptExpression, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
+            if (typeof participantExpression === "function") { // (pattern, onResult)
+                onResult = participantExpression;
+                participantExpression = null;
+                transcriptExpression = null;
                 mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof transcriptTypes === "function") {
-                // (pattern, participantIds, onResult)
-                onResult = transcriptTypes;
-                transcriptTypes = null;
+            } else if (typeof transcriptExpression === "function") {
+                // (pattern, participantExpression, onResult)
+                onResult = transcriptExpression;
+                transcriptExpression = null;
                 mainParticipant = true;
                 aligned = false;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof transcriptTypes === "boolean") {
-                // (pattern, participantIds, mainParticipant, aligned,
+            } else if (typeof transcriptExpression === "boolean") {
+                // (pattern, participantExpression, mainParticipant, aligned,
                 // matchesPerTranscript, onResult) 
-                onResult = matchesPerTranscript;
+                onResult = overlapThreshold;
+                overlapThreshold = matchesPerTranscript
                 matchesPerTranscript = aligned;
                 aligned = mainParticipant;
-                mainParticipant = transcriptTypes;
-                transcriptTypes = null;
+                mainParticipant = transcriptExpression;
+                overlapThreshold = null;
+            } else if (typeof mainParticipant === "function") {
+                // (pattern, participantExpression, transcriptExpression, onResult)
+                onResult = mainParticipant;
+                mainParticipant = true;
+                aligned = false;
+                matchesPerTranscript = null;
                 overlapThreshold = null;
             }
             if (typeof aligned === "function") {
-                // (pattern, participantIds, mainParticipant, onResult)
+                // (pattern, participantIds, transcriptExpression, mainParticipant, onResult)
                 // i.e. the original signature of this function
                 onResult = aligned;
                 aligned = false;
@@ -1039,12 +1068,28 @@
             }
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
-                            +", "+JSON.stringify(participantIds)
-                            +", "+JSON.stringify(transcriptTypes)
+                            +", "+participantExpression
+                            +", "+transcriptExpression
                             +", "+mainParticipant
                             +", "+aligned
                             +", "+matchesPerTranscript
                             +", "+overlapThreshold+")");
+            }
+
+            // for backwards compatibility, convert arrays of IDs to expressions
+            if (Array.isArray(participantExpression)) {
+                participantExpression = "["
+                    +participantExpression
+                    .map(s=>"'"+s.replace(/'/,"\\'")+"'")
+                    .join(",")
+                    +"].includes(id)";
+            }
+            if (Array.isArray(transcriptExpression)) {
+                transcriptExpression = "["
+                    +transcriptExpression
+                    .map(s=>"'"+s.replace(/'/,"\\'")+"'")
+                    .join(",")
+                    +"].includes(first('transcript_type').label)";
             }
 
             // first normalize the pattern...
@@ -1081,8 +1126,8 @@
             if (mainParticipant) parameters.only_main_speaker = true;
             if (aligned) parameters.only_aligned = true;
             if (matchesPerTranscript) parameters.matches_per_transcript = matchesPerTranscript;
-            if (participantIds) parameters.participant_id = participantIds;
-            if (transcriptTypes) parameters.transcript_type = transcriptTypes;
+            if (participantExpression) parameters.participant_expression = participantExpression;
+            if (transcriptExpression) parameters.transcript_expression = transcriptExpression;
             if (overlapThreshold) parameters.overlap_threshold = overlapThreshold;
 
             this.createRequest(
@@ -1456,9 +1501,10 @@
                         +"&amp;start="+encodeURIComponent(startOffsets[i])
                         +"&amp;end="+encodeURIComponent(endOffsets[i]);
                     if (sampleRate) queryString += "&amp;sampleRate="+sampleRate;
+                    queryString += "&amp;prefix=true"; // TODO add function parameter for this
                     
                     if (exports.verbose) {
-                        console.log("GET: "+url + queryString + " as " + lc.username);
+                        console.log("GET: "+url + "?" + queryString + " as " + lc.username);
                     }
 	            xhr.open("GET", url + queryString, true);
 	            if (lc.username) {
@@ -1614,6 +1660,7 @@
 	            let queryString = "&amp;id="+encodeURIComponent(transcriptIds[i])
                         +"&amp;start="+encodeURIComponent(startOffsets[i])
                         +"&amp;end="+encodeURIComponent(endOffsets[i]);
+                    queryString += "&amp;prefix=true"; // TODO add a function parameter for this
                     
                     if (exports.verbose) {
                         console.log("GET: "+url + queryString + " as " + lc.username);
@@ -2270,6 +2317,35 @@
 	        }); // got length
             } // runningOnNode
         }
+        
+        /**
+         * Supplies a list of automation tasks for the identified annotator.
+         * @param {string} annotatorId The ID of the annotator that will perform the task.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var>, which is a map of task IDs to descriptions.
+         */
+        getAnnotatorTasks(annotatorId, onResult) {
+            this.createRequest(
+                "getAnnotatorTasks", {
+                    annotatorId: annotatorId
+                }, onResult)
+                .send();
+        }
+        
+        /**
+         * Supplies the given task's parameter string.
+         * @param {string} taskId The ID of the task, which must not already exist.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * &lt;var>result&lt;/var>, which is the task parameters, serialized as a string.
+         */
+        getAnnotatorTaskParameters(taskId, onResult) {
+            this.createRequest(
+                "getAnnotatorTaskParameters", {
+                    taskId: taskId
+                }, onResult)
+                .send();
+        }
+                
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
@@ -2540,9 +2616,7 @@
                                     errors = ["" +exception+ ": " + labbcat.responseText];
                                     messages = [];
 			        }
-                                // for this call, the result is an object with one key, whose
-                                // value is the threadId - so just return that
-			        onResult(result[transcriptName], errors, messages, "newTranscript",
+			        onResult(result, errors, messages, "newTranscript",
                                          transcriptName);
 		            });
 		        } else {
@@ -2559,18 +2633,28 @@
          * Uploads a new version of an existing transcript.
          * @param {file|string} transcript The transcript to upload. In a browser, this
          * must be a file object, and in Node, it must be the full path to the file. 
+         * @param {boolean} suppressGeneration (optional) false (the default) to run
+         * automatic layer generation, true to suppress automatic layer generation.
          * @param {resultCallback} onResult Invoked when the request has returned a result, 
          * which is the task ID of the resulting annotation generation task. The 
          * task status can be updated using {@link LabbcatView#taskStatus}
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
-        updateTranscript(transcript, onResult, onProgress) {
-            if (exports.verbose) console.log("updateTranscript(" + transcript + ")");
+        updateTranscript(transcript, suppressGeneration, onResult, onProgress) {
+            if (typeof suppressGeneration === "function") {
+                onProgress = onResult;
+                onResult = suppressGeneration;
+                suppressGeneration = false
+            }
+            if (exports.verbose) {
+                console.log("updateTranscript(" + transcript + ","+suppressGeneration+")");
+            }
             
             // create form
             var fd = new FormData();
             fd.append("todo", "update");
             fd.append("auto", "true");
+            if (suppressGeneration) fd.append("suppressGeneration", "true");
             
             if (!runningOnNode) {	
                 
@@ -2642,7 +2726,7 @@
 		            }
                             // for this call, the result is an object with one key, whose
                             // value is the threadId - so just return that
-			    onResult(result[transcriptName], errors, messages, "updateTranscript",
+			    onResult(result, errors, messages, "updateTranscript",
                                      transcriptName);
                         });
 	            } else {
@@ -2658,7 +2742,7 @@
          * For HTK dictionary-filling, this adds a new dictionary entry and updates all tokens.
          * @param {string} layerId The dictionary of this layer will be used.
          * @param {string} label The word label to add an entry for.
-         * @param {string} label The definition (pronunciation) of the word to add.
+         * @param {string} entry The definition (pronunciation) of the word to add.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * &lt;var>result&lt;/var>.
          */
@@ -3560,34 +3644,6 @@
         }
         
         /**
-         * Supplies a list of automation tasks for the identified annotator.
-         * @param {string} annotatorId The ID of the annotator that will perform the task.
-         * @param {resultCallback} onResult Invoked when the request has returned a 
-         * &lt;var>result&lt;/var>, which is a map of task IDs to descriptions.
-         */
-        getAnnotatorTasks(annotatorId, onResult) {
-            this.createRequest(
-                "getAnnotatorTasks", {
-                    annotatorId: annotatorId
-                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTasks")
-                .send();
-        }
-        
-        /**
-         * Supplies the given task's parameter string.
-         * @param {string} taskId The ID of the task, which must not already exist.
-         * @param {resultCallback} onResult Invoked when the request has returned a 
-         * &lt;var>result&lt;/var>, which is the task parameters, serialized as a string.
-         */
-        getAnnotatorTaskParameters(taskId, onResult) {
-            this.createRequest(
-                "getAnnotatorTaskParameters", {
-                    taskId: taskId
-                }, onResult, null, null, this.storeAdminUrl+"getAnnotatorTaskParameters")
-                .send();
-        }
-                
-        /**
          * Update the annotator task description.
          * @param {string} taskId The ID of the task, which must not already exist.
          * @param {string} description The description of the task.
@@ -3790,19 +3846,6 @@
                 }));
         }
 
-        /**
-         * Saves the store's information document.
-         * @param {string} html An HTML document with information about the corpus as a whole.
-         * @param {resultCallback} onResult Invoked when the request has returned a 
-         * &lt;var>result&lt;/var>.
-         */
-        updateInfo(html, onResult) {
-            this.createRequest(
-                "saveInfo", null, onResult, this.baseUrl + "api/admin/info", "PUT",
-                null, "text/html")
-                .send(html);
-        }
-        
         /**
          * Creates a new user record.
          * @see LabbcatAdmin#readUsers
@@ -4072,7 +4115,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu May 27 2021 18:18:25 GMT-0300 (Uruguay Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Feb 02 2023 18:59:18 GMT-0300 (Argentina Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
