@@ -227,6 +227,26 @@ describe("#LabbcatView", function() {
         });
     });
 
+    it("implements countAnnotations with maxOrdinal parameter", (done)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isAtLeast(ids.length, 1, "There's at least one transcript");
+            store.countAnnotations(ids[0], "phonemes", (countAll, errors, messages)=>{
+                assert.isNull(errors);
+                assert.isNumber(countAll);
+                assert.isAtLeast(countAll, 1, "There are some matches");
+                store.countAnnotations(ids[0], "phonemes", 1, (countFirsts, errors, messages)=>{
+                    assert.isNull(errors);
+                    assert.isNumber(countFirsts);
+                    assert.isAtLeast(countFirsts, 1, "There are some maxOrdinal=1 matches");
+                    assert.isTrue(countFirsts < countAll,
+                                  "countFirsts ("+countFirsts+") < countAll ("+countAll+")");
+                    done();
+                });
+            });
+        });
+    });
+
     it("implements getAnnotations", (done)=>{
         store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
@@ -248,6 +268,33 @@ describe("#LabbcatView", function() {
                         done();
                     });
             });
+        });
+    });
+    
+    it("implements getAnnotations with maxOrdinal parameter", (done)=>{
+        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isAtLeast(ids.length, 1, "There's at least one transcript");
+            let graphId = ids[0];
+            
+            store.getAnnotations(
+                graphId, "phonemes", (allAnnotations, errors, messages)=>{
+                    assert.isNull(errors);
+                    assert.isArray(allAnnotations);
+                    assert.isAtLeast(allAnnotations.length, 1, "There are phonemes annotations");
+                    store.getAnnotations(
+                        graphId, "phonemes", 1, (firstAnnotations, errors, messages)=>{
+                            assert.isNull(errors);
+                            assert.isArray(firstAnnotations);
+                            assert.isAtLeast(firstAnnotations.length, 1,
+                                             "There are first phonemes annotations");
+                            assert.isTrue(firstAnnotations.length < allAnnotations.length,
+                                          "firstAnnotations ("+firstAnnotations.length
+                                          +") are less numerous than allAnnotations ("
+                                          +allAnnotations.length+")");
+                            done();
+                        });
+                });
         });
     });
     

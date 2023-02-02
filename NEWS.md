@@ -1,3 +1,10 @@
+# 1.4.0
+
+- Changed LabbcatView functions
+  + *countAnnotations* - new maxOrdinal parameter
+  + *getAnnotations* - new maxOrdinal parameter
+  + *updateTranscript* - new suppressGeneration parameter
+
 # v1.3.0
 
 - New LabbcatView functions

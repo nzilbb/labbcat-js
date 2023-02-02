@@ -80,8 +80,9 @@ describe("#LabbcatEdit", function() {
              assert(fs.existsSync(transcriptPath), "Test transcript exists");
              store.newTranscript(
                transcriptPath, null, null, transcriptType, corpusId, "test",
-               (threadId, errors, messages)=>{
+               (result, errors, messages)=>{
                  assert.isNull(errors, JSON.stringify(errors));
+                 const threadId = result[Object.keys(result)[0]]
                  assert.isNotNull(threadId);
                  
                  store.waitForTask(threadId, 30, (task, errors, messages)=>{
@@ -106,8 +107,9 @@ describe("#LabbcatEdit", function() {
                            
                            // re-upload it
                            store.updateTranscript(
-                             transcriptPath, (threadId, errors, messages)=>{
+                             transcriptPath, (result, errors, messages)=>{
                                assert.isNull(errors, JSON.stringify(errors))
+                               const threadId = result[Object.keys(result)[0]]
                                assert.isNotNull(threadId);
                                
                                store.waitForTask(
@@ -190,8 +192,9 @@ describe("#LabbcatEdit", function() {
                 // upload without mediaSuffix
                 store.newTranscript(
                     transcriptPath, null, transcriptType, corpusId, "test",
-                    (threadId, errors, messages)=>{
+                    (result, errors, messages)=>{
                         assert.isNull(errors, JSON.stringify(errors));
+                        const threadId = result[Object.keys(result)[0]]
                         assert.isNotNull(threadId);
                         
                         store.waitForTask(threadId, 30, (task, errors, messages)=>{
@@ -215,8 +218,9 @@ describe("#LabbcatEdit", function() {
                                             // upload without mediaSuffix and episode
                                             store.newTranscript(
                                                 transcriptPath, null, transcriptType, corpusId, "test",
-                                                (threadId, errors, messages)=>{
+                                                (result, errors, messages)=>{
                                                     assert.isNull(errors, JSON.stringify(errors));
+                                                    const threadId = result[Object.keys(result)[0]]
                                                     assert.isNotNull(threadId);
                                                     
                                                     store.waitForTask(threadId, 30, (task, errors, messages)=>{
