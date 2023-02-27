@@ -58,6 +58,66 @@ describe("#LabbcatEdit", function() {
         });
     });
 
+    it("implements getParticipant, saveParticipant, and deleteTranscript", (done)=>{
+        const originalId = "TestLabbcatEdit-participant";
+        const changedId = "TestLabbcatEdit-participant-changed";
+        // create participant
+        store.saveParticipant(
+            originalId, originalId, {"participant_gender":"X"}, (result, errors, messages) =>{
+                assert.isNull(errors);
+                
+                // check it's there
+                store.getParticipant(
+                    originalId, ["participant_gender"], (participant, errors, messages)=>{
+                        assert.isNull(errors);
+                        assert.equal(
+                            participant.label, originalId, "Correct participant"); // not getId()
+                        assert.isNotNull(participant.annotations,
+                                         "Has child annotations " + JSON.stringify(participant));
+                        assert.isNotNull(participant.annotations.participant_gender,
+                                         "Includes attribute " + JSON.stringify(participant));
+                        assert.equal(participant.annotations.participant_gender[0].label, "X",
+                                     "Attribute correct " + JSON.stringify(participant));
+                        
+                        // update participant
+                        store.saveParticipant(
+                            originalId, changedId, {"participant_gender":"Y"},
+                            (result, errors, messages) =>{
+                                assert.isNull(errors);
+                                
+                                // check it's changed
+                                store.getParticipant(
+                                    changedId, ["participant_gender"],
+                                    (participant, errors, messages)=>{
+                                        assert.isNull(errors);
+                                        assert.equal(
+                                            participant.label, changedId, "Correct participant");
+                                        assert.equal(
+                                            participant.annotations["participant_gender"][0].label,
+                                            "Y", "Attribute changed");
+                                        
+                                        // delete participant
+                                        store.deleteParticipant(
+                                            changedId, (result, errors, messages)=>{
+                                                assert.isNull(errors, JSON.stringify(errors));
+                                                
+                                                // check it's gone
+                                                store.getParticipant(
+                                                    changedId, ["participant_gender"],
+                                                    (participant, errors, messages)=>{
+                                                        assert.isNull(errors);
+                                                        assert.isNull(participant,
+                                                                      "Participant not returned");
+                                                        
+                                                        done();
+                                                    });
+                                            });
+                                    });
+                            });
+                    });
+            });
+    });
+    
     it("implements newTranscript, updateTranscript, deleteTranscript, and deleteParticipant", (done)=>{
      const participantName = "UnitTester";
      const transcriptName = "labbcat-js.test.txt";

@@ -373,7 +373,7 @@ describe("#LabbcatView", function() {
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
-            store.getParticipant(participantId, ["participant_gender"], (participant, errorrs, messages)=>{
+            store.getParticipant(participantId, ["participant_gender"], (participant, errors, messages)=>{
                 assert.isNull(errors);
                 assert.equal(participant.label, participantId, "Correct participant"); // not getId()
                 assert.containsAllKeys(

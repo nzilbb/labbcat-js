@@ -2417,6 +2417,28 @@
         }
 
         /**
+         * Saves a participant, and all its tags, to the graph store.
+         * To change the ID of an existing participant, pass the old/current ID as the
+         * <var>id</var>, and pass the new ID as the <var>label</var>.
+         * If the participant ID does not already exist in the database, a new participant record
+         * is created. 
+         * @param {string} id The participant ID - either the unique internal database ID,
+         * or their name. 
+         * @param {string} label The new ID (name) for the participant
+         * @param {object} attributes Participant attribute values - the names are the
+         * participant attribute layer IDs, and the values are the corresponding new
+         * attribute values.  
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        saveParticipant(id, label, attributes, onResult) {
+            attributes["id"] = id;
+            attributes["label"] = label;
+	    this.createRequest(
+                "saveParticipant", null, onResult, null, "POST",
+                this.storeEditUrl, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString(attributes));
+        }
+        /**
          * Deletes the given participan, and all assciated meta-data, from the graph store.
          * @param {string} id The participant ID
          * @param {resultCallback} onResult Invoked when the request has completed.
