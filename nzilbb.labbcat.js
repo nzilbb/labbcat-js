@@ -2427,7 +2427,8 @@
          * @param {string} label The new ID (name) for the participant
          * @param {object} attributes Participant attribute values - the names are the
          * participant attribute layer IDs, and the values are the corresponding new
-         * attribute values.  
+         * attribute values. The pass phrase for participant access can also be set by
+         * specifying a "_password" attribute.
          * @param {resultCallback} onResult Invoked when the request has completed.
          */
         saveParticipant(id, label, attributes, onResult) {
