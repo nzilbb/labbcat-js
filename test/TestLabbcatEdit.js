@@ -314,4 +314,42 @@ describe("#LabbcatEdit", function() {
             });
         });
     });
+    
+    it("implements saveTranscript", (done)=>{
+        store.getMatchingTranscriptIds("/AP511.+\\.eaf/.test(id)'", 1, 0, (ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotEmpty(ids, "Some transcript IDs are returned - maybe check the test regex?");
+            let graphId = ids[0];
+            store.getTranscript(graphId, ["transcript_language"], (graph, errors, messages)=>{
+                // get transcript_language
+                assert.isNull(errors);
+                assert.isNotNull(graph);
+                assert.isNotNull(graph.transcript_language);
+                assert.isTrue(graph.transcript_language.length > 0);
+                const originalLabel = graph.transcript_language[0].label;
+
+                // change label
+                graph.transcript_language[0].label = "TestLabbcatEdit.js";
+                store.saveTranscript(graph, (saved, errors, messages)=>{
+                    assert.isNull(errors);
+                    assert.isTrue(saved);
+
+                    // check label is really changed
+                    store.getTranscript(graphId, ["transcript_language"], (graph, errors, messages)=>{
+                        assert.isNull(errors);
+                        assert.equal("TestLabbcatEdit.js", graph.transcript_language[0].label);
+
+                        // put back the original value
+                        graph.transcript_language[0].label = originalLabel;
+                        store.saveTranscript(graph, (saved, errors, messages)=>{
+                            assert.isNull(errors);
+                            assert.isTrue(saved);                   
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+    });
+
 });

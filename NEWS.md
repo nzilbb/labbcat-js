@@ -1,7 +1,8 @@
 # 1.5.0
 
-- New LabbcatEdit function
+- New LabbcatEdit functions
   + *saveParticipant* - add or update a participant record
+  + *saveTranscript* - update transcript attributes
 
 Requires LaBB-CAT version 20230224.1731
 
