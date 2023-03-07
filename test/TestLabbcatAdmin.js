@@ -268,6 +268,115 @@ describe("#LabbcatAdmin", function() {
         });
     });
 
+    it("implements category CRUD operations", (done)=>{
+
+        const scope = "participant";
+        const class_id = "speaker";
+        const category_name = "unit-test";
+        const description = "Temporary category for unit testing";
+        const display_order = 999;
+        
+        // ensure the record doesn't exist to start with
+        store.deleteCategory(scope, category_name, (result, errors, messages)=>{
+            
+            // create the category
+            store.createCategory(
+                scope, category_name, description, display_order, (category, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors));
+                    assert.isNotNull(category);
+                    assert.equal(category.category, category_name, "category saved");
+                    assert.equal(category.class_id, class_id, "class_id correct");
+                    assert.equal(category.description, description, "description saved");
+                    
+                    // ensure the category exists
+                    store.readCategories(scope, (categories, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors))
+                        assert.isNotNull(categories, "The categories are returned")
+                        assert.isAtLeast(categories.length, 1, "There is at least one category");
+                        
+                        const matchedCategories = categories.filter(c => {
+                            return c.category == category_name;});
+                        assert.equal(matchedCategories.length, 1,
+                                     "The new category is present: " + JSON.stringify(categories));
+                        assert.equal(matchedCategories[0].category, category_name,
+                                     "category name present");
+                        assert.equal(matchedCategories[0].description, description,
+                                     "description correct");
+                        
+                        // update it
+                        const new_description = "New description";
+                        const new_display_order = 9999;
+                        store.updateCategory(
+                            scope, category_name, new_description, new_display_order,
+                            (updatedCategory, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors))
+                                assert.isNotNull(updatedCategory);
+                                assert.equal(updatedCategory.category, category_name,
+                                             "category name unchanged");
+                                assert.equal(updatedCategory.description, new_description,
+                                             "description changed");
+                                assert.equal(updatedCategory.display_order, new_display_order,
+                                             "display_order changed");
+                                
+                                // ensure the category updated
+                                store.readCategories(scope, (categories, errors, messages)=>{
+                                    assert.isNull(errors, JSON.stringify(errors))
+                                    assert.isNotNull(categories, "The categories are returned")
+                                    assert.isAtLeast(categories.length, 1,
+                                                     "There is at least one category");
+                                    
+                                    const newMatchedCategories = categories.filter(c => {
+                                        return c.category == category_name;});
+                                    assert.equal(
+                                        newMatchedCategories.length, 1,
+                                        "The updated category is present");
+                                    assert.equal(
+                                        newMatchedCategories[0].category, category_name,
+                                        "updated category name correct");
+                                    assert.equal(
+                                        newMatchedCategories[0].description,
+                                        new_description,
+                                        "updated description correct");
+                                    assert.equal(
+                                        newMatchedCategories[0].display_order,
+                                        new_display_order,
+                                        "updated display_order correct");
+                                    
+                                    // delete it
+                                    store.deleteCategory(
+                                        scope, category_name, (result, errors, messages)=>{
+                                            assert.isNull(errors, JSON.stringify(errors))
+                                            
+                                            // ensure the transcript no longer exists
+                                            store.readCategories(
+                                                scope, (categories, errors, messages)=>{
+                                                    assert.isNull(errors, JSON.stringify(errors))
+                                                    assert.isNotNull(categories, "The categories are returned")
+                                                    
+                                                    const finalMatchedCategories = categories.filter(c => {
+                                                        return c.category == category_name;});
+                                                    assert.equal(finalMatchedCategories.length, 0,
+                                                                 "The new category is gone");
+                                                    
+                                                    // can't delete it again
+                                                    store.deleteCategory(
+                                                        scope, category_name,
+                                                        (result, errors, messages) =>{
+                                                            assert.isNotNull(
+                                                                errors,
+                                                                "deleteCategory fails for nonexistant category ID");
+                                                            assert.include(errors[0], "not found");
+                                                            done();
+                                                        });
+                                                });
+                                        });
+                                });
+                            });
+                    });
+                });
+        });
+    });
+    
     it("implements mediatrack CRUD operations", (done)=>{
 
         const track_suffix = "unit-test";
