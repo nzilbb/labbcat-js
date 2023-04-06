@@ -33,6 +33,8 @@ from JavaScript.
 
 The current version of this library requires LaBB-CAT version 20200608.1507.
 
+**Detailed documentation is available at https://nzilbb.github.io/labbcat-js/**
+
 ## Basic usage
 
 The following example shows how to perform a search and download audio and Praat TextGrids
@@ -88,10 +90,6 @@ corpus.getParticipantIds((ids, errors, messages)=>{
     });
 });
 ```
-
-## Documentation
-
-Detailed documentation is available [here](https://nzilbb.github.io/labbcat-js/)
 
 ## Developers
 
