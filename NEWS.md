@@ -1,10 +1,11 @@
 # 1.5.0
 
 - New LabbcatEdit functions
+  + *versionInfo* - gets version information of all components of LaBB-CAT
   + *saveParticipant* - add or update a participant record
   + *saveTranscript* - update transcript attributes
 
-Requires LaBB-CAT version 20230224.1731
+Requires LaBB-CAT version 20230508.1434
 
 # 1.4.0
 

@@ -59,6 +59,17 @@ describe("#LabbcatView", function() {
         });
     });
     
+    it("implements versionInfo", (done)=>{
+        assert.equal(baseUrl + "api/store/", store.storeUrl);
+        store.versionInfo((version, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotNull(version);
+            assert.isNotNull(version["System"]);
+            assert.isNotNull(version["System"]["LaBB-CAT"]);
+            done();
+        });
+    });
+    
     it("implements getInfo", (done)=>{
         store.getInfo((info, errors, messages)=>{
             assert.isNull(errors);
@@ -1176,7 +1187,11 @@ describe("#LabbcatView", function() {
                                 for (let textgrid of textgrids) {
                                     //console.log(textgrid);
                                     // be tidy
-                                    fs.unlinkSync(textgrid);
+                                    try {
+                                        fs.unlinkSync(textgrid);
+                                    } catch(x) {
+                                        console.warn("example code test TextGrid: "+x);
+                                    }
                                 }
                                 
                                 // get the utterance recordings
@@ -1190,7 +1205,11 @@ describe("#LabbcatView", function() {
                                         for (let wav of wavs) {
                                             //console.log(wav);
                                             // be tidy
-                                            fs.unlinkSync(wav);
+                                            try  {
+                                                fs.unlinkSync(wav);
+                                            } catch(x) {
+                                                console.warn("example code test wav: "+x);
+                                            }
                                         }
                                         done();
                                     });
