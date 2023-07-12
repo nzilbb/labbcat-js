@@ -1282,5 +1282,20 @@ describe("#LabbcatView", function() {
             done();
         });
     });
+  
+  it("implements readOnlyCategories", (done)=>{
+    store.readOnlyCategories("transcript", (categories, errors, messages)=>{
+      assert.isNull(errors, JSON.stringify(errors))
+      assert.isNotNull(categories, "The categories are returned")
+      assert.isAtLeast(categories.length, 1, "There is at least one category");
+      
+      const category = categories[0];
+      assert.containsAllKeys(
+        categories[0], ["class_id", "category", "description", "display_order"],
+        "Looks like a category");
+      done();
+    });
+  });
+
 
 });
