@@ -699,7 +699,7 @@ describe("#LabbcatView", function() {
             // all instances of "and"
             const fullPattern = {"columns" : [{
                 "layers" : {
-                    "orthography" : { "pattern" : "i.*"}}}]};
+                    "orthography" : { "pattern" : "i"}}}]};
             store.search(fullPattern, [ participantId ], false, (response, errors, messages)=>{
                 assert.isNull(errors, JSON.stringify(errors))
                 assert.isNotNull(response)
