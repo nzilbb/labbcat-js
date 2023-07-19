@@ -59,6 +59,17 @@ describe("#LabbcatView", function() {
         });
     });
     
+    it("implements versionInfo", (done)=>{
+        assert.equal(baseUrl + "api/store/", store.storeUrl);
+        store.versionInfo((version, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isNotNull(version);
+            assert.isNotNull(version["System"]);
+            assert.isNotNull(version["System"]["LaBB-CAT"]);
+            done();
+        });
+    });
+    
     it("implements getInfo", (done)=>{
         store.getInfo((info, errors, messages)=>{
             assert.isNull(errors);
@@ -373,7 +384,7 @@ describe("#LabbcatView", function() {
             assert.isNull(errors);
             assert.isNotEmpty(ids, "Some participant IDs exist");
             const participantId = ids[0];
-            store.getParticipant(participantId, ["participant_gender"], (participant, errorrs, messages)=>{
+            store.getParticipant(participantId, ["participant_gender"], (participant, errors, messages)=>{
                 assert.isNull(errors);
                 assert.equal(participant.label, participantId, "Correct participant"); // not getId()
                 assert.containsAllKeys(
@@ -758,6 +769,34 @@ describe("#LabbcatView", function() {
         });
     });
 
+    it("supports searching for non-ASCII unicode characters", (done)=>{
+      // get a participant ID to use
+      store.getParticipantIds((ids, errors, messages)=>{
+        assert.isNull(errors);
+        assert.isNotEmpty(ids, "Some participant IDs exist");
+        const participantId = ids[0];
+        
+        // all instances of "and"
+        const pattern = {"columns" : [{"layers" : {"segment" : { "pattern" : "iː"}}}]};
+        store.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+          assert.isNull(errors, JSON.stringify(errors))
+          assert.isNotNull(response)
+          assert.isObject(response)
+          const threadId = response.threadId
+          
+          store.waitForTask(threadId, 30, (task, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors));
+            
+            // if the task is still running, it's taking too long, so cancel it
+            if (task.running) store.cancelTask(threadId);
+            assert.isFalse(task.running, "Search finished in a timely manner");
+            store.releaseTask(threadId);
+            done();
+          });
+        });
+      });
+    });
+      
     it("implements allUtterances", (done)=>{
         // get a participant ID to use
         store.getParticipantIds((ids, errors, messages)=>{
@@ -1176,7 +1215,11 @@ describe("#LabbcatView", function() {
                                 for (let textgrid of textgrids) {
                                     //console.log(textgrid);
                                     // be tidy
-                                    fs.unlinkSync(textgrid);
+                                    try {
+                                        fs.unlinkSync(textgrid);
+                                    } catch(x) {
+                                        console.warn("example code test TextGrid: "+x);
+                                    }
                                 }
                                 
                                 // get the utterance recordings
@@ -1190,7 +1233,11 @@ describe("#LabbcatView", function() {
                                         for (let wav of wavs) {
                                             //console.log(wav);
                                             // be tidy
-                                            fs.unlinkSync(wav);
+                                            try  {
+                                                fs.unlinkSync(wav);
+                                            } catch(x) {
+                                                console.warn("example code test wav: "+x);
+                                            }
                                         }
                                         done();
                                     });
@@ -1263,5 +1310,20 @@ describe("#LabbcatView", function() {
             done();
         });
     });
+  
+  it("implements readOnlyCategories", (done)=>{
+    store.readOnlyCategories("transcript", (categories, errors, messages)=>{
+      assert.isNull(errors, JSON.stringify(errors))
+      assert.isNotNull(categories, "The categories are returned")
+      assert.isAtLeast(categories.length, 1, "There is at least one category");
+      
+      const category = categories[0];
+      assert.containsAllKeys(
+        categories[0], ["class_id", "category", "description", "display_order"],
+        "Looks like a category");
+      done();
+    });
+  });
+
 
 });

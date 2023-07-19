@@ -312,6 +312,25 @@
         }
         
         /**
+         * Gets version information of all components of LaBB-CAT.
+         * @param {resultCallback} onResult Invoked when the request has returned a
+         * <var>result</var> which will be:  {object} An object containing section objects
+         * "System", "Formats", "Layer Managers", etc. each containing version information
+         * for sub-components. e.g.
+         * <ul>
+         *  <li>result["System"]["LaBB-CAT"] is the overall LaBB-CAT version,</li>
+         *  <li>result["System"]["nzilbb.ag"] is the overall annotation graph package
+         *      version,</li>
+         *  <li>result["Formats"]["Praat TextGrid"] is version of the Praat TextGrid
+         *      conversion module,</li>
+         *  <li>result["Layer Managers"]["HTK"] is version of the HTK Layer Manager, etc.</li>
+         * </ul>
+         */
+        versionInfo(onResult) {
+	    this.createRequest("version", null, onResult, this.baseUrl+"version").send();
+        }
+        
+        /**
          * Gets the store's ID.
          * @param {resultCallback} onResult Invoked when the request has returned a
          * <var>result</var> which will be:  {string} The annotation store's ID.
@@ -876,7 +895,7 @@
         
         /**
          * Searches for tokens that match the given pattern.
-         * <p> Although <var>mainParticipant</var>, <var>aligned</var> and
+         * <p> Although <var>mainParticipantOnly</var>, <var>offsetThreshold</var> and
          * <var>matchesPerTranscript</var> are all optional, if one of them is specified,
          * then all must be specified.
          * <p> The <var>pattern</var> should match the structure of the search matrix in the
@@ -960,19 +979,22 @@
          * </pre>
          * @param {object} pattern An object representing the pattern to search for, which
          * mirrors the Search Matrix in the browser interface.
-         * @param {string[]} [participantExpression=null] An optional expression for
+         * @param {string[]} [participantQuery=null] An optional expression for
          * identifying participants to search the utterances of. This can be any
          * expression of the kind used with {@link LabbcatView#getMatchingParticipantIds}
          * e.g. "['AP2505_Nelson','AP2512_MattBlack','AP2515_ErrolHitt'].includes(id)"
-         * @param {string[]} [transcriptExpression=null] An optional expression for
+         * @param {string[]} [transcriptQuery=null] An optional expression for
          * identifying transcripts to search the utterances of. This can be any
          * expression of the kind used with {@link LabbcatView#getMatchingTranscriptIds} 
          * e.g. "['CC','ID'].includes(first('corpus').label)
          *       && first('transcript_type').label == 'wordlist'"
-         * @param {boolean} [mainParticipant=true] true to search only main-participant
+         * @param {boolean} [mainParticipantOnly=true] true to search only main-participant
          * utterances, false to search all utterances. 
-         * @param {boolean} [aligned=false] true to include only words that are aligned (i.e. have
-         * anchor confidence &ge; 50, false to search include un-aligned words as well. 
+         * @param {int} [offsetThreshold=null] Optional minimum alignment confidence for
+         * matching word or segment annotations. A value of 50 means that annotations that
+         * were at least automatically aligned will be returned. Use 100 for
+         * manually-aligned annotations only, and 0 or no value to return all matching
+         * annotations regardless of alignment confidence.
          * @param {int} [matchesPerTranscript=null] Optional maximum number of matches per
          * transcript to return. <tt>null</tt> means all matches.
          * @param {int} [overlapThreshold=null] Optional percentage overlap with other
@@ -984,81 +1006,81 @@
          * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
          * {@link LabbcatView#waitForTask}, etc.
          */
-        search(pattern, participantExpression, transcriptExpression, mainParticipant, aligned, matchesPerTranscript, overlapThreshold, onResult) {
-            if (typeof participantExpression === "function") { // (pattern, onResult)
-                onResult = participantExpression;
-                participantExpression = null;
-                transcriptExpression = null;
-                mainParticipant = true;
-                aligned = false;
+        search(pattern, participantQuery, transcriptQuery, mainParticipantOnly, offsetThreshold, matchesPerTranscript, overlapThreshold, onResult) {
+            if (typeof participantQuery === "function") { // (pattern, onResult)
+                onResult = participantQuery;
+                participantQuery = null;
+                transcriptQuery = null;
+                mainParticipantOnly = true;
+                offsetThreshold = null;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof transcriptExpression === "function") {
-                // (pattern, participantExpression, onResult)
-                onResult = transcriptExpression;
-                transcriptExpression = null;
-                mainParticipant = true;
-                aligned = false;
+            } else if (typeof transcriptQuery === "function") {
+                // (pattern, participantQuery, onResult)
+                onResult = transcriptQuery;
+                transcriptQuery = null;
+                mainParticipantOnly = true;
+                offsetThreshold = null;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
-            } else if (typeof transcriptExpression === "boolean") {
-                // (pattern, participantExpression, mainParticipant, aligned,
+            } else if (typeof transcriptQuery === "boolean") {
+                // (pattern, participantQuery, mainParticipantOnly, offsetThreshold,
                 // matchesPerTranscript, onResult) 
                 onResult = overlapThreshold;
                 overlapThreshold = matchesPerTranscript
-                matchesPerTranscript = aligned;
-                aligned = mainParticipant;
-                mainParticipant = transcriptExpression;
+                matchesPerTranscript = offsetThreshold;
+                offsetThreshold = mainParticipantOnly;
+                mainParticipantOnly = transcriptQuery;
                 overlapThreshold = null;
-            } else if (typeof mainParticipant === "function") {
-                // (pattern, participantExpression, transcriptExpression, onResult)
-                onResult = mainParticipant;
-                mainParticipant = true;
-                aligned = false;
+            } else if (typeof mainParticipantOnly === "function") {
+                // (pattern, participantQuery, transcriptQuery, onResult)
+                onResult = mainParticipantOnly;
+                mainParticipantOnly = true;
+                offsetThreshold = null;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
             }
-            if (typeof aligned === "function") {
-                // (pattern, participantIds, transcriptExpression, mainParticipant, onResult)
+            if (typeof offsetThreshold === "function") {
+                // (pattern, participantIds, transcriptQuery, mainParticipantOnly, onResult)
                 // i.e. the original signature of this function
-                onResult = aligned;
-                aligned = false;
+                onResult = offsetThreshold;
+                offsetThreshold = null;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
             }
             if (typeof matchesPerTranscript === "function") {
-                // (pattern, participantIds, mainParticipant, aligned, onResult)
+                // (pattern, participantIds, mainParticipantOnly, offsetThreshold, onResult)
                 // i.e. the original signature of this function
                 onResult = matchesPerTranscript;
                 matchesPerTranscript = null;
                 overlapThreshold = null;
             }
             if (typeof overlapThreshold === "function") {
-                // (pattern, participantIds, mainParticipant, aligned, matchesPerTranscript, onResult)
+                // (pattern, participantIds, mainParticipantOnly, offsetThreshold, matchesPerTranscript, onResult)
                 onResult = overlapThreshold;
                 overlapThreshold = null;
             }
             if (exports.verbose) {
                 console.log("search("+JSON.stringify(pattern)
-                            +", "+participantExpression
-                            +", "+transcriptExpression
-                            +", "+mainParticipant
-                            +", "+aligned
+                            +", "+participantQuery
+                            +", "+transcriptQuery
+                            +", "+mainParticipantOnly
+                            +", "+offsetThreshold
                             +", "+matchesPerTranscript
                             +", "+overlapThreshold+")");
             }
 
             // for backwards compatibility, convert arrays of IDs to expressions
-            if (Array.isArray(participantExpression)) {
-                participantExpression = "["
-                    +participantExpression
+            if (Array.isArray(participantQuery)) {
+                participantQuery = "["
+                    +participantQuery
                     .map(s=>"'"+s.replace(/'/,"\\'")+"'")
                     .join(",")
                     +"].includes(id)";
             }
-            if (Array.isArray(transcriptExpression)) {
-                transcriptExpression = "["
-                    +transcriptExpression
+            if (Array.isArray(transcriptQuery)) {
+                transcriptQuery = "["
+                    +transcriptQuery
                     .map(s=>"'"+s.replace(/'/,"\\'")+"'")
                     .join(",")
                     +"].includes(first('transcript_type').label)";
@@ -1095,17 +1117,17 @@
                 searchJson : JSON.stringify(pattern),
                 words_context : 0
             }
-            if (mainParticipant) parameters.only_main_speaker = true;
-            if (aligned) parameters.only_aligned = true;
-            if (matchesPerTranscript) parameters.matches_per_transcript = matchesPerTranscript;
-            if (participantExpression) parameters.participant_expression = participantExpression;
-            if (transcriptExpression) parameters.transcript_expression = transcriptExpression;
-            if (overlapThreshold) parameters.overlap_threshold = overlapThreshold;
+            if (mainParticipantOnly) parameters.mainParticipantOnly = true;
+            if (offsetThreshold) parameters.offsetThreshold = offsetThreshold;
+            if (matchesPerTranscript) parameters.matchesPerTranscript = matchesPerTranscript;
+            if (participantQuery) parameters.participantQuery = participantQuery;
+            if (transcriptQuery) parameters.transcriptQuery = transcriptQuery;
+            if (overlapThreshold) parameters.overlapThreshold = overlapThreshold;
 
             this.createRequest(
-                "search", null, onResult, this.baseUrl+"search",
+                "search", null, onResult, this.baseUrl+"api/search",
                 "POST", // not GET, because the number of parameters can make the URL too long
-                null, "application/x-www-form-urlencoded")
+                null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
                 .send(this.parametersToQueryString(parameters));
         }
         
@@ -1155,7 +1177,7 @@
             if (exports.verbose) console.log(JSON.stringify(parameters));
 
             this.createRequest(
-                "allUtterances", null, onResult, this.baseUrl+"allUtterances",
+                "allUtterances", null, onResult, this.baseUrl+"api/utterances",
                 "POST", // not GET, because the number of parameters can make the URL too long
                 null, "application/x-www-form-urlencoded")
                 .send(this.parametersToQueryString(parameters));
@@ -1227,7 +1249,7 @@
                 words_context : wordsContext,
                 pageLength : pageLength,
                 pageNumber : pageNumber
-            }, onResult, this.baseUrl+"resultsStream").send();
+            }, onResult, this.baseUrl+"api/results").send();
         }
         
         /**
@@ -2318,6 +2340,40 @@
                 .send();
         }
                 
+        /**
+         * Reads a list of category records.
+         * @param {string} class_id What attributes to read; "transcript" or "participant". 
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of category records with the following
+         * attributes:
+         * <dl>
+         *  <dt> class_id </dt> <dd> The class_id of the category. </dd>
+         *  <dt> category </dt> <dd> The name/id of the category. </dd>
+         *  <dt> description </dt> <dd> The description of the category. </dd>
+         *  <dt> display_order </dt> <dd> Where the category appears among other categories. </dd>
+         * </dl>
+         */
+        readOnlyCategories(class_id, pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            if (class_id == "participant") class_id = "speaker";
+            this.createRequest(
+                `categories/${class_id}`, {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, `${this.baseUrl}api/categories/${class_id}`)
+                .send();
+        }
+        
     } // class LabbcatView
 
     // LabbcatEdit class - read/write "edit" access
@@ -2366,14 +2422,24 @@
         }
 
         /**
-         * Saves the given transcript. The graph can be partial e.g. include only some of
-         * the layers that the stored version of the transcript contains.
-         * @param graph The transcript to save.
+         * Saves changes to the given transcript annotation graph object, which was
+         * previously returned from {@link #getTranscript}. 
+         * <em>NB</em> this not be confused with the methods that upload a file:
+         * {@link #newTranscript} and {@link #updateTranscript}.
+         * <em>NB</em> Currently only transcript attributes can be updated.
+         * <p> The graph can be partial e.g. include only some of the layers that the
+         * stored version of the transcript contains. 
+         * @param transcript The transcript to save.
          * @param {resultCallback} onResult Invoked when the request has returned a 
          * <var>result</var> which will be: true if changes were saved, false if there
          * were no changes to save.
+         * @see LabbcatView#getTranscript
          */
-        saveGraph(graph, onResult) { // TODO
+        saveTranscript(transcript, onResult) {
+	    this.createRequest(
+                "saveTranscript", null, onResult, null, "POST",
+                this.storeEditUrl, "application/json")
+                .send(JSON.stringify(transcript));
         }
     
         /**
@@ -2416,6 +2482,29 @@
                 .send(this.parametersToQueryString({id : id}));
         }
 
+        /**
+         * Saves a participant, and all its tags, to the graph store.
+         * To change the ID of an existing participant, pass the old/current ID as the
+         * <var>id</var>, and pass the new ID as the <var>label</var>.
+         * If the participant ID does not already exist in the database, a new participant record
+         * is created. 
+         * @param {string} id The participant ID - either the unique internal database ID,
+         * or their name. 
+         * @param {string} label The new ID (name) for the participant
+         * @param {object} attributes Participant attribute values - the names are the
+         * participant attribute layer IDs, and the values are the corresponding new
+         * attribute values. The pass phrase for participant access can also be set by
+         * specifying a "_password" attribute.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        saveParticipant(id, label, attributes, onResult) {
+            attributes["id"] = id;
+            attributes["label"] = label;
+	    this.createRequest(
+                "saveParticipant", null, onResult, null, "POST",
+                this.storeEditUrl, "application/x-www-form-urlencoded")
+                .send(this.parametersToQueryString(attributes));
+        }
         /**
          * Deletes the given participan, and all assciated meta-data, from the graph store.
          * @param {string} id The participant ID
@@ -2603,6 +2692,8 @@
         
         /**
          * Uploads a new version of an existing transcript.
+         * <em>NB</em> this not be confused with the method that saves an annotation graph
+         * object: {@link #saveTranscript}
          * @param {file|string} transcript The transcript to upload. In a browser, this
          * must be a file object, and in Node, it must be the full path to the file. 
          * @param {boolean} suppressGeneration (optional) false (the default) to run
@@ -3069,6 +3160,115 @@
         deleteProject(project, onResult) {
             this.createRequest(
                 "projects", null, onResult, `${this.baseUrl}api/admin/projects/${project}`,
+                "DELETE").send();
+        }
+        
+        /**
+         * Reads a list of category records. This overrides the LabbcatView version, and includes
+         * information about the possibility of deletion.
+         * @see LabbcatAdmin#createCategory
+         * @see LabbcatAdmin#updateCategory
+         * @see LabbcatAdmin#deleteCategory
+         * @param {string} class_id What attributes to read; "transcript" or "participant". 
+         * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+         * records will be returned). 
+         * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A list of category records with the following
+         * attributes:
+         * <dl>
+         *  <dt> class_id </dt> <dd> The class_id of the category. </dd>
+         *  <dt> category </dt> <dd> The name/id of the category. </dd>
+         *  <dt> description </dt> <dd> The description of the category. </dd>
+         *  <dt> display_order </dt> <dd> Where the category appears among other categories. </dd>
+         *  <dt> _cantDelete </dt> <dd> This is not a database field, but rather is present in
+         *    records returned from the server that can not currently be deleted; 
+         *    a string representing the reason the record can't be deleted. </dd>
+         * </dl>
+         */
+        readCategories(class_id, pageNumber, pageLength, onResult) {
+            if (typeof pageNumber === "function") { // (onResult)
+                onResult = pageNumber;
+                pageNumber = null;
+                pageLength = null;
+            } else if (typeof l === "function") { // (p, onResult)
+                onResult = l;
+                pageLength = null;
+            }
+            if (class_id == "participant") class_id = "speaker";
+            this.createRequest(
+                `categories/${class_id}`, {
+                    pageNumber:pageNumber,
+                    pageLength:pageLength
+                }, onResult, `${this.baseUrl}api/admin/categories/${class_id}`)
+                .send();
+        }
+        
+        /**
+         * Creates a new category record.
+         * @see LabbcatView#readCategories
+         * @see LabbcatAdmin#updateCategory
+         * @see LabbcatAdmin#deleteCategory
+         * @param {string} class_id What attributes the category applies to; "transcript" or
+         * "participant". 
+         * @param {string} category The name/ID of the category.
+         * @param {string} description The description of the category.
+         * @param {number} display_order Where the category appears among other categories.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the category record, 
+         * including <em> category_id </em> - The database key for the record. 
+         */
+        createCategory(class_id, category, description, display_order, onResult) {
+            if (class_id == "participant") class_id = "speaker";
+            this.createRequest(
+                "categories", null, onResult, this.baseUrl+"api/admin/categories", "POST",
+                null, "application/json")
+                .send(JSON.stringify({
+                    class_id : class_id,
+                    category : category,
+                    description : description,
+                    display_order : display_order}));
+        }
+        
+        /**
+         * Updates an existing category record.
+         * @see LabbcatAdmin#createCategory
+         * @see LabbcatView#readCategories
+         * @see LabbcatAdmin#deleteCategory
+         * @param {string} class_id What attributes the category applies to; "transcript" or
+         * "participant". 
+         * @param {string} category The name/ID of the category.
+         * @param {string} description The description of the category.
+         * @param {number} display_order Where the category appears among other categories.
+         * @param {resultCallback} onResult Invoked when the request has returned a 
+         * <var>result</var> which will be: A copy of the category record. 
+         */
+        updateCategory(class_id, category, description, display_order, onResult) {
+            if (class_id == "participant") class_id = "speaker";
+            this.createRequest(
+                "categories", null, onResult, this.baseUrl+"api/admin/categories", "PUT")
+                .send(JSON.stringify({
+                    class_id : class_id,
+                    category : category,
+                    description : description,
+                    display_order : display_order}));
+        }
+        
+        /**
+         * Deletes an existing category record.
+         * @see LabbcatAdmin#createCategory
+         * @see LabbcatView#readCategories
+         * @see LabbcatAdmin#updateCategory
+         * @param {string} class_id What attributes the category applies to; "transcript" or
+         * "participant". 
+         * @param {string} category The name/ID of the category.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteCategory(class_id, category, onResult) {
+            if (class_id == "participant") class_id = "speaker";
+            this.createRequest(
+                "categories", null, onResult,
+                `${this.baseUrl}api/admin/categories/${class_id}/${category}`,
                 "DELETE").send();
         }
         
