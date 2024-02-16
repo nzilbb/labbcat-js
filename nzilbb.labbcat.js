@@ -1205,6 +1205,8 @@
          *  <dt>matches</dt>
          *   <dd>A list of match objects, with the following attributes
          *    <dl>
+         *      <dt>Title</dt> <dd>The title of the LaBB-CAT instance</dd>
+         *      <dt>Version</dt> <dd>The current version of the LaBB-CAT instance</dd>
          *      <dt>MatchId</dt> <dd>A string identifying the match, of the kind expected
          *        by {@link LabbcatView#getMatchAnnotations}</dd>
          *      <dt>Transcript</dt> <dd>The name of the transcript</dd>
