@@ -797,6 +797,34 @@ describe("#LabbcatView", function() {
       });
     });
       
+    it("supports searching for special JSON characters", (done)=>{
+      // get a participant ID to use
+      store.getParticipantIds((ids, errors, messages)=>{
+        assert.isNull(errors);
+        assert.isNotEmpty(ids, "Some participant IDs exist");
+        const participantId = ids[0];
+        
+        // all instances of "and"
+        const pattern = {"columns" : [{"layers" : {"segment" : { "pattern" : "\""}}}]};
+        store.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+          assert.isNull(errors, JSON.stringify(errors))
+          assert.isNotNull(response)
+          assert.isObject(response)
+          const threadId = response.threadId
+          
+          store.waitForTask(threadId, 30, (task, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors));
+            
+            // if the task is still running, it's taking too long, so cancel it
+            if (task.running) store.cancelTask(threadId);
+            assert.isFalse(task.running, "Search finished in a timely manner");
+            store.releaseTask(threadId);
+            done();
+          });
+        });
+      });
+    });
+      
     it("implements allUtterances", (done)=>{
         // get a participant ID to use
         store.getParticipantIds((ids, errors, messages)=>{
