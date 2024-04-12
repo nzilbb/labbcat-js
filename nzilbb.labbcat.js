@@ -2447,11 +2447,116 @@
         /**
          * Saves the given media for the given transcript
          * @param {string} id The transcript ID
+         * @param {file|string} media The media to upload. In a browser, this must be
+         * a file object, and in Node, it must be the full path to the file.
          * @param {string} trackSuffix The track suffix of the media.
-         * @param {string} mediaUrl A URL to the media content.
          * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param onProgress Invoked on XMLHttpRequest progress.
          */
-        saveMedia(id, trackSuffix, mediaUrl, onResult) { // TODO
+        saveMedia(id, media, trackSuffix, onResult, onProgress) {
+          if (typeof trackSuffix === "function") {
+            // (id, mediaUrl, onResult, onProgress)
+            onProgress = onResult;
+            onResult = trackSuffix;
+            trackSuffix = null;
+          }
+          if (exports.verbose) {
+            console.log("saveMedia(" + id + ", " + media + ", " + trackSuffix + ")");
+          }
+          
+          // create form
+          var fd = new FormData();
+          fd.append("id", id);
+          if (trackSuffix) fd.append("trackSuffix", trackSuffix);
+          
+          if (!runningOnNode) {
+	    fd.append("media", media);
+            
+	    // create HTTP request
+	    var xhr = new XMLHttpRequest();
+	    xhr.call = "saveMedia";
+	    xhr.id = id;
+	    xhr.onResult = onResult;
+	    xhr.addEventListener("load", callComplete, false);
+	    xhr.addEventListener("error", callFailed, false);
+	    xhr.addEventListener("abort", callCancelled, false);
+	    xhr.upload.addEventListener("progress", onProgress, false);
+	    xhr.upload.id = id; // for knowing what status to update during events
+	        
+	    xhr.open("POST", this._storeEditUrl + "saveMedia");
+	    if (this.username) {
+	      xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	    }
+	    xhr.setRequestHeader("Accept", "application/json");
+	    xhr.send(fd);
+          } else { // runningOnNode
+	    
+	    // on node.js, files are actually paths
+	    var mediaName = media.replace(/.*\//g, "");
+            if (exports.verbose) console.log("mediaName: " + mediaName);
+            
+	    fd.append("media", 
+		      fs.createReadStream(media).on('error', function(){
+		        onResult(null, ["Invalid media: " + mediaName], [], "saveMedia", id);
+		      }), mediaName);
+            var urlParts = parseUrl(this._storeEditUrl + "saveMedia");
+	    // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	    var labbcat = this;
+            var password = this._password;
+	    fd.getLength(function(something, contentLength) {
+	      var requestParameters = {
+		port: urlParts.port,
+		path: urlParts.pathname,
+		host: urlParts.hostname,
+		headers: {
+		  "Accept" : "application/json",
+		  "content-length" : contentLength,
+		  "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		}
+	      };
+	      if (labbcat.username && password) {
+		requestParameters.auth = labbcat.username+':'+password;
+	      }
+	      if (/^https.*/.test(labbcat.baseUrl)) {
+		requestParameters.protocol = "https:";
+	      }
+              if (exports.verbose) {
+                console.log("submit: " + labbcat._storeEditUrl + "saveMedia");
+              }
+	      fd.submit(requestParameters, function(err, res) {
+		var responseText = "";
+		if (!err) {
+		  res.on('data',function(buffer) {
+		    //console.log('data ' + buffer);
+		    responseText += buffer;
+		  });
+		  res.on('end',function(){
+                    if (exports.verbose) console.log("response: " + responseText);
+	            var result = null;
+	            var errors = null;
+	            var messages = null;
+		    try {
+		      var response = JSON.parse(responseText);
+		      result = response.model.result || response.model;
+		      errors = response.errors;
+		      if (errors.length == 0) errors = null
+		      messages = response.messages;
+		      if (messages.length == 0) messages = null
+		    } catch(exception) {
+		      result = null
+                      errors = ["" +exception+ ": " + labbcat.responseText];
+                      messages = [];
+		    }
+		    onResult(result, errors, messages, "saveMedia", id);
+		  });
+		} else {
+		  onResult(null, ["" +err+ ": " + labbcat.responseText], [], "saveMedia", id);
+		}
+		
+		if (res) res.resume();
+	      });
+	    }); // got length
+          } // runningOnNode
         }
         
         /**
@@ -2466,12 +2571,123 @@
         /**
          * Saves the given document for the episode of the given transcript.
          * @param {string} id The transcript ID
-         * @param {string} url A URL to the document.
+         * @param {file|string} document The document to upload. In a browser, this must be
+         * a file object, and in Node, it must be the full path to the file.
          * @param {resultCallback} onResult Invoked when the request has returned a result.
+         * @param onProgress Invoked on XMLHttpRequest progress.
          */
-        saveEpisodeDocument(id, url, onResult) { // TODO
+        saveEpisodeDocument(id, document, onResult, onProgress) {
+          if (exports.verbose) {
+            console.log("saveEpisodeDocument(" + id + ", " + document + ")");
+          }
+          
+          // create form
+          var fd = new FormData();
+          fd.append("id", id);
+          
+          if (!runningOnNode) {
+	    fd.append("document", document);
+            
+	    // create HTTP request
+	    var xhr = new XMLHttpRequest();
+	    xhr.call = "saveEpisodeDocument";
+	    xhr.id = id;
+	    xhr.onResult = onResult;
+	    xhr.addEventListener("load", callComplete, false);
+	    xhr.addEventListener("error", callFailed, false);
+	    xhr.addEventListener("abort", callCancelled, false);
+	    xhr.upload.addEventListener("progress", onProgress, false);
+	    xhr.upload.id = id; // for knowing what status to update during events
+	        
+	    xhr.open("POST", this._storeEditUrl + "saveEpisodeDocument");
+	    if (this.username) {
+	      xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	    }
+	    xhr.setRequestHeader("Accept", "application/json");
+	    xhr.send(fd);
+          } else { // runningOnNode
+	    
+	    // on node.js, files are actually paths
+	    var docName = document.replace(/.*\//g, "");
+            if (exports.verbose) console.log("docName: " + docName);
+            
+	    fd.append("document", 
+		      fs.createReadStream(document).on('error', function(){
+		        onResult(null, ["Invalid document: " + docName],[],"saveEpisodeDocument",id);
+		      }), docName);
+            var urlParts = parseUrl(this._storeEditUrl + "saveEpisodeDocument");
+	    // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	    var labbcat = this;
+            var password = this._password;
+	    fd.getLength(function(something, contentLength) {
+	      var requestParameters = {
+		port: urlParts.port,
+		path: urlParts.pathname,
+		host: urlParts.hostname,
+		headers: {
+		  "Accept" : "application/json",
+		  "content-length" : contentLength,
+		  "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+		}
+	      };
+	      if (labbcat.username && password) {
+		requestParameters.auth = labbcat.username+':'+password;
+	      }
+	      if (/^https.*/.test(labbcat.baseUrl)) {
+		requestParameters.protocol = "https:";
+	      }
+              if (exports.verbose) {
+                console.log("submit: " + labbcat._storeEditUrl + "saveEpisodeDocument");
+              }
+	      fd.submit(requestParameters, function(err, res) {
+		var responseText = "";
+		if (!err) {
+		  res.on('data',function(buffer) {
+		    //console.log('data ' + buffer);
+		    responseText += buffer;
+		  });
+		  res.on('end',function(){
+                    if (exports.verbose) console.log("response: " + responseText);
+	            var result = null;
+	            var errors = null;
+	            var messages = null;
+		    try {
+		      var response = JSON.parse(responseText);
+		      result = response.model.result || response.model;
+		      errors = response.errors;
+		      if (errors.length == 0) errors = null
+		      messages = response.messages;
+		      if (messages.length == 0) messages = null
+		    } catch(exception) {
+		      result = null
+                      errors = ["" +exception+ ": " + labbcat.responseText];
+                      messages = [];
+		    }
+		    onResult(result, errors, messages, "saveEpisodeDocument", id);
+		  });
+		} else {
+		  onResult(null, ["" +err+ ": " + labbcat.responseText],[],"saveEpisodeDocument",id);
+		}
+		
+		if (res) res.resume();
+	      });
+	    }); // got length
+          } // runningOnNode
         }
         
+        /**
+         * Delete a given media or episode document file.
+         * @param {string} id The transcript ID
+         * @param {string} fileName The media file name, e.g. mediaFile.name.
+         * @param {resultCallback} onResult Invoked when the request has completed.
+         */
+        deleteMedia(id, fileName, onResult) {
+	  this.createRequest(
+            "deleteMedia", null, onResult, null, "POST",
+            this.storeEditUrl, "application/x-www-form-urlencoded")
+            .send(this.parametersToQueryString({id : id, fileName : fileName}));
+        }
+
         /**
          * Deletes the given transcript, and all associated media, from the graph store.
          * @param {string} id The transcript ID
@@ -2526,7 +2742,7 @@
          * @param {file|file[]|string|string[]} media The media to upload, if any. In a
          * browser, these must be file objects, and in Node, they must be the full paths
          * to the files.
-         * @param {string} [mediaSuffix] The media suffix for the media.
+         * @param {string} [trackSuffix] The track suffix for the media.
          * @param {string} transcriptType The transcript type.
          * @param {string} corpus The corpus for the transcript.
          * @param {string} [episode] The episode the transcript belongs to.
@@ -2535,26 +2751,26 @@
          * task status can be updated using {@link LabbcatView#taskStatus} 
          * @param onProgress Invoked on XMLHttpRequest progress.
          */
-        newTranscript(transcript, media, mediaSuffix, transcriptType, corpus, episode, onResult, onProgress) {
+        newTranscript(transcript, media, trackSuffix, transcriptType, corpus, episode, onResult, onProgress) {
             if (typeof corpus === "function") {
                 // (transcript, media, transcriptType, corpus, onResult, onProgress)
                 onProgress = episode;
                 onResult = corpus;
                 episode = null;
                 corpus = transcriptType;
-                transcriptType = mediaSuffix;
-                mediaSuffix = null;
+                transcriptType = trackSuffix;
+                trackSuffix = null;
             } else if (typeof episode === "function") {
                 // (transcript, media, transcriptType, corpus, episode, onResult, onProgress)
                 onProgress = onResult;
                 onResult = episode;
                 episode = corpus;
                 corpus= transcriptType;
-                transcriptType = mediaSuffix;
-                mediaSuffix = null;
+                transcriptType = trackSuffix;
+                trackSuffix = null;
             }
             if (exports.verbose) {
-                console.log("newTranscript(" + transcript + ", " + media + ", " + mediaSuffix
+                console.log("newTranscript(" + transcript + ", " + media + ", " + trackSuffix
                             + ", " + transcriptType + ", " + corpus + ", " + episode + ")");
             }
             // create form
@@ -2569,13 +2785,13 @@
                 
 	        fd.append("uploadfile1_0", transcript);
 	        if (media) {
-	            if (!mediaSuffix) mediaSuffix = "";
+	            if (!trackSuffix) trackSuffix = "";
 	            if (media.constructor === Array) { // multiple files
 		        for (var f in media) {
-		            fd.append("uploadmedia"+mediaSuffix+"1", media[f]);
+		            fd.append("uploadmedia"+trackSuffix+"1", media[f]);
 		        } // next file
                     } else { // a single file
-		        fd.append("uploadmedia"+mediaSuffix+"1", media);
+		        fd.append("uploadmedia"+trackSuffix+"1", media);
 	            }
 	        }
                 
@@ -2608,12 +2824,12 @@
 		          }), transcriptName);
                 
 	        if (media) {
-	            if (!mediaSuffix) mediaSuffix = "";
+	            if (!trackSuffix) trackSuffix = "";
 	            if (media.constructor === Array) { // multiple files
 		        for (var f in media) {
 		            var mediaName = media[f].replace(/.*\//g, "");
 		            try {
-			        fd.append("uploadmedia"+mediaSuffix+(f+1), 
+			        fd.append("uploadmedia"+trackSuffix+(f+1), 
 				          fs.createReadStream(media[f]).on('error', function(){
 				              onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
 				          }), mediaName);
@@ -2624,7 +2840,7 @@
 		        } // next file
                     } else { // a single file
 		        var mediaName = media.replace(/.*\//g, "");
-		        fd.append("uploadmedia"+mediaSuffix+"1", 
+		        fd.append("uploadmedia"+trackSuffix+"1", 
 			          fs.createReadStream(media).on('error', function(){
 			              onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
 			          }), mediaName);

@@ -122,6 +122,8 @@ describe("#LabbcatEdit", function() {
     const participantName = "UnitTester";
     const transcriptName = "labbcat-js.test.txt";
     const transcriptPath = "test/" + transcriptName;
+    const mediaPath = "test/labbcat-js.test.wav";
+    const docPath = "test/labbcat-js.test.doc";
     
     // ensure the transcript/participant dosn't exist to start with    
     store.deleteTranscript(transcriptName, (nothing, errors, messages)=>{
@@ -164,63 +166,87 @@ describe("#LabbcatEdit", function() {
                           assert.isNull(errors, JSON.stringify(errors))
                           assert.isNumber(count);
                           assert.equal(count, 1, "Participant is in the store");
-                          
-                          // re-upload it
-                          store.updateTranscript(
-                            transcriptPath, (result, errors, messages)=>{
-                              assert.isNull(errors, JSON.stringify(errors))
-                              const threadId = result[Object.keys(result)[0]]
-                              assert.isNotNull(threadId);
+
+                          // upload media
+                          store.saveMedia(transcriptName, mediaPath, (mediaFile, errors, messages) => {
+                            assert.isNull(errors, JSON.stringify(errors));
+                            assert.isNotNull(mediaFile, "Media file returned by saveMedia");
+                            assert.isNotNull(mediaFile.name,
+                                             "Media file name returned by saveMedia: "
+                                             + JSON.stringify(mediaFile));
+                            
+                            // upload document
+                            store.saveEpisodeDocument(transcriptName, docPath, (docFile, errors, messages) => {
+                              assert.isNull(errors, JSON.stringify(errors));
+                              assert.isNotNull(
+                                mediaFile, "Document file returned by saveEpisodeDocument");
+                              assert.isNotNull(docFile.name,
+                                               "Document file name returned by saveEpisodeDocument: "
+                                               + JSON.stringify(docFile));
                               
-                              store.waitForTask(
-                                threadId, 30, (task, errors, messages)=>{
-                                  assert.isNull(errors, JSON.stringify(errors));
-                                  assert.isFalse(
-                                    task.running, "Upload task finished in a timely manner");
-                                  
-                                  store.releaseTask(threadId);
-                                  
-                                  // ensure the transcript exists
-                                  store.countMatchingTranscriptIds(
-                                    "id = '"+transcriptName+"'", (count, errors, messages)=>{
-                                      assert.isNull(errors, JSON.stringify(errors))
-                                      assert.isNumber(count);
-                                      assert.equal(count, 1, "Transcript is still in the store");
-                                      
-                                      // delete it
-                                      store.deleteTranscript(
-                                        transcriptName, (result, errors, messages)=>{
-                                          assert.isNull(errors, JSON.stringify(errors))
-                                          
-                                          // ensure the transcript no longer exists
-                                          store.countMatchingTranscriptIds(
-                                            "id = '"+transcriptName+"'",
-                                            (count, errors, messages)=>{
-                                              assert.isNull(errors, JSON.stringify(errors))
-                                              assert.isNumber(count);
-                                              assert.equal(count, 0, "Transcript is gone");
-                                              // delete participant
-                                              store.deleteParticipant(
-                                                participantName, (result, errors, messages)=>{
-                                                  assert.isNull(errors, JSON.stringify(errors))
-                                                  
-                                                  // ensure the participant no longer exists
-                                                  store.countMatchingParticipantIds(
-                                                    "id = '"+transcriptName+"'",
-                                                    (count, errors, messages)=>{
-                                                      assert.isNull(
-                                                        errors, JSON.stringify(errors))
-                                                      assert.isNumber(count);
-                                                      assert.equal(
-                                                        count, 0, "Transcript is gone");
-                                                      done();
-                                                    });
-                                                });
-                                            });
-                                        });
-                                    });
-                                });
+                              // delete document
+                              store.deleteMedia(transcriptName, docFile.name, (x, errors, messages)=>{
+                                assert.isNull(errors, JSON.stringify(errors));
+                                
+                                // re-upload trancript
+                                store.updateTranscript(
+                                  transcriptPath, (result, errors, messages)=>{
+                                    assert.isNull(errors, JSON.stringify(errors))
+                                    const threadId = result[Object.keys(result)[0]]
+                                    assert.isNotNull(threadId);
+                                    
+                                    store.waitForTask(
+                                      threadId, 30, (task, errors, messages)=>{
+                                        assert.isNull(errors, JSON.stringify(errors));
+                                        assert.isFalse(
+                                          task.running, "Upload task finished in a timely manner");
+                                        
+                                        store.releaseTask(threadId);
+                                    
+                                        // ensure the transcript exists
+                                        store.countMatchingTranscriptIds(
+                                          "id = '"+transcriptName+"'", (count, errors, messages)=>{
+                                            assert.isNull(errors, JSON.stringify(errors))
+                                            assert.isNumber(count);
+                                            assert.equal(count, 1, "Transcript is still in the store");
+                                            
+                                            // delete it
+                                            store.deleteTranscript(
+                                              transcriptName, (result, errors, messages)=>{
+                                                assert.isNull(errors, JSON.stringify(errors))
+                                                
+                                                // ensure the transcript no longer exists
+                                                store.countMatchingTranscriptIds(
+                                                  "id = '"+transcriptName+"'",
+                                                  (count, errors, messages)=>{
+                                                    assert.isNull(errors, JSON.stringify(errors))
+                                                    assert.isNumber(count);
+                                                    assert.equal(count, 0, "Transcript is gone");
+                                                    // delete participant
+                                                    store.deleteParticipant(
+                                                      participantName, (result, errors, messages)=>{
+                                                        assert.isNull(errors, JSON.stringify(errors))
+                                                        
+                                                        // ensure the participant no longer exists
+                                                        store.countMatchingParticipantIds(
+                                                          "id = '"+transcriptName+"'",
+                                                          (count, errors, messages)=>{
+                                                            assert.isNull(
+                                                              errors, JSON.stringify(errors))
+                                                            assert.isNumber(count);
+                                                            assert.equal(
+                                                              count, 0, "Transcript is gone");
+                                                            done();
+                                                          });
+                                                      });
+                                                  });
+                                              });
+                                          });
+                                      });
+                                  });
+                              });
                             });
+                          });
                         });
                     });
                 });
