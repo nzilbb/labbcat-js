@@ -3293,9 +3293,9 @@
     
     /**
      * Creates a new project record.
-     * @see LabbcatAdmin#readProjects
-     * @see LabbcatAdmin#updateProject
-     * @see LabbcatAdmin#deleteProject
+     * @deprecated since version 1.6.0: 'projects' are now categories with classId = 'layer'
+     * - use createCategory instead. 
+     * @see LabbcatAdmin#createCategory
      * @param {string} project The name/ID of the project.
      * @param {string} description The description of the project.
      * @param {resultCallback} onResult Invoked when the request has returned a 
@@ -3303,19 +3303,14 @@
      * including <em> project_id </em> - The database key for the record. 
      */
     createProject(project, description, onResult) {
-      this.createRequest(
-        "projects", null, onResult, this.baseUrl+"api/admin/projects", "POST",
-        null, "application/json")
-        .send(JSON.stringify({
-          project : project,
-          description : description}));
+      this.createCategory("layer", project, description, 0, onResult);
     }
     
     /**
      * Reads a list of project records.
-     * @see LabbcatAdmin#createProject
-     * @see LabbcatAdmin#updateProject
-     * @see LabbcatAdmin#deleteProject
+     * @deprecated since version 1.6.0: 'projects' are now categories with classId = 'layer'
+     * - use readCategories('layer') instead. 
+     * @see LabbcatAdmin#readCategories
      * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
      * records will be returned). 
      * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
@@ -3332,27 +3327,14 @@
      * </dl>
      */
     readProjects(pageNumber, pageLength, onResult) {
-      if (typeof pageNumber === "function") { // (onResult)
-        onResult = pageNumber;
-        pageNumber = null;
-        pageLength = null;
-      } else if (typeof l === "function") { // (p, onResult)
-        onResult = l;
-        pageLength = null;
-      }
-      this.createRequest(
-        "projects", {
-          pageNumber:pageNumber,
-          pageLength:pageLength
-        }, onResult, this.baseUrl+"api/admin/projects")
-        .send();
+      this.readCategories("layer", pageNumber, pageLength, onResult);
     }
     
     /**
      * Updates an existing project record.
-     * @see LabbcatAdmin#createProject
-     * @see LabbcatAdmin#readProjects
-     * @see LabbcatAdmin#deleteProject
+     * @deprecated since version 1.6.0: 'projects' are now categories with classId = 'layer'
+     * - use updateCategory instead. 
+     * @see LabbcatAdmin#updateCategory
      * @param {string} project_id The database key for the record. // TODO eliminate project_id
      * @param {string} project The name/ID of the project.
      * @param {string} description The description of the project.
@@ -3360,25 +3342,19 @@
      * <var>result</var> which will be: A copy of the project record. 
      */
     updateProject(project, description, onResult) {
-      this.createRequest(
-        "projects", null, onResult, this.baseUrl+"api/admin/projects", "PUT")
-        .send(JSON.stringify({
-          project : project,
-          description : description}));
+      this.updateCategory("layer", project, description, 0, onResult);
     }
     
     /**
      * Deletes an existing project record.
-     * @see LabbcatAdmin#createProject
-     * @see LabbcatAdmin#readProjects
-     * @see LabbcatAdmin#updateProject
+     * @deprecated Deprecated as 'projects' are now categories with classId = 'layer' 
+     * - use deleteCategory instead.
+     * @see LabbcatAdmin#deleteCategory
      * @param {string} project The name/ID of the project.
      * @param {resultCallback} onResult Invoked when the request has completed.
      */
     deleteProject(project, onResult) {
-      this.createRequest(
-        "projects", null, onResult, `${this.baseUrl}api/admin/projects/${project}`,
-        "DELETE").send();
+      this.deleteCategory("layer", project, onResult);
     }
     
     /**

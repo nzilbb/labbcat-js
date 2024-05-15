@@ -185,7 +185,7 @@ describe("#LabbcatAdmin", function() {
                 project_name, description, (project, errors, messages)=>{
                     assert.isNull(errors, JSON.stringify(errors));
                     assert.isNotNull(project);
-                    assert.equal(project.project, project_name, "project saved");
+                    assert.equal(project.category, project_name, "project saved");
                     assert.equal(project.description, description, "description saved");
                     
                     // ensure the project exists
@@ -195,10 +195,10 @@ describe("#LabbcatAdmin", function() {
                         assert.isAtLeast(projects.length, 1, "There is at least one project");
                         
                         const matchedProjects = projects.filter(c => {
-                            return c.project == project_name;});
+                            return c.category == project_name;});
                         assert.equal(matchedProjects.length, 1,
                                      "The new project is present: " + JSON.stringify(projects));
-                        assert.equal(matchedProjects[0].project, project_name,
+                        assert.equal(matchedProjects[0].category, project_name,
                                      "project name present");
                         assert.equal(matchedProjects[0].description, description,
                                      "description correct");
@@ -210,7 +210,7 @@ describe("#LabbcatAdmin", function() {
                             (updatedProject, errors, messages)=>{
                                 assert.isNull(errors, JSON.stringify(errors))
                                 assert.isNotNull(updatedProject);
-                                assert.equal(updatedProject.project, project_name,
+                                assert.equal(updatedProject.category, project_name,
                                              "project name unchanged");
                                 assert.equal(updatedProject.description, new_description,
                                              "description changed");
@@ -223,12 +223,12 @@ describe("#LabbcatAdmin", function() {
                                                      "There is at least one project");
                                     
                                     const newMatchedProjects = projects.filter(c => {
-                                        return c.project == project_name;});
+                                        return c.category == project_name;});
                                     assert.equal(
                                         newMatchedProjects.length, 1,
                                         "The updated project is present");
                                     assert.equal(
-                                        newMatchedProjects[0].project, project_name,
+                                        newMatchedProjects[0].category, project_name,
                                         "updated project name correct");
                                     assert.equal(
                                         newMatchedProjects[0].description,
@@ -246,7 +246,7 @@ describe("#LabbcatAdmin", function() {
                                                 assert.isNotNull(projects, "The projects are returned")
                                                 
                                                 const finalMatchedProjects = projects.filter(c => {
-                                                    return c.project == project_name;});
+                                                    return c.category == project_name;});
                                                 assert.equal(finalMatchedProjects.length, 0,
                                                              "The new project is gone");
                                                 
