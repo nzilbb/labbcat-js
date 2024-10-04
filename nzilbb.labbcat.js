@@ -140,24 +140,29 @@
     var errors = null;
     var messages = null;
     try {
-      var response = JSON.parse(this.responseText);
-      if (response.model != null) {
-        if (response.model.result) {
-          result = response.model.result;
+      if (evt.target.raw) {
+        result = this.responseText;
+      } else {
+        var response = JSON.parse(this.responseText);
+        if (response.model != null) {
+          if (response.model.result) {
+            result = response.model.result;
+          }
+	  if (!result && result != 0) result = response.model;
         }
-	if (!result && result != 0) result = response.model;
+        if (exports.verbose) console.log("result: " + JSON.stringify(result));
+        var errors = response.errors;
+        if (!errors || errors.length == 0) errors = null;
+        var messages = response.messages;
+        if (!messages || messages.length == 0) messages = null;
       }
-      if (exports.verbose) console.log("result: " + JSON.stringify(result));
-      var errors = response.errors;
-      if (!errors || errors.length == 0) errors = null;
-      var messages = response.messages;
-      if (!messages || messages.length == 0) messages = null;
     } catch(exception) {
       result = null;
       errors = ["" +exception+ ": " + this.responseText];
       messages = [];
     }
     if (evt.target.onResult) {
+      if (exports.verbose) console.log("onResult: " + result);
       evt.target.onResult(result, errors, messages, evt.target.call, evt.target.id);
     }
   }
@@ -270,9 +275,10 @@
     // @param {string} [method=GET] The HTTP method e.g. "POST"
     // @param {string} [storeUrl=null] The URL for the graph store.
     // @param {string} [contentTypeHeader=null] The request content type e.g "application/x-www-form-urlencoded".
+    // @param {boolean} [raw=false] Whether the result should be the un-parsed request response text.
     // @return {XMLHttpRequest} An open request.
     //
-    createRequest(call, parameters, onResult, url, method, storeUrl, contentTypeHeader) {
+    createRequest(call, parameters, onResult, url, method, storeUrl, contentTypeHeader, raw) {
       if (exports.verbose)  {
         console.log("createRequest "+method+" "+url + " "
                     + call + " " + JSON.stringify(parameters));
@@ -307,7 +313,12 @@
       if (exports.language) {
 	xhr.setRequestHeader("Accept-Language", exports.language);
       }
-      xhr.setRequestHeader("Accept", "application/json");
+      if (raw) {
+        xhr.raw = true;
+        xhr.setRequestHeader("Accept", "text/plain");
+      } else {
+        xhr.setRequestHeader("Accept", "application/json");
+      }
       return xhr;
     }
     
@@ -2375,6 +2386,17 @@
         }, onResult, `${this.baseUrl}api/categories/${class_id}`)
         .send();
     }
+
+    /**
+     * Reads the current license agreement (HTML) document.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be a string containing the HTML document.
+     */
+    readAgreement(onResult) {
+      this.createRequest(
+        "readAgreement", null, onResult, `${this.baseUrl}agreement.html`, "GET", null, null, true)
+        .send();
+    }
     
   } // class LabbcatView
 
@@ -4331,7 +4353,31 @@
           password : password,
           resetPassword : resetPassword}));
     }
-    
+
+    /**
+     * Updates the current license agreement (HTML) document (creating it if it 
+     * doesn't already exist).
+     * @param {string} agreementHtml The HTML content of the document. 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be "OK" if the operation succeeded.
+     */
+    updateAgreement(agreementHtml, onResult) {
+      this.createRequest(
+        "updateAgreement", null, onResult, this.baseUrl+"agreement.html", "PUT")
+        .send(agreementHtml);
+    }
+
+    /**
+     * Deletes the current license agreement (HTML) document.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be "OK" if the operation succeeded.
+     */
+    deleteAgreement(onResult) {
+      this.createRequest(
+        "deleteAgreement", null, onResult, `${this.baseUrl}agreement.html`, "DELETE")
+        .send();
+    }
+
   }
   
   /**
