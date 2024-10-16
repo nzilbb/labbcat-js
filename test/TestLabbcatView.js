@@ -148,6 +148,16 @@ describe("#LabbcatView", function() {
         });
     });
     
+    it("implements aggregateMatchingAnnotations", (done)=>{
+      store.aggregateMatchingAnnotations(
+        "COUNT DISTINCT", "layer.id == 'segment'", (aggregate, errors, messages)=>{
+          assert.isArray(aggregate);
+          assert.isNull(errors);
+          assert.equal(aggregate.length, 1, "There is exactly one result");
+          done();
+        });
+    });
+    
     it("implements getMatchingParticipantIds", (done)=>{
         store.getMatchingParticipantIds("/.+/.test(id)", (ids, errors, messages)=>{
             assert.isNull(errors);
