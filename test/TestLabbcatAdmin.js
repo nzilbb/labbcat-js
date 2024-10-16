@@ -938,7 +938,7 @@ describe("#LabbcatAdmin", function() {
         store.updateAgreement(testAgreement, (updateResult, errors, messages)=>{
           assert.isNull(errors, JSON.stringify(errors));
           assert.isNotNull(messages);
-          assert.equal(messages[0], "OK");
+          assert.equal(messages[0], "License agreement updated.");
           
           // ensure the agreement has been saved
           store.readAgreement((updatedAgreement, errors, messages)=>{
@@ -952,7 +952,7 @@ describe("#LabbcatAdmin", function() {
             store.updateAgreement(testAgreement2, (updateResult, errors, messages)=>{
               assert.isNull(errors, JSON.stringify(errors));
               assert.isNotNull(messages);
-              assert.equal(messages[0], "OK");
+              assert.equal(messages[0], "License agreement updated.");
               
               // ensure the agreement has been changed
               store.readAgreement((updatedAgreement2, errors, messages)=>{
@@ -965,7 +965,7 @@ describe("#LabbcatAdmin", function() {
                 store.deleteAgreement((deleteResult, errors, messages)=>{
                   assert.isNull(errors, JSON.stringify(errors));
                   assert.isNotNull(messages);
-                  assert.equal(messages[0], "OK");
+                  assert.equal(messages[0], "License agreement deleted.");
                   
                   // ensure it was deleted
                   store.readAgreement((deletedAgreement, errors, messages)=>{
