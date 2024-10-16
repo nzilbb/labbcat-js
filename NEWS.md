@@ -1,6 +1,6 @@
 # 1.6.0
 
-- New LabbcatView funxtion
+- New LabbcatView function
   + *aggregateMatchingAnnotations* - Identifies a list of annotations and aggregates their labels
 - New LabbcatEdit functions
   + *saveMedia* - saves the given media for the given transcript.
