@@ -141,7 +141,7 @@ describe("#LabbcatEdit", function() {
               parameters[parameter.name] = parameters[parameter.value];
             }
             store.transcriptUploadParameters(
-              result.id, parameters, // merge=false : new transcript
+              result.id, parameters,
               (result, errors, messages)=>{
                 assert.isNull(errors, "No errors on transcriptUpload: "+JSON.stringify(errors));
                 assert.isNotNull(result, "redult returned");

@@ -2869,13 +2869,15 @@
           if (typeof media != "object") media = { "" : [media] }; // convert to track->array map
           for (var trackSuffix in Object.keys(media)) {
             var files = media[trackSuffix];
-	    if (files === Array) { // multiple files
-	      for (var f in files) {
-	        fd.append("media"+trackSuffix, files[f]);
-	      } // next file
-            } else { // a single file
-	      fd.append("media"+trackSuffix, files);
-	    }
+            if (files) {
+	      if (files === Array) { // multiple files
+	        for (var f in files) {
+	          fd.append("media"+trackSuffix, files[f]);
+	        } // next file
+              } else { // a single file
+	        fd.append("media"+trackSuffix, files);
+	      }
+            }
           } // next track suffix
 	} // media to upload
         
@@ -2910,18 +2912,35 @@
 	  }), transcriptName);
         
         if (media) {
+          console.log("media " + JSON.stringify(media));
           if (typeof media == "string") media = { "" : [media] }; // convert to track->array map
           for (var trackSuffix in media) {
             var files = media[trackSuffix];
-	    if (files.constructor === Array) { // multiple files
-	      for (var f in files) {
-	        var mediaName = files[f].replace(/.*\//g, "");
+            if (files) {
+	      if (files.constructor === Array) { // multiple files
+	        for (var f in files) {
+	          var mediaName = files[f].replace(/.*\//g, "");
+	          try {
+		    fd.append(
+                      "media"+trackSuffix, 
+		      fs.createReadStream(files[f]).on('error', function(x){
+		        onResult(
+                          null, ["Invalid media: " + mediaName], [], "transcriptUpload", transcriptName);
+		      }), mediaName);
+	          } catch(error) {
+		    onResult(
+                      null, ["Invalid media: " + mediaName, error.code], [], "transcriptUpload", 
+                      transcriptName);
+		    return;
+	          }
+	        } // next file
+              } else { // a single file
+	        var mediaName = files.replace(/.*\//g, "");
 	        try {
-		  fd.append(
+	          fd.append(
                     "media"+trackSuffix, 
-		    fs.createReadStream(files[f]).on('error', function(x){
-		      onResult(
-                        null, ["Invalid media: " + mediaName], [], "transcriptUpload", transcriptName);
+		    fs.createReadStream(files).on('error', function(){
+		      onResult(null, ["Invalid media: " + mediaName], [], "transcriptUpload", transcriptName);
 		    }), mediaName);
 	        } catch(error) {
 		  onResult(
@@ -2929,80 +2948,67 @@
                     transcriptName);
 		  return;
 	        }
-	      } // next file
-            } else { // a single file
-	      var mediaName = files.replace(/.*\//g, "");
-	      try {
-	        fd.append(
-                  "media"+trackSuffix, 
-		  fs.createReadStream(files).on('error', function(){
-		    onResult(null, ["Invalid media: " + mediaName], [], "transcriptUpload", transcriptName);
-		  }), mediaName);
-	      } catch(error) {
-		onResult(
-                  null, ["Invalid media: " + mediaName, error.code], [], "transcriptUpload", 
-                  transcriptName);
-		return;
-	      }
-	    } // single file
-	  } // next track suffix
-	  
-	  var urlParts = parseUrl(this.baseUrl + "api/edit/transcript/upload");
-	  // for tomcat 8, we need to explicitly send the content-type and content-length headers...
-	  var labbcat = this;
-          var password = this._password;
-	  fd.getLength(function(something, contentLength) {
-	    var requestParameters = {
-	      port: urlParts.port,
-	      path: urlParts.pathname,
-	      host: urlParts.hostname,
-	      headers: {
-	        "Accept" : "application/json",
-	        "content-length" : contentLength,
-	        "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
-	      }
-	    };
-	    if (labbcat.username && password) {
-	      requestParameters.auth = labbcat.username+':'+password;
-	    }
-	    if (/^https.*/.test(labbcat.baseUrl)) {
-	      requestParameters.protocol = "https:";
-	    }
-            if (exports.verbose) {
-              console.log("submit: " + labbcat.baseUrl + "api/edit/transcript/upload");
-            }
-	    fd.submit(requestParameters, function(err, res) {
-	      var responseText = "";
-	      if (!err) {
-	        res.on('data',function(buffer) {
-		  responseText += buffer;
-	        });
-	        res.on('end',function(){
-	          var result = null;
-	          var errors = null;
-	          var messages = null;
-		  try {
-		    var response = JSON.parse(responseText);
-		    result = response.model.result || response.model;
-		    errors = response.errors;
-		    if (errors && errors.length == 0) errors = null
-		    messages = response.messages;
-		    if (messages && messages.length == 0) messages = null
-		  } catch(exception) {
-		    result = null
-                    errors = ["" +exception+ ": " + labbcat.responseText];
-                    messages = [];
-		  }
-		  onResult(result, errors, messages, "transcriptUpload", transcriptName);
-	        });
-	      } else {
-	        onResult(null, ["" +err+ ": " + labbcat.responseText], [], "transcriptUpload", transcriptName);
-	      }
-	      
-	      if (res) res.resume();
-	    });
-	  }); // got length
+	      } // single file
+            } // there are files in this track
+          } // next track suffix
         } // media is specified
+	var urlParts = parseUrl(this.baseUrl + "api/edit/transcript/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/edit/transcript/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "transcriptUpload", transcriptName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "transcriptUpload", transcriptName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
       } // runningOnNode
     } // transcriptUpload
     
@@ -3074,139 +3080,192 @@
         console.log("newTranscript(" + transcript + ", " + media + ", " + trackSuffix
                     + ", " + transcriptType + ", " + corpus + ", " + episode + ")");
       }
-      // create form
-      var fd = new FormData();
-      fd.append("todo", "new");
-      fd.append("auto", "true");
-      if (transcriptType) fd.append("transcript_type", transcriptType);
-      if (corpus) fd.append("corpus", corpus);
-      if (episode) fd.append("episode", episode);
-      
-      if (!runningOnNode) {	
-        
-	fd.append("uploadfile1_0", transcript);
-	if (media) {
-	  if (!trackSuffix) trackSuffix = "";
-	  if (media.constructor === Array) { // multiple files
-	    for (var f in media) {
-	      fd.append("uploadmedia"+trackSuffix+"1", media[f]);
-	    } // next file
-          } else { // a single file
-	    fd.append("uploadmedia"+trackSuffix+"1", media);
-	  }
-	}
-        
-	// create HTTP request
-	var xhr = new XMLHttpRequest();
-	xhr.call = "newTranscript";
-	xhr.id = transcript.name;
-	xhr.onResult = onResult;
-	xhr.addEventListener("load", callComplete, false);
-	xhr.addEventListener("error", callFailed, false);
-	xhr.addEventListener("abort", callCancelled, false);
-	xhr.upload.addEventListener("progress", onProgress, false);
-	xhr.upload.id = transcript.name; // for knowing what status to update during events
-	
-	xhr.open("POST", this.baseUrl + "edit/transcript/new");
-	if (this.username) {
-	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
-	}
-	xhr.setRequestHeader("Accept", "application/json");
-	xhr.send(fd);
-      } else { // runningOnNode
-	
-	// on node.js, files are actually paths
-	var transcriptName = transcript.replace(/.*\//g, "");
-        if (exports.verbose) console.log("transcriptName: " + transcriptName);
 
-	fd.append("uploadfile1_0", 
-		  fs.createReadStream(transcript).on('error', function(){
-		    onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
-		  }), transcriptName);
+      // determine transcript name for onResult
+      var transcriptName = transcript;
+      if (!runningOnNode) {
+        transcriptName = transcript.name;
+      } else { // node
+	transcriptName = transcript.replace(/.*\//g, "");
+      }
+      
+      var legacyApi = () => { // for fallback if the new API isn't available:
+        // create form
+        var fd = new FormData();
+        fd.append("todo", "new");
+        fd.append("auto", "true");
+        if (transcriptType) fd.append("transcript_type", transcriptType);
+        if (corpus) fd.append("corpus", corpus);
+        if (episode) fd.append("episode", episode);
         
-	if (media) {
-	  if (!trackSuffix) trackSuffix = "";
-	  if (media.constructor === Array) { // multiple files
-	    for (var f in media) {
-	      var mediaName = media[f].replace(/.*\//g, "");
-	      try {
-		fd.append("uploadmedia"+trackSuffix+(f+1), 
-			  fs.createReadStream(media[f]).on('error', function(){
-			    onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
-			  }), mediaName);
-	      } catch(error) {
-		onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
-		return;
+        if (!runningOnNode) {	
+          
+	  fd.append("uploadfile1_0", transcript);
+	  if (media) {
+	    if (!trackSuffix) trackSuffix = "";
+	    if (media.constructor === Array) { // multiple files
+	      for (var f in media) {
+	        fd.append("uploadmedia"+trackSuffix+"1", media[f]);
+	      } // next file
+            } else { // a single file
+	      fd.append("uploadmedia"+trackSuffix+"1", media);
+	    }
+	  }
+          
+	  // create HTTP request
+	  var xhr = new XMLHttpRequest();
+	  xhr.call = "newTranscript";
+	  xhr.id = transcript.name;
+	  xhr.onResult = onResult;
+	  xhr.addEventListener("load", callComplete, false);
+	  xhr.addEventListener("error", callFailed, false);
+	  xhr.addEventListener("abort", callCancelled, false);
+	  xhr.upload.addEventListener("progress", onProgress, false);
+	  xhr.upload.id = transcript.name; // for knowing what status to update during events
+	  
+	  xhr.open("POST", this.baseUrl + "edit/transcript/new");
+	  if (this.username) {
+	    xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	  }
+	  xhr.setRequestHeader("Accept", "application/json");
+	  xhr.send(fd);
+        } else { // runningOnNode
+	  
+	  // on node.js, files are actually paths
+          if (exports.verbose) console.log("transcriptName: " + transcriptName);
+
+	  fd.append("uploadfile1_0", 
+		    fs.createReadStream(transcript).on('error', function(){
+		      onResult(null, ["Invalid transcript: " + transcriptName], [], "newTranscript", transcriptName);
+		    }), transcriptName);
+          
+	  if (media) {
+	    if (!trackSuffix) trackSuffix = "";
+	    if (media.constructor === Array) { // multiple files
+	      for (var f in media) {
+	        var mediaName = media[f].replace(/.*\//g, "");
+	        try {
+		  fd.append("uploadmedia"+trackSuffix+(f+1), 
+			    fs.createReadStream(media[f]).on('error', function(){
+			      onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
+			    }), mediaName);
+	        } catch(error) {
+		  onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
+		  return;
+	        }
+	      } // next file
+            } else { // a single file
+	      var mediaName = media.replace(/.*\//g, "");
+	      fd.append("uploadmedia"+trackSuffix+"1", 
+		        fs.createReadStream(media).on('error', function(){
+			  onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
+		        }), mediaName);
+	    }
+	  }
+	  
+	  var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
+	  // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	  var labbcat = this;
+          var password = this._password;
+	  fd.getLength(function(something, contentLength) {
+	    var requestParameters = {
+	      port: urlParts.port,
+	      path: urlParts.pathname,
+	      host: urlParts.hostname,
+	      headers: {
+	        "Accept" : "application/json",
+	        "content-length" : contentLength,
+	        "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
 	      }
-	    } // next file
-          } else { // a single file
-	    var mediaName = media.replace(/.*\//g, "");
-	    fd.append("uploadmedia"+trackSuffix+"1", 
-		      fs.createReadStream(media).on('error', function(){
-			onResult(null, ["Invalid media: " + mediaName], [], "newTranscript", transcriptName);
-		      }), mediaName);
-	  }
-	}
-	
-	var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
-	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
-	var labbcat = this;
-        var password = this._password;
-	fd.getLength(function(something, contentLength) {
-	  var requestParameters = {
-	    port: urlParts.port,
-	    path: urlParts.pathname,
-	    host: urlParts.hostname,
-	    headers: {
-	      "Accept" : "application/json",
-	      "content-length" : contentLength,
-	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    };
+	    if (labbcat.username && password) {
+	      requestParameters.auth = labbcat.username+':'+password;
 	    }
-	  };
-	  if (labbcat.username && password) {
-	    requestParameters.auth = labbcat.username+':'+password;
-	  }
-	  if (/^https.*/.test(labbcat.baseUrl)) {
-	    requestParameters.protocol = "https:";
-	  }
-          if (exports.verbose) {
-            console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
-          }
-	  fd.submit(requestParameters, function(err, res) {
-	    var responseText = "";
-	    if (!err) {
-	      res.on('data',function(buffer) {
-		//console.log('data ' + buffer);
-		responseText += buffer;
-	      });
-	      res.on('end',function(){
-                if (exports.verbose) console.log("response: " + responseText);
-	        var result = null;
-	        var errors = null;
-	        var messages = null;
-		try {
-		  var response = JSON.parse(responseText);
-		  result = response.model.result || response.model;
-		  errors = response.errors;
-		  if (errors && errors.length == 0) errors = null
-		  messages = response.messages;
-		  if (messages && messages.length == 0) messages = null
-		} catch(exception) {
-		  result = null
-                  errors = ["" +exception+ ": " + labbcat.responseText];
-                  messages = [];
-		}
-		onResult(result, errors, messages, "newTranscript",
-                         transcriptName);
-	      });
-	    } else {
-	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "newTranscript", transcriptName);
+	    if (/^https.*/.test(labbcat.baseUrl)) {
+	      requestParameters.protocol = "https:";
 	    }
-	    
-	    if (res) res.resume();
-	  });
-	}); // got length
-      } // runningOnNode
+            if (exports.verbose) {
+              console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+            }
+	    fd.submit(requestParameters, function(err, res) {
+	      var responseText = "";
+	      if (!err) {
+	        res.on('data',function(buffer) {
+		  //console.log('data ' + buffer);
+		  responseText += buffer;
+	        });
+	        res.on('end',function(){
+                  if (exports.verbose) console.log("response: " + responseText);
+	          var result = null;
+	          var errors = null;
+	          var messages = null;
+		  try {
+		    var response = JSON.parse(responseText);
+		    result = response.model.result || response.model;
+		    errors = response.errors;
+		    if (errors && errors.length == 0) errors = null
+		    messages = response.messages;
+		    if (messages && messages.length == 0) messages = null
+		  } catch(exception) {
+		    result = null
+                    errors = ["" +exception+ ": " + labbcat.responseText];
+                    messages = [];
+		  }
+		  onResult(result, errors, messages, "newTranscript",
+                           transcriptName);
+	        });
+	      } else {
+	        onResult(null, ["" +err+ ": " + labbcat.responseText], [], "newTranscript", transcriptName);
+	      }
+	      
+	      if (res) res.resume();
+	    });
+	  }); // got length
+        } // runningOnNode
+      }; // legacyApi
+
+      // phase 1: upload files
+      if (media) { // uploading media
+        // convert to the track structure expected by transcriptUpload
+        trackSuffix = trackSuffix || ""; // if not specified, trackSuffix is empty string
+        media = { trackSuffix: media };
+      }
+      this.transcriptUpload(
+        transcript, media, false, // merge=false: new transcript
+        (result, errors, messages)=>{
+          if (errors && errors.length > 0) {
+            if (/.*404.*/.test(errors[0])) { // endpoint not found
+              if (exports.verbose) {
+                console.log("transcriptUpload: " + errors[0] + " - falling back to legacy API");
+              }
+              // fall back to lgacy API
+              legacyApi();
+            } else { // some other error 
+	      onResult(result, errors, messages, "newTranscript", transcriptName);
+            }
+          } else { // no errors
+            // set parameters to default values
+            var parameters = {};
+            for (var parameter of result.parameters) {
+              parameters[parameter.name] = parameters[parameter.value];
+            }
+            // set the parameters we know the values of
+            if (transcriptType) parameters["labbcat_transcript_type"] = transcriptType;
+            if (corpus) parameters["labbcat_corpus"] = corpus;
+            if (episode) parameters["labbcat_episode"] = episode;
+            
+            // phase 2: upload parameters
+            this.transcriptUploadParameters(
+              result.id, parameters, // merge=false : new transcript
+              (result, errors, messages)=>{
+                if (result && result.transcripts) {
+                  // result is expected to be the transcriptId->threadId map
+                  result = result.transcripts;
+                }
+	        onResult(result, errors, messages, "newTranscript", transcriptName);
+              }); // transcriptUploadParameters
+          } // no errors
+      }, onProgress); // transcriptUpload
     }
     
     /**
@@ -3232,92 +3291,140 @@
         console.log("updateTranscript(" + transcript + ","+suppressGeneration+")");
       }
       
-      // create form
-      var fd = new FormData();
-      fd.append("todo", "update");
-      fd.append("auto", "true");
-      if (suppressGeneration) fd.append("suppressGeneration", "true");
-      
-      if (!runningOnNode) {	
-        
-	fd.append("uploadfile1_0", transcript);
-        
-	// create HTTP request
-	var xhr = new XMLHttpRequest();
-	xhr.call = "updateTranscript";
-	xhr.id = transcript.name;
-	xhr.onResult = onResult;
-	xhr.addEventListener("load", callComplete, false);
-	xhr.addEventListener("error", callFailed, false);
-	xhr.addEventListener("abort", callCancelled, false);
-	xhr.upload.addEventListener("progress", onProgress, false);
-	xhr.upload.id = transcript.name; // for knowing what status to update during events
-	
-	xhr.open("POST", this.baseUrl + "edit/transcript/new");
-	if (this.username) {
-	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this._password))
-	}
-	xhr.setRequestHeader("Accept", "application/json");
-	xhr.send(fd);
-      } else { // runningOnNode
-	
-	// on node.js, files are actually paths
-	var transcriptName = transcript.replace(/.*\//g, "");
-	fd.append("uploadfile1_0", 
-		  fs.createReadStream(transcript).on('error', function(){
-		    onResult(null, ["Invalid transcript: " + transcriptName], [], "updateTranscript", transcriptName);
-		  }), transcriptName);
-	
-	var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
-	var requestParameters = {
-	  port: urlParts.port,
-	  path: urlParts.pathname,
-	  host: urlParts.hostname,
-	  headers: { "Accept" : "application/json" }
-	};
-	if (this.username && this._password) {
-	  requestParameters.auth = this.username+':'+this._password;
-	}
-	if (/^https.*/.test(this.baseUrl)) {
-	  requestParameters.protocol = "https:";
-	}
-	fd.submit(requestParameters, function(err, res) {
-	  var responseText = "";
-	  if (!err) {
-	    res.on('data',function(buffer) {
-	      //console.log('data ' + buffer);
-	      responseText += buffer;
-	    });
-	    res.on('end',function(){
-              if (exports.verbose) console.log("response: " + responseText);
-	      var result = null;
-	      var errors = null;
-	      var messages = null;
-	      try {
-		var response = JSON.parse(responseText);
-		result = response.model.result || response.model;
-		errors = response.errors;
-		if (errors && errors.length == 0) errors = null
-		messages = response.messages;
-		if (messages && messages.length == 0) messages = null
-                ;
-	      } catch(exception) {
-		result = null
-                errors = ["" +exception+ ": " + labbcat.responseText];
-                messages = [];
-	      }
-              // for this call, the result is an object with one key, whose
-              // value is the threadId - so just return that
-	      onResult(result, errors, messages, "updateTranscript",
-                       transcriptName);
-            });
-	  } else {
-	    onResult(null, ["" +err+ ": " + this.responseText], [], "updateTranscript", transcriptName);
-	  }
-          
-	  if (res) res.resume();
-	});
+      // determine transcript name for onResult
+      var transcriptName = transcript;
+      if (!runningOnNode) {
+        transcriptName = transcript.name;
+      } else { // node
+	transcriptName = transcript.replace(/.*\//g, "");
       }
+      
+      var legacyApi = () => { // for fallback if the new API isn't available:
+        // create form
+        var fd = new FormData();
+        fd.append("todo", "update");
+        fd.append("auto", "true");
+        if (suppressGeneration) fd.append("suppressGeneration", "true");
+        
+        if (!runningOnNode) {	
+          
+	  fd.append("uploadfile1_0", transcript);
+          
+	  // create HTTP request
+	  var xhr = new XMLHttpRequest();
+	  xhr.call = "updateTranscript";
+	  xhr.id = transcript.name;
+	  xhr.onResult = onResult;
+	  xhr.addEventListener("load", callComplete, false);
+	  xhr.addEventListener("error", callFailed, false);
+	  xhr.addEventListener("abort", callCancelled, false);
+	  xhr.upload.addEventListener("progress", onProgress, false);
+	  xhr.upload.id = transcript.name; // for knowing what status to update during events
+	  
+	  xhr.open("POST", this.baseUrl + "edit/transcript/new");
+	  if (this.username) {
+	    xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this._password))
+	  }
+	  xhr.setRequestHeader("Accept", "application/json");
+	  xhr.send(fd);
+        } else { // runningOnNode
+	  
+	  // on node.js, files are actually paths
+	  fd.append("uploadfile1_0", 
+		    fs.createReadStream(transcript).on('error', function(){
+		      onResult(null, ["Invalid transcript: " + transcriptName], [], "updateTranscript", transcriptName);
+		    }), transcriptName);
+	  
+	  var urlParts = parseUrl(this.baseUrl + "edit/transcript/new");
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: { "Accept" : "application/json" }
+	  };
+	  if (this.username && this._password) {
+	    requestParameters.auth = this.username+':'+this._password;
+	  }
+	  if (/^https.*/.test(this.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+	        //console.log('data ' + buffer);
+	        responseText += buffer;
+	      });
+	      res.on('end',function(){
+                if (exports.verbose) console.log("response: " + responseText);
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+	        try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+                  ;
+	        } catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+	        }
+                // for this call, the result is an object with one key, whose
+                // value is the threadId - so just return that
+	        onResult(result, errors, messages, "updateTranscript", transcriptName);
+              });
+	    } else {
+	      onResult(null, ["" +err+ ": " + this.responseText], [], "updateTranscript", transcriptName);
+	    }
+            
+	    if (res) res.resume();
+	  });
+        }
+      }; // legacyApi
+
+      // phase 1: upload files
+      this.transcriptUpload(
+        transcript, null, true, // merge=true: existing transcript
+        (result, errors, messages)=>{
+          if (errors && errors.length > 0) {
+            if (/.*404.*/.test(errors[0])) { // endpoint not found
+              if (exports.verbose) {
+                console.log("transcriptUpload: " + errors[0] + " - falling back to legacy API");
+              }
+              // fall back to lgacy API
+              legacyApi();
+            } else { // some other error 
+	      onResult(result, errors, messages, "updateTranscript", transcriptName);
+            }
+          } else { // no errors
+            // set parameters to default values
+            var parameters = {};
+            for (var parameter of result.parameters) {
+              parameters[parameter.name] = parameters[parameter.value];
+            }
+            // set the parameters we know the values of
+            if (suppressGeneration) {
+              parameters["labbcat_generate"] = false;
+            } else {
+              parameters["labbcat_generate"] = true;
+            }
+            
+            // phase 2: upload parameters
+            this.transcriptUploadParameters(
+              result.id, parameters, // merge=false : new transcript
+              (result, errors, messages)=>{
+                if (result && result.transcripts) {
+                  // result is expected to be the transcriptId->threadId map
+                  result = result.transcripts;
+                }
+	        onResult(result, errors, messages, "updateTranscript", transcriptName);
+              }); // transcriptUploadParameters
+          } // no errors
+      }, onProgress); // transcriptUpload      
     }
 
     /**
