@@ -102,7 +102,7 @@ npm test
 To run specific tests, provide the path to the test module, e.g.
 
 ```
-npm test test/TestLabbcatAdmin
+npm test -- test/TestLabbcatEdit --grep newTrascript
 ```
 
 ### Generating documentation

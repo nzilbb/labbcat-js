@@ -118,6 +118,61 @@ describe("#LabbcatEdit", function() {
       });
   });
   
+  it("implements transcriptUpload and transcriptUploadParameters", (done)=>{
+    const participantName = "UnitTester";
+    const transcriptName = "labbcat-js.test.txt";
+    const transcriptPath = "test/" + transcriptName;
+    const mediaPath = "test/labbcat-js.test.wav";
+    const docPath = "test/labbcat-js.test.doc";
+    
+    // ensure the transcript/participant dosn't exist to start with    
+    store.deleteTranscript(transcriptName, (nothing, errors, messages)=>{
+      store.deleteParticipant(participantName, (nothing, errors, messages)=>{
+
+        store.transcriptUpload(
+          transcriptPath, mediaPath, false, // merge=false : new transcript
+          (result, errors, messages)=>{
+            assert.isNull(errors, "No errors on transcriptUpload: "+JSON.stringify(errors));
+            assert.exists(result.id, "Upload ID returned");
+            assert.exists(result.parameters, "Upload parameters returned");
+            // set parameters with their default values
+            var parameters = {};
+            for (var parameter of result.parameters) {
+              parameters[parameter.name] = parameters[parameter.value];
+            }
+            store.transcriptUploadParameters(
+              result.id, parameters, // merge=false : new transcript
+              (result, errors, messages)=>{
+                assert.isNull(errors, "No errors on transcriptUpload: "+JSON.stringify(errors));
+                assert.isNotNull(result, "redult returned");
+                assert.isNotNull(result.transcripts, "Result includes task info");            
+                assert.isNotNull(result.transcripts[transcriptName], "Transcript thread included");
+                var threadId = result.transcripts[transcriptName];
+                store.cancelTask(threadId, (task, errors, messages)=>{
+                  assert.isNull(errors, JSON.stringify(errors));
+                  store.releaseTask(threadId);
+                  
+                  // ensure the transcript exists
+                  store.countMatchingTranscriptIds(
+                    "id = '"+transcriptName+"'", (count, errors, messages)=>{
+                      assert.isNull(errors, JSON.stringify(errors))
+                      assert.isNumber(count);
+                      assert.equal(count, 1, "Transcript is in the store");
+                      
+                      // delete it
+                      store.deleteTranscript(
+                        transcriptName, (result, errors, messages)=>{
+                          assert.isNull(errors, JSON.stringify(errors))
+                          done();
+                        });
+                    });
+                });
+              });
+          });
+      });
+    });
+  });
+  
   it("implements newTranscript, updateTranscript, saveMedia, deleteTranscript, and deleteParticipant", (done)=>{
     const participantName = "UnitTester";
     const transcriptName = "labbcat-js.test.txt";

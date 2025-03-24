@@ -1,3 +1,9 @@
+# 1.7.0
+
+- New LabbcatEdit functions for phased uploading of transcripts:
+  + transcriptUpload - phase 1: upload a transcript file and associated media files
+  + transcriptUploadParameters - phase 2: specify parameters for processing upladed trascript
+
 # 1.6.0
 
 - New LabbcatView function

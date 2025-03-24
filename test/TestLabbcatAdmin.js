@@ -910,7 +910,7 @@ describe("#LabbcatAdmin", function() {
 
                             // ensure it's been deleted
                             store.getLayer(testLayer.id, (finalLayer, errors, messages)=>{
-                                assert.isNotNull(
+                                assert.isNull(
                                     errors, JSON.stringify(errors),
                                     "Should not be able to get layer that has been deleted: "
                                         + testLayer.id);
