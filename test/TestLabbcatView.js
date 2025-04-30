@@ -249,7 +249,7 @@ describe("#LabbcatView", function() {
     });
 
     it("implements countAnnotations with maxOrdinal parameter", (done)=>{
-        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/^AP.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isAtLeast(ids.length, 1, "There's at least one transcript");
             store.countAnnotations(ids[0], "phonemes", (countAll, errors, messages)=>{
@@ -293,7 +293,7 @@ describe("#LabbcatView", function() {
     });
     
     it("implements getAnnotations with maxOrdinal parameter", (done)=>{
-        store.getMatchingTranscriptIds("/.+/.test(id)", 1, 0, (ids, errors, messages)=>{
+        store.getMatchingTranscriptIds("/^AP.+/.test(id)", 1, 0, (ids, errors, messages)=>{
             assert.isNull(errors);
             assert.isAtLeast(ids.length, 1, "There's at least one transcript");
             let graphId = ids[0];
