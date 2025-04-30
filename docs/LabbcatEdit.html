@@ -2670,7 +2670,7 @@ labels('participant').includes('Robert')</code></li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3085">line 3085</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3448">line 3448</a>
     </li></ul></dd>
     
 
@@ -11119,7 +11119,7 @@ task status can be updated using <a href="LabbcatView.html#taskStatus">LabbcatVi
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2809">line 2809</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3071">line 3071</a>
     </li></ul></dd>
     
 
@@ -13915,6 +13915,479 @@ which identifies the resulting task, which can be passed to
     
 
     
+    <h4 class="name" id="transcriptUpload"><span class="type-signature"></span>transcriptUpload<span class="signature">(transcript, media, merge, onResult, onProgress)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Upload a transcript file and associated media files, as the first stage in adding or
+modifying a transcript to LaBB-CAT. The second stage is #transcriptUploadParameters
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>transcript</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">file</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The transcript to upload. In a browser, this
+must be a file object, and in Node, it must be the full path to the file.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>media</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The media to upload, if any. This can be a single
+file, or a map of  track suffixes to media files to upload for that track. In a
+browser, attribute values must be arrays of file objects, and in Node, they must be
+arrays of strings representing the full path to the file.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>merge</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether the upload corresponds to updates to an existing transcript
+(true) or a new transcript (false).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+result, which is and object that hass the following attributes::
+<dl>
+ <dt> id </dt> <dd> The unique identifier to use for this upload when subsequently
+         calling #transcriptUploadParameters. </dd>
+ <dt> parameters </dt> <dd> An array of objects representing the parameters that
+         require values to be passed into #transcriptUploadParameters. 
+         The <q>parameters</q> returned may include both information
+         required by the format deserializer (e.g. mappings from tiers to LaBB-CAT
+         layers) and also general information required by LaBB-CAT (e.g. the
+         corpus, episode, and type of the transcript). 
+                </dd>
+<p> Each parameter may contain the following attributes:
+ <dl>
+  <dt> name </dt>
+      <dd> The name that should be used when specifying the value for the parameter
+       when calling #transcriptUploadParameters. </dd> 
+  <dt> label </dt>
+      <dd> A label for the parameter intended for display to the user.</dd> 
+  <dt> hint </dt>
+      <dd> A description of the purpose of the parameter, for display to the user.</dd> 
+  <dt> type </dt>
+      <dd> The type of the parameter, e.g. <q>String</q>, <q>Double</q>, <q>Integer</q>,  
+        <q>Boolean</q>.</dd> 
+  <dt> required </dt>
+      <dd> <tt>true</tt> if the value must be specified, <tt>false</tt> if it is optional.</dd> 
+  <dt> value </dt>
+      <dd> A default value for the parameter.</dd> 
+  <dt> possibleValues </dt>
+      <dd> A list of possible values, if the possibilities are limited to a finite set.</dd> 
+ </dl>
+<p> The required parameters may include both information
+required by the format deserializer (e.g. mappings from tiers to LaBB-CAT layers) 
+and also general information required by LaBB-CAT, such as:
+ <dl>
+  <dt> labbcat_corpus </dt>
+      <dd> The corpus the new transcript(s) belong(s) to. </dd> 
+  <dt> labbcat_episode </dt>
+      <dd> The episode the new transcript(s) belong(s) to. </dd> 
+  <dt> labbcat_transcript_type </dt>
+      <dd> The transcript type for the new transcript(s). </dd> 
+  <dt> labbcat_generate </dt>
+      <dd> Whether to re-regenerate layers of automated annotations or not. </dd> 
+ </dl></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onProgress</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked on XMLHttpRequest progress.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2850">line 2850</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="transcriptUploadParameters"><span class="type-signature"></span>transcriptUploadParameters<span class="signature">(id, parameters, onResult)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    The second part of a transcript upload process started by a call to
+#transcriptUpload, which specifies values for the parameters
+required to save the uploaded transcript to LaBB-CAT's database. 
+<p> If the response includes more parameters, then this method should be called again
+to supply their values.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Upload ID returned by the prior call to #transcriptUpload.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parameters</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Object with an attribute and value for each parameter
+returned by the prior call to #transcriptUpload.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onResult</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#resultCallback">resultCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Invoked when the request has returned a
+result, which is and object that hass the following attributes::
+<dl>
+ <dt> transcripts </dt> <dd> an object for which each key is a transcript name, and its 
+         value is the threadId of the server task processing the uploaded transcript, 
+         which can be passed to <a href="LabbcatView.html#taskStatus">LabbcatView#taskStatus</a> to monitor progress. </dd>
+ <dt> id </dt> <dd> The unique identifier to use for this upload when subsequently
+         calling #transcriptUploadParameters (if parameters are returned). </dd>
+ <dt> parameters </dt> <dd> An array of objects representing the parameters that
+         still require values. </dd>
+<p> If parameters are returned, they have the same structure as those returned by 
+#transcriptUpload</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3037">line 3037</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="updateTranscript"><span class="type-signature"></span>updateTranscript<span class="signature">(transcript, suppressGeneration, onResult, onProgress)</span><span class="type-signature"></span></h4>
     
 
@@ -14089,7 +14562,7 @@ task status can be updated using <a href="LabbcatView.html#taskStatus">LabbcatVi
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line2979">line 2979</a>
+        <a href="nzilbb.labbcat.js.html">nzilbb.labbcat.js</a>, <a href="nzilbb.labbcat.js.html#line3294">line 3294</a>
     </li></ul></dd>
     
 
@@ -14485,7 +14958,7 @@ will be false if the task finished.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Wed Oct 16 2024 12:03:08 GMT-0300 (Argentina Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Wed Apr 30 2025 16:13:44 GMT-0300 (Argentina Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
