@@ -95,6 +95,9 @@ corpus.getParticipantIds((ids, errors, messages)=>{
 
 ### Running unit tests
 
+**NB** Automated tests will currently only work on a server with 'Basic' authentication,
+not 'Form' authentication.
+
 ```
 npm test
 ```
