@@ -1,8 +1,17 @@
+# 1.8.0
+
+- New LabbcatView functions:
+  + *changePassword* - change the current user's password
+
+Requires LaBB-CAT version 202500703.1313
+
 # 1.7.0
 
 - New LabbcatEdit functions for phased uploading of transcripts:
   + transcriptUpload - phase 1: upload a transcript file and associated media files
   + transcriptUploadParameters - phase 2: specify parameters for processing upladed trascript
+
+Requires LaBB-CAT version 20250430.1200
 
 # 1.6.0
 
