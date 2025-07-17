@@ -658,12 +658,13 @@ describe("#LabbcatView", function() {
                                     
                                     assert.equal(matchIds.length, annotations.length,
                                                  "annotations array is same size as matches");
-                                    assert.equal(1, annotations[0].length,
+                                    assert.equal(1, annotations[0].orthography.length,
                                                  "row arrays are the right size");
                                     
-                                    let annotation = annotations[0][0];
+                                    let annotation = annotations[0].orthography[0];
                                     assert.containsAllKeys(
-                                        annotation, ["id", "label", "startId", "endId"],
+                                        annotation,
+                                        ["id", "label", "startId", "endId", "start", "end"],
                                         "Looks like an annotation");
                                     
                                     // ensure we can also pass in a list of matches
@@ -680,10 +681,11 @@ describe("#LabbcatView", function() {
                                             assert.equal(
                                                 matchIds.length, annotations.length,
                                                 "annotations array is same size as matches array");
-                                            assert.equal(1, annotations[0].length,
-                                                         "row arrays are the right size");
+                                            assert.equal(
+                                              1, annotations[0].orthography.length,
+                                              "row arrays are the right size");
                                             
-                                            let annotation = annotations[0][0];
+                                            let annotation = annotations[0].orthography[0];
                                             assert.containsAllKeys(
                                                 annotation, ["id", "label", "startId", "endId"],
                                                 "Looks like an annotation");
