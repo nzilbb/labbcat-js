@@ -2,8 +2,13 @@
 
 - New LabbcatView functions:
   + *changePassword* - change the current user's password
+  + *resultsUpload* - reload CSV results for subsequent call to *getMatchAnnotations*
+  + *getDashboardItems* - list available corpus statistics
+  + *getDashboardItem* - get the value of a specific corpus statistic
 
-Requires LaBB-CAT version 202500703.1313
+Also updates to use new API endpoints.
+
+Requires LaBB-CAT version 20250716.1022
 
 # 1.7.0
 

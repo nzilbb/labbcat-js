@@ -338,7 +338,7 @@
      * </ul>
      */
     versionInfo(onResult) {
-      this.createRequest("version", null, onResult, this.baseUrl+"version").send();
+      this.createRequest("version", null, onResult, this.baseUrl+"api/versions").send();
     }
     
     /**
@@ -1297,6 +1297,124 @@
     }
     
     /**
+     * Upload a CSV results file to parse, for then processing as any other results.
+     * @param {file|string} results a CSV results file previously returned by
+     * <tt>/api/results</tt>. 
+     * @param targetColumn Optional column name that identifies each match.
+     * The default is "MatchId".
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute, "threadId",
+     * which identifies the resulting task, which can be passed to 
+     * {@link LabbcatView#getMatches}, {@link LabbcatView#taskStatus}, 
+     * {@link LabbcatView#waitForTask}, etc.
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    resultsUpload(results, targetColumn, onResult, onProgress) {
+      if (typeof targetColumn === "function") { // (results, onResult, onProgress)
+        onProgress = onResult;
+        onResult = targetColumn;
+        targetColumn = null;
+      }
+      if (exports.verbose) {
+        console.log("resultsUpload(" + results + ", " + targetColumn + ")");
+      }
+      // create form
+      var fd = new FormData();
+      if (targetColumn) fd.append("targetColumn", targetColumn);
+      
+      if (!runningOnNode) {
+        
+	fd.append("results", results);
+        
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "resultsUpload";
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	
+	xhr.open("POST", this.baseUrl + "api/results/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var resultsName = results.replace(/.*\//g, "");
+        if (exports.verbose) console.log("resultsName: " + resultsName);
+
+	fd.append(
+          "results", 
+	  fs.createReadStream(results).on('error', function(){
+	    onResult(
+              null, ["Invalid results: " + resultsName], [], "resultsUpload", resultsName);
+	  }), resultsName);
+        
+	var urlParts = parseUrl(this.baseUrl + "api/results/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/edit/transcript/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "transcriptUpload", transcriptName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "transcriptUpload", transcriptName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // resultsUpload
+    
+    /**
      * Gets a list of tokens that were matched by {@link LabbcatView#search}.
      * <p>If the task is still running, then this function will wait for it to finish.
      * <p>This means calls can be stacked like this:
@@ -1415,29 +1533,47 @@
       targetOffset = targetOffset || 0;
       annotationsPerLayer = annotationsPerLayer || 1;
 
-      // create form
-      var fd = new FormData();
-      fd.append("targetOffset", targetOffset);
-      fd.append("annotationsPerLayer", annotationsPerLayer);
-      fd.append("csvFieldDelimiter", ",");
-      fd.append("targetColumn", "0");
-      fd.append("copyColumns", "false");
-      for (let layerId of layerIds ) fd.append("layer", layerId);
-
-      // getMatchAnnotations expects an uploaded CSV file for MatchIds, 
+      // create forms
+      var fdUpload = new FormData();
+      fdUpload.append("csvFieldDelimiter", ",");
+      fdUpload.append("targetColumn", "MatchId");
+      // api/results/upload expects an uploaded CSV file for MatchIds, 
       const uploadfile = "MatchId\n"+matchIds.join("\n");
-      fd.append("uploadfile", uploadfile, {
+      fdUpload.append("results", uploadfile, {
         filename: 'uploadfile.csv',
         contentType: 'text/csv',
         knownLength: uploadfile.length
       });
-
+      
+      var downloadResults = (threadId) => {
+        this.createRequest(
+          "getMatchAnnotations", {
+            threadId: threadId,
+            targetOffset: targetOffset,
+            annotationsPerLayer: annotationsPerLayer,
+            offsetThreshold: 0, // return all anchors
+            csvFieldDelimiter: ",",
+            csv_layer: layerIds
+          }, (result, errors, messages, call, id) => {
+            this.releaseTask(threadId, ()=>{});
+            if (onResult) onResult(result.matches, errors, messages, call, id);
+          },
+          this.baseUrl+"api/results")
+          .send();
+      };
+      
       if (!runningOnNode) {	
 	// create HTTP request
 	var xhr = new XMLHttpRequest();
 	xhr.call = "getMatchAnnotations";
 	xhr.id = transcript.name;
-	xhr.onResult = onResult;
+	xhr.onResult = (result, errors, messages, call, id) => {
+          if (result && result.threadId) {
+            downloadResults(result.threadId);
+          } else {
+	    onResult(result, errors, messages, "getMatchAnnotations");
+          }
+        };
 	xhr.addEventListener("load", callComplete, false);
 	xhr.addEventListener("error", callFailed, false);
 	xhr.addEventListener("abort", callCancelled, false);	        
@@ -1446,13 +1582,13 @@
 	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
 	}
 	xhr.setRequestHeader("Accept", "application/json");
-	xhr.send(fd);
+	xhr.send(fdUpload);
       } else { // runningOnNode
-	var urlParts = parseUrl(this.baseUrl + "api/getMatchAnnotations");
+	var urlParts = parseUrl(this.baseUrl + "api/results/upload");
 	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
 	var labbcat = this;
         var password = this._password;
-	fd.getLength(function(something, contentLength) {
+	fdUpload.getLength(function(something, contentLength) {
 	  var requestParameters = {
 	    port: urlParts.port,
 	    path: urlParts.pathname,
@@ -1460,7 +1596,7 @@
 	    headers: {
 	      "Accept" : "application/json",
 	      "content-length" : contentLength,
-	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	      "Content-Type" : "multipart/form-data; boundary=" + fdUpload.getBoundary()
 	    }
 	  };
 	  if (labbcat.username && password) {
@@ -1472,7 +1608,7 @@
           if (exports.verbose) {
             console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
           }
-	  fd.submit(requestParameters, function(err, res) {
+	  fdUpload.submit(requestParameters, function(err, res) {
 	    var responseText = "";
 	    if (!err) {
 	      res.on('data',function(buffer) {
@@ -1496,7 +1632,11 @@
                   errors = ["" +exception+ ": " + labbcat.responseText];
                   messages = [];
 		}
-		onResult(result, errors, messages, "getMatchAnnotations");
+                if (result && result.threadId) {
+                  downloadResults(result.threadId);
+                } else {
+		  onResult(result, errors, messages, "getMatchAnnotations");
+                }
 	      });
 	    } else {
 	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "getMatchAnnotations");
@@ -1506,6 +1646,98 @@
 	  });
 	}); // got length
       } // runningOnNode
+      // old API
+      // // create form
+      // var fd = new FormData();
+      // fd.append("targetOffset", targetOffset);
+      // fd.append("annotationsPerLayer", annotationsPerLayer);
+      // fd.append("csvFieldDelimiter", ",");
+      // fd.append("targetColumn", "0");
+      // fd.append("copyColumns", "false");
+      // for (let layerId of layerIds ) fd.append("layer", layerId);
+
+      // // getMatchAnnotations expects an uploaded CSV file for MatchIds, 
+      // const uploadfile = "MatchId\n"+matchIds.join("\n");
+      // fd.append("uploadfile", uploadfile, {
+      //   filename: 'uploadfile.csv',
+      //   contentType: 'text/csv',
+      //   knownLength: uploadfile.length
+      // });
+
+      // if (!runningOnNode) {	
+      //   // create HTTP request
+      //   var xhr = new XMLHttpRequest();
+      //   xhr.call = "getMatchAnnotations";
+      //   xhr.id = transcript.name;
+      //   xhr.onResult = onResult;
+      //   xhr.addEventListener("load", callComplete, false);
+      //   xhr.addEventListener("error", callFailed, false);
+      //   xhr.addEventListener("abort", callCancelled, false);	        
+      //   xhr.open("POST", this.baseUrl + "api/getMatchAnnotations");
+      //   if (this.username) {
+      //     xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+      //   }
+      //   xhr.setRequestHeader("Accept", "application/json");
+      //   xhr.send(fd);
+      // } else { // runningOnNode
+      //   var urlParts = parseUrl(this.baseUrl + "api/getMatchAnnotations");
+      //   // for tomcat 8, we need to explicitly send the content-type and content-length headers...
+      //   var labbcat = this;
+      //   var password = this._password;
+      //   fd.getLength(function(something, contentLength) {
+      //     var requestParameters = {
+      //       port: urlParts.port,
+      //       path: urlParts.pathname,
+      //       host: urlParts.hostname,
+      //       headers: {
+      //         "Accept" : "application/json",
+      //         "content-length" : contentLength,
+      //         "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+      //       }
+      //     };
+      //     if (labbcat.username && password) {
+      //       requestParameters.auth = labbcat.username+':'+password;
+      //     }
+      //     if (/^https.*/.test(labbcat.baseUrl)) {
+      //       requestParameters.protocol = "https:";
+      //     }
+      //     if (exports.verbose) {
+      //       console.log("submit: " + labbcat.baseUrl + "edit/transcript/new");
+      //     }
+      //     fd.submit(requestParameters, function(err, res) {
+      //       var responseText = "";
+      //       if (!err) {
+      //         res.on('data',function(buffer) {
+      // 	  //console.log('data ' + buffer);
+      // 	  responseText += buffer;
+      //         });
+      //         res.on('end',function(){
+      //           if (exports.verbose) console.log("response: " + responseText);
+      //           var result = null;
+      //           var errors = null;
+      //           var messages = null;
+      // 	  try {
+      // 	    var response = JSON.parse(responseText);
+      // 	    result = response.model.result || response.model;
+      // 	    errors = response.errors;
+      // 	    if (errors && errors.length == 0) errors = null
+      // 	    messages = response.messages;
+      // 	    if (messages && messages.length == 0) messages = null
+      // 	  } catch(exception) {
+      // 	    result = null
+      //             errors = ["" +exception+ ": " + labbcat.responseText];
+      //             messages = [];
+      // 	  }
+      // 	  onResult(result, errors, messages, "getMatchAnnotations");
+      //         });
+      //       } else {
+      //         onResult(null, ["" +err+ ": " + labbcat.responseText], [], "getMatchAnnotations");
+      //       }
+      
+      //       if (res) res.resume();
+      //     });
+      //   }); // got length
+      // } // runningOnNode
     }
     
     /**
@@ -1600,7 +1832,7 @@
       
       // get fragments individually to ensure elements in result map 1:1 to element
       // in transcriptIds
-      const url = this.baseUrl + "soundfragment";
+      const url = this.baseUrl + "api/media/fragments";
       const lc = this;
       const nextFragment = function(i) {
         if (i < transcriptIds.length) { // next file
@@ -2075,6 +2307,47 @@
         .send();
     }
 
+    /**
+     * Lists configured items for the given dashboard.
+     * <p> These are generally single statistics about the corpus that are displayed
+     *   on the home page or the 'statistics' page, which are individually configurable.
+     *   However items can also be links, or the output of a command.
+     * @param {string} dashboard Which dashboard to get items for;
+     * "home", "statistics", or "express"
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be: an array of item objects, each with the
+     * following attributes:
+     * <ul>
+     *  <li> <q> item_id </q> : ID of the item. </li>
+     *  <li> <q> type </q> : The type of the item: "link", "sql", or "exec". </li>
+     *  <li> <q> label </q> : The item's text label. </li>
+     *  <li> <q> icon </q> : The item's icon. </li>
+     * </ul>
+     * The items are not evaluated by this function.
+     * To get item values, call {@link LabbcatView#getDashboardItem}.
+     */
+    getDashboardItems(dashboard, onResult) {
+      dashboard = dashboard||"home";
+      this.createRequest(
+        "dashboard", null, onResult,
+        this.baseUrl+"api/dashboard"+(dashboard=="home"?"":"/"+dashboard))
+        .send();
+    }
+
+    /**
+     * Gets information about the current user, including the roles or groups they are
+     * in.
+     * @param {number} id The item_id of the item, as returned by
+     * {@link LabbcatView#getDashboardItems}
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be a string representing the value of the item.
+     */
+    getDashboardItem(id, onResult) {
+      this.createRequest(
+        "dashboard/item", null, onResult,
+        this.baseUrl+"api/dashboard/item/"+id)
+        .send();
+    }
     /**
      * For HTK dictionary-filling, this starts a task (returning it's threadId) that
      * traverses the given utterances, looking for missing word pronunciations
