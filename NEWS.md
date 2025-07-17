@@ -3,6 +3,7 @@
 - New LabbcatView functions:
   + *changePassword* - change the current user's password
   + *resultsUpload* - reload CSV results for subsequent call to *getMatchAnnotations*
+  + *intervalAnnotations* - Concatenates annotation labels for given labels contained in given time intervals
   + *getDashboardItems* - list available corpus statistics
   + *getDashboardItem* - get the value of a specific corpus statistic
 
