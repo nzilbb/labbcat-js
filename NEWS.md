@@ -6,6 +6,14 @@
   + *intervalAnnotations* - Concatenates annotation labels for given labels contained in given time intervals
   + *getDashboardItems* - list available corpus statistics
   + *getDashboardItem* - get the value of a specific corpus statistic
+  + *getCorpusInfo* - gets statistics about a given corpus
+  + *getFragment* - gets a fragment of a transcript, as defined a given annotation
+  + *getDictionaries* - Lists generic dictionaries published by layer managers
+  + Functions for managing utterance correction: *utteranceForSuggestion*, *utteranceSuggestion* 
+- Changed LabbcatView function:
+  + *taskStatus* - now includes an 'options' parameter
+- New LabbcatEdit functions:
+  + Functions for managing utterance correction: *utteranceForCorrection*, *utteranceCorrection* 
 
 Also updates to use new API endpoints.
 

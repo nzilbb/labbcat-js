@@ -192,6 +192,21 @@ describe("#LabbcatView", function() {
         });
     });
 
+    it("implements getCorpusInfo", (done)=>{
+        store.getCorpusIds((ids, errors, messages)=>{
+            assert.isNull(errors);
+            assert.isAtLeast(ids.length, 1, "There's at least one corpus");
+            store.getCorpusInfo(ids[0], (info, errors, messages)=>{
+              assert.isNull(errors);
+              assert.isObject(info);
+              assert.isNotEmpty(Object.keys(info), "Some info is returned");
+              assert.isString(Object.keys(info)[0], "Keys are strings");
+              assert.isString(info[Object.keys(info)[0]], "Values are strings");
+              done();
+            });
+        });
+    });
+
     it("implements getTranscriptIdsWithParticipant", (done)=>{
         store.getParticipantIds((ids, errors, messages)=>{
             assert.isNull(errors);
@@ -491,45 +506,77 @@ describe("#LabbcatView", function() {
         });
     });
 
-    it("implements getTasks", (done)=>{
+  it("implements getTasks", (done)=>{
+    // create a task for testing
+    const pattern = {"columns" : [{"layers" : {"orthography" : { "pattern" : ".*"}}}]};
+    store.search(pattern, null, false, (response, errors, messages)=>{
+      assert.isNull(errors, JSON.stringify(errors))
+      assert.isNotNull(response, JSON.stringify(errors))
+      assert.isObject(response, JSON.stringify(errors))
+      const threadId = response.threadId
+      assert.isNotNull(threadId);
+      // cancel it so it's no taking up resources (the task will linger)
+      store.cancelTask(threadId, (result, errors, messages)=>{
+        assert.isNull(errors, JSON.stringify(errors))
+
+        // now the getTasks tests...
+        
         store.getTasks((tasks, errors, messages)=>{
-            assert.isNull(errors, JSON.stringify(errors))
-            assert.isObject(tasks);
-            // not sure what we expect, but let's just print out what we got
-            if (Object.keys(tasks).length == 0) {
-                console.warn("There are no tasks, can't test for well-formed response.");
-            } else {
-                const firstTaskId = Object.keys(tasks)[0];
-                const task = tasks[firstTaskId];
-                assert.containsAllKeys(
-                    task, ["threadId", "threadName", "running", "percentComplete", "status"],
-                    "Looks like a MediaFile");
-            }
-            done();
+          assert.isNull(errors, JSON.stringify(errors))
+          assert.isArray(tasks);
+          // not sure what we expect, but let's just print out what we got
+          if (tasks.length == 0) {
+            console.warn("There are no tasks, can't test for well-formed response.");
+          } else {
+            const firstTaskId = tasks[0];
+            assert.isNumber(firstTaskId);
+          }
+          done();
         });
+      });
     });
+  });
 
     it("implements taskStatus", (done)=>{
-        // first get a list of tasks
-        store.getTasks((tasks, errors, messages)=>{
-            assert.isNull(errors, JSON.stringify(errors))
-            if (Object.keys(tasks).length == 0) {
-                console.warn("There are no tasks, so can't test getTask.");
-                done();
-            } else {
-                const threadId = Object.keys(tasks)[0];
-                store.taskStatus(threadId, (task, errors, messages)=>{
-                    assert.isNull(errors, JSON.stringify(errors))
-                    assert.isNotNull(task);
-                    assert.isObject(task);
-                    assert.equal(threadId, task.threadId, "Correct task");
-                    assert.containsAllKeys(
-                        task, ["threadId", "threadName", "running", "percentComplete", "status"],
-                        "Looks like a MediaFile");
-                    done();
-                });
-            }
+      // create a task for testing
+      const pattern = {"columns" : [{"layers" : {"orthography" : { "pattern" : ".*"}}}]};
+      store.search(pattern, null, false, (response, errors, messages)=>{
+          assert.isNull(errors, JSON.stringify(errors))
+        assert.isNotNull(response, JSON.stringify(errors))
+        assert.isObject(response, JSON.stringify(errors))
+        const threadId = response.threadId
+        assert.isNotNull(threadId);
+        // cancel it so it's no taking up resources (the task will linger)
+        store.cancelTask(threadId, (result, errors, messages)=>{
+          assert.isNull(errors, JSON.stringify(errors))
+
+          // now the tastStatus tests...
+          
+          store.taskStatus(threadId, (task, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors));
+            assert.isNotNull(task);
+            assert.isObject(task);
+            assert.equal(threadId, task.threadId, "Correct task");
+            assert.containsAllKeys(
+              task, ["threadId", "threadName", "running", "percentComplete", "status"],
+              "Looks like a task");
+            assert.isUndefined(task["log"], "Doesn't include log");
+
+            // use options to get log
+            store.taskStatus(threadId, {log:true}, (task, errors, messages)=>{
+              assert.isNull(errors, JSON.stringify(errors))
+              assert.isNotNull(task);
+              assert.isObject(task);
+              assert.equal(threadId, task.threadId, "Correct task");
+              assert.containsAllKeys(
+                task, ["threadId", "threadName", "running", "percentComplete", "status",
+                       "log"],
+                "Now includes log");
+              done();
+            });
+          });
         });
+      });
     });
 
     it("implements waitForTask", (done)=>{
@@ -1359,11 +1406,47 @@ describe("#LabbcatView", function() {
       
       const category = categories[0];
       assert.containsAllKeys(
-        categories[0], ["class_id", "category", "description", "display_order"],
+        category, ["class_id", "category", "description", "display_order"],
         "Looks like a category");
       done();
     });
   });
 
+  it("implements getDashboardItems and getDashboardItem", (done)=>{
+    store.getDashboardItems("home", (items, errors, messages)=>{
+      assert.isNull(errors, JSON.stringify(errors))
+      assert.isNotNull(items, "The items are returned")
+      assert.isAtLeast(items.length, 1, "There is at least one item");
+      
+      const item = items[0];
+      assert.containsAllKeys(
+        item, ["item_id", "type", "label", "icon"],
+        "Looks like an item");
+      store.getDashboardItem(item.item_id, (value, errors, messages)=>{
+        assert.isNull(errors, JSON.stringify(errors))
+        assert.isNotNull(value, "The item was returned")
+        assert.isNotEmpty(value, "The item is not empty");
+        done();
+      });
+    });
+  });
 
+  it("implements getDictionaries", (done)=>{
+    store.getDictionaries((dictionaries, errors, messages)=>{
+      assert.isNull(errors);
+      assert.isObject(dictionaries);
+      if (Object.keys(dictionaries).length == 0) {
+        console.log(
+          "There are no dictionaries, so getDictionaries response cannot be fully tested.");
+      } else {
+        const layerManager = Object.keys(dictionaries)[0];
+        assert.isString(layerManager, "LayerManager IDs are strings");
+        assert.isArray(
+          dictionaries[layerManager], "LayerManager value is array");
+        assert.isString(
+          dictionaries[layerManager][0], "Dictionary IDs are strings");
+        done();
+      }
+    });
+  });
 });

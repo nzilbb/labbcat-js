@@ -494,6 +494,18 @@
     }
     
     /**
+     * Gets statistics about a given corpus.
+     * @param {string} id ID of the corpus.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be:  An object, where each key is the name of
+     * a statistic and the value is the statistic's value.
+     */
+    getCorpusInfo(id, onResult) {
+      this.createRequest("getCorpusInfo", null, onResult, `${this.baseUrl}api/corpus/${id}`)
+        .send();
+    }
+    
+    /**
      * Gets a list of participant IDs.
      * @param {resultCallback} onResult Invoked when the request has returned a
      * <var>result</var> which will be: {string[]} A list of participant IDs.
@@ -868,6 +880,22 @@
     }
     
     /**
+     * Gets a transcript given its ID, containing only the given layers.
+     * @param {string} transcriptId The given transcript ID.
+     * @param {string} annotationId The ID of an annotation that
+     * defines the bounds of the fragment. 
+     * @param {string[]} layerIds The IDs of the layers to load, or null for all
+     * layers. If only transcript data is required, set this to ["graph"]. 
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be:  The identified transcript.
+     */
+    getFragment(id, annotationId, layerIds, onResult) {
+      this.createRequest("getFragment", {
+        id : id, annotationId: annotationId, layerIds : layerIds
+      }, onResult).send();
+    }
+    
+    /**
      * Gets the given anchors in the given transcript.
      * @param {string} id The given transcript ID.
      * @param {string[]} anchorIds The IDs of the anchors to load.
@@ -938,20 +966,33 @@
     /**
      * Gets list of tasks.
      * @param {resultCallback} onResult Invoked when the request has returned a
-     * result, which is an map of task IDs to statuses.
+     * result, which is an array of task IDs.
      */
     getTasks(onResult) {
       if (exports.verbose) console.log("getTasks()");
-      this.createRequest("getTasks", null, onResult, this.baseUrl + "threads").send();
+      this.createRequest("getTasks", null, onResult, `${this.baseUrl}api/task/`).send();
     }
     
     /**
      * Gets the status of a task.
      * @param {string} id ID of the task.
+     * @param {object} options An object with boolean settings, e.g. {log:true}
+     * Current supported options are:
+     * <ul>
+     *  <li>log: whether to return the tasks log (default is false)</li>
+     *  <li>keepalive: whether to keep the thread alive (default is true)</li>
+     * </ul>
+     * "log": whether to return the tasks log,
      * @param {resultCallback} onResult Invoked when the request has returned a result.
      */
-    taskStatus(id, onResult) {
-      this.createRequest("taskStatus", { id : id, threadId : id }, onResult, this.baseUrl+"thread").send();
+    taskStatus(id, options, onResult) {
+      if (typeof options === "function") { // (id, onResult)
+        onResult = options;
+        options = null;
+      }
+      options = Object.assign({log:false, keepalive:true}, options);
+      this.createRequest(
+        "taskStatus", options, onResult, `${this.baseUrl}api/task/${id}`).send();
     }
 
     /**
@@ -988,22 +1029,20 @@
     releaseTask(id, onResult) {
       if (exports.verbose) console.log("releaseTask("+id+")");
       this.createRequest("releaseTask", {
-        threadId : id,
-        command : "release"
-      }, onResult, this.baseUrl+"threads").send();
+        release : true
+      }, onResult, `${this.baseUrl}api/task/${id}`, "DELETE").send();
     }
     
     /**
      * Cancels a running task.
-     * @param threadId The ID of the task.
+     * @param id The ID of the task.
      * @param {resultCallback} onResult Invoked when the request has completed.
      */
-    cancelTask(threadId, onResult) {
+    cancelTask(id, onResult) {
       if (exports.verbose) console.log("cancelTask("+threadId+")");
       this.createRequest("cancelTask", {
-        threadId : threadId,
-        command : "cancel"
-      }, onResult, this.baseUrl+"threads").send();
+        cancel : true
+      }, onResult, `${this.baseUrl}api/task/${id}`, "DELETE").send();
     }
     
     /**
@@ -2335,8 +2374,7 @@
     }
 
     /**
-     * Gets information about the current user, including the roles or groups they are
-     * in.
+     * Gets the value of one dashboard item.
      * @param {number} id The item_id of the item, as returned by
      * {@link LabbcatView#getDashboardItems}
      * @param {resultCallback} onResult Invoked when the request has returned a
@@ -2375,6 +2413,17 @@
           tokenLayerId : tokenLayerId,
           annotationLayerId : annotationLayerId
         }, onResult, this.baseUrl+"api/missingAnnotations").send();
+    }
+
+    /**
+     * Lists generic dictionaries published by layer managers.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which will be an object whose keys are layer manager IDs, with
+     * each value being an array of generic dictionary IDs for that layer manager.
+     */
+    getDictionaries(onResult) {
+      this.createRequest(
+        "getDictionaries", null, onResult, this.baseUrl+"api/dictionaries").send();
     }
 
     /**
@@ -2909,6 +2958,47 @@
       this.createRequest(
         "readAgreement", null, onResult, `${this.baseUrl}agreement.html`, "GET", null, null, true)
         .send();
+    }
+    
+    /**
+     * Gets the transcript of a given utterance, for possible correction suggestion using
+     * {@link #utteranceSuggestion}.
+     * @param {string} transcriptId The ID of the transcript.
+     * @param {string} utteranceId The utterance's ID.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> with a "text" attribute, which is the plain-text
+     * representation of the utterance, including word annotations and possibly
+     * noise, comment, pronunciation etc. annotations using the configured transcript
+     * conventions.
+     */
+    utteranceForSuggestion(transcriptId, utteranceId, onResult) {
+      this.createRequest(
+        "utteranceForSuggestion", {
+          transcriptId : transcriptId,
+          utteranceId : utteranceId
+        }, onResult, this.baseUrl+"api/utterance/correction").send();
+    }
+    
+    /**
+     * Submits a suggestion for correction of the transcript of a given utterance.
+     * @param {string} transcriptId The ID of the transcript.
+     * @param {string} utteranceId The utterance's ID.
+     * @param {string} text The corrected version of the transcript for the utterance.
+     * This may include noise, comment, pronunciation etc. annotations using the
+     * configured transcript conventions.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> with a "threadId" attribute, which is the ID of the task
+     * regenerating layers based on the new transcript.
+     */
+    utteranceSuggestion(transcriptId, utteranceId, text, onResult) {
+      this.createRequest(
+        "utterance/correction", null, onResult, null, "POST", // TODO should be PUT
+        this.baseUrl+"api/", "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          transcriptId : transcriptId,
+          utteranceId : utteranceId,
+          text : text
+        }));
     }
     
   } // class LabbcatView
@@ -3947,6 +4037,119 @@
         }, onResult, this.baseUrl+"api/edit/dictionary/add").send();
     }
 
+    /**
+     * Creates an annotation starting at <var>fromId</var> and ending at <var>toId</var>.
+     * @param {string} id The ID of the transcript.
+     * @param {string} fromId The start anchor's ID, which can be null if the layer is a tag layer.
+     * @param {string} toId The end anchor's ID, which can be null if the layer is a tag layer.
+     * @param {string} layerId The layer ID of the resulting annotation.
+     * @param {string} label The label of the resulting annotation.
+     * @param {number} confidence The confidence rating.
+     * @param {string} parentId The new annotation's parent's ID.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> which is the new annotation's ID.
+     */
+    createAnnotation(id, fromId, toId, layerId, label, confidence, parentId, onResult) {
+      this.createRequest(
+        "createAnnotation", null, onResult, null, "POST",
+        this.storeEditUrl, "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          id : id,
+          fromId : fromId,
+          toId : toId,
+          layerId : layerId,
+          label : label,
+          confidence : confidence,
+          parentId : parentId
+        }));
+    }
+    
+    /**
+     * Updates the label of the given annotation.
+     * @param {string} id The ID of the transcript.
+     * @param {string} annotationId The annotation's ID.
+     * @param {string} label The new label.
+     * @param {number} confidence The confidence rating.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * null <var>result</var> on success.
+     */
+    updateAnnotationLabel(id, annotationId, label, confidence, onResult) {
+      this.createRequest(
+        "updateAnnotationLabel", null, onResult, null, "POST",
+        this.storeEditUrl, "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          id : id,
+          annotationId : annotationId,
+          label : label,
+          confidence : confidence
+        }));
+    }
+
+    /**
+     * Destroys the annotation with the given ID.
+     * @param {string} id The ID of the transcript.
+     * @param {string} annotationId The annotation's ID.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * null <var>result</var> on success.
+     */
+    destroyAnnotation(id, annotationId, onResult) {
+      this.createRequest(
+        "destroyAnnotation", null, onResult, null, "POST",
+        this.storeEditUrl, "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          id : id,
+          annotationId : annotationId
+        }));
+    }
+    
+    /**
+     * Gets the transcript of a given utterance, for possible correction using
+     * {@link #utteranceCorrection}.
+     * @param {string} transcriptId The ID of the transcript.
+     * @param {string} utteranceId The utterance's ID.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> with a "text" attribute, which is the plain-text
+     * representation of the utterance, including word annotations and possibly
+     * noise, comment, pronunciation etc. annotations using the configured transcript
+     * conventions.
+     */
+    utteranceForCorrection(transcriptId, utteranceId, onResult) {
+      this.createRequest(
+        "readUtteranceTranscript", {
+          transcriptId : transcriptId,
+          utteranceId : utteranceId
+        }, onResult, this.baseUrl+"api/edit/utterance/correction").send();
+    }
+    
+    /**
+     * Corrects the transcript of a given utterance.
+     * @param {string} transcriptId The ID of the transcript.
+     * @param {string} utteranceId The utterance's ID.
+     * @param {string} text The corrected version of the transcript for the utterance.
+     * This may include noise, comment, pronunciation etc. annotations using the
+     * configured transcript conventions.
+     * @param {boolean} suppressGeneration (optional) false (the default) to run
+     * automatic layer generation, true to suppress automatic layer generation.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * <var>result</var> with a "threadId" attribute, which is the ID of the task
+     * regenerating layers based on the new transcript.
+     */
+    utteranceCorrection(transcriptId, utteranceId, text, suppressGeneration, onResult) {
+      if (typeof suppressGeneration === "function") {
+        // utteranceCorrection(transcriptId, utteranceId, text, onResult)
+        onResult = suppressGeneration;
+        suppressGeneration = false
+      }
+      this.createRequest(
+        "utterance/correction", null, onResult, null, "POST", // TODO should be PUT
+        this.baseUrl+"api/edit/", "application/x-www-form-urlencoded")
+        .send(this.parametersToQueryString({
+          transcriptId : transcriptId,
+          utteranceId : utteranceId,
+          text : text,
+          suppressGeneration : suppressGeneration
+        }));
+    }
   } // class LabbcatEdit
   
   // LabbcatAdmin class - read/write "admin" access
