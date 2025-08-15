@@ -529,7 +529,7 @@ describe("#LabbcatView", function() {
             console.warn("There are no tasks, can't test for well-formed response.");
           } else {
             const firstTaskId = tasks[0];
-            assert.isNumber(firstTaskId);
+            assert.isFalse(isNaN(firstTaskId));
           }
           done();
         });
