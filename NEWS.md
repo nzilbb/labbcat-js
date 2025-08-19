@@ -15,9 +15,7 @@
 - New LabbcatEdit functions:
   + Functions for managing utterance correction: *utteranceForCorrection*, *utteranceCorrection* 
 
-Also updates to use new API endpoints.
-
-Requires LaBB-CAT version 20250716.1022
+Requires LaBB-CAT version 20250819.1454
 
 # 1.7.0
 
