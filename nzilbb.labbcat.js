@@ -387,7 +387,8 @@
           }
           xhr.raw = true;
           xhr.setRequestHeader("Accept", "text/plain");
-          xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+          xhr.setRequestHeader(
+            "Content-Type", "application/x-www-form-urlencoded;charset=\"utf-8\"");
           console.log(`about to send...`);
           xhr.send(this.parametersToQueryString({
             j_username: username,
@@ -743,7 +744,8 @@
         layerId : layerId,
         maxOrdinal : maxOrdinal,
         pageLength : pageLength,
-        pageNumber : pageNumber
+        pageNumber : pageNumber,
+        includeAnchors : true
       }, onResult).send();
     }
     
@@ -1333,7 +1335,7 @@
       this.createRequest(
         "allUtterances", null, onResult, this.baseUrl+"api/utterances",
         "POST", // not GET, because the number of parameters can make the URL too long
-        null, "application/x-www-form-urlencoded")
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString(parameters));
     }
     
@@ -2995,7 +2997,7 @@
     utteranceSuggestion(transcriptId, utteranceId, text, onResult) {
       this.createRequest(
         "utterance/correction", null, onResult, null, "POST", // TODO should be PUT
-        this.baseUrl+"api/", "application/x-www-form-urlencoded")
+        this.baseUrl+"api/", "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           transcriptId : transcriptId,
           utteranceId : utteranceId,
@@ -3311,7 +3313,7 @@
     deleteMedia(id, fileName, onResult) {
       this.createRequest(
         "deleteMedia", null, onResult, null, "POST",
-        this.storeEditUrl, "application/x-www-form-urlencoded")
+        this.storeEditUrl, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({id : id, fileName : fileName}));
     }
 
@@ -3323,7 +3325,7 @@
     deleteTranscript(id, onResult) {
       this.createRequest(
         "deleteTranscript", null, onResult, null, "POST",
-        this.storeEditUrl, "application/x-www-form-urlencoded")
+        this.storeEditUrl, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({id : id}));
     }
 
@@ -3347,7 +3349,7 @@
       attributes["label"] = label;
       this.createRequest(
         "saveParticipant", null, onResult, null, "POST",
-        this.storeEditUrl, "application/x-www-form-urlencoded")
+        this.storeEditUrl, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString(attributes));
     }
     /**
@@ -3358,7 +3360,7 @@
     deleteParticipant(id, onResult) {
       this.createRequest(
         "deleteParticipant", null, onResult, null, "POST",
-        this.storeEditUrl, "application/x-www-form-urlencoded")
+        this.storeEditUrl, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({id : id}));
     }
 
@@ -4054,7 +4056,7 @@
     createAnnotation(id, fromId, toId, layerId, label, confidence, parentId, onResult) {
       this.createRequest(
         "createAnnotation", null, onResult, null, "POST",
-        this.storeEditUrl, "application/x-www-form-urlencoded")
+        this.storeEditUrl, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           id : id,
           fromId : fromId,
@@ -4078,7 +4080,7 @@
     updateAnnotationLabel(id, annotationId, label, confidence, onResult) {
       this.createRequest(
         "updateAnnotationLabel", null, onResult, null, "POST",
-        this.storeEditUrl, "application/x-www-form-urlencoded")
+        this.storeEditUrl, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           id : id,
           annotationId : annotationId,
@@ -4097,7 +4099,7 @@
     destroyAnnotation(id, annotationId, onResult) {
       this.createRequest(
         "destroyAnnotation", null, onResult, null, "POST",
-        this.storeEditUrl, "application/x-www-form-urlencoded")
+        this.storeEditUrl, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           id : id,
           annotationId : annotationId
@@ -4144,7 +4146,7 @@
       }
       this.createRequest(
         "utterance/correction", null, onResult, null, "POST", // TODO should be PUT
-        this.baseUrl+"api/edit/", "application/x-www-form-urlencoded")
+        this.baseUrl+"api/edit/", "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           transcriptId : transcriptId,
           utteranceId : utteranceId,
@@ -4306,7 +4308,7 @@
     deleteLayer(id, onResult) {
       this.createRequest(
         "deleteLayer", null, onResult, this.storeAdminUrl + "deleteLayer", "POST",
-        null, "application/x-www-form-urlencoded")
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           id : id
         }));
@@ -5082,7 +5084,7 @@
       this.createRequest(
         "installAnnotator", null, onResult, this.baseUrl+"admin/annotator",
         "POST", // not GET, because the number of parameters can make the URL too long
-        null, "application/x-www-form-urlencoded")
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           jar : jar,
           action : install?"install":"cancel"
@@ -5099,7 +5101,7 @@
       this.createRequest(
         "uninstallAnnotator", null, onResult, this.baseUrl+"admin/annotator",
         "POST", // not GET, because the number of parameters can make the URL too long
-        null, "application/x-www-form-urlencoded")
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           annotatorId : annotatorId,
           action : "uninstall"
@@ -5117,7 +5119,8 @@
     newAnnotatorTask(annotatorId, taskId, description, onResult) {
       this.createRequest(
         "newAnnotatorTask", null, onResult, null, "POST",
-        this.storeAdminUrl+"newAnnotatorTask", "application/x-www-form-urlencoded")
+        this.storeAdminUrl+"newAnnotatorTask",
+        "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           annotatorId: annotatorId,
           taskId: taskId,
@@ -5135,7 +5138,8 @@
     saveAnnotatorTaskDescription(taskId, description, onResult) {
       this.createRequest(
         "saveAnnotatorTaskDescription", null, onResult, null, "POST",
-        this.storeAdminUrl+"saveAnnotatorTaskDescription", "application/x-www-form-urlencoded")
+        this.storeAdminUrl+"saveAnnotatorTaskDescription",
+        "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           taskId: taskId,
           description: description
@@ -5152,7 +5156,8 @@
     saveAnnotatorTaskParameters(taskId, parameters, onResult) {
       this.createRequest(
         "saveAnnotatorTaskParameters", null, onResult, null, "POST",
-        this.storeAdminUrl+"saveAnnotatorTaskParameters", "application/x-www-form-urlencoded")
+        this.storeAdminUrl+"saveAnnotatorTaskParameters",
+        "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           taskId: taskId,
           parameters: parameters
@@ -5168,7 +5173,8 @@
     deleteAnnotatorTask(taskId, onResult) {
       this.createRequest(
         "deleteAnnotatorTask", null, onResult, null, "POST",
-        this.storeAdminUrl+"deleteAnnotatorTask", "application/x-www-form-urlencoded")
+        this.storeAdminUrl+"deleteAnnotatorTask",
+        "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           taskId: taskId
         }));
@@ -5304,7 +5310,7 @@
       this.createRequest(
         "installTranscriber", null, onResult, this.baseUrl+"admin/transcriber",
         "POST", // not GET, because the number of parameters can make the URL too long
-        null, "application/x-www-form-urlencoded")
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           jar : jar,
           action : install?"install":"cancel"
@@ -5321,7 +5327,7 @@
       this.createRequest(
         "uninstallTranscriber", null, onResult, this.baseUrl+"admin/transcriber",
         "POST", // not GET, because the number of parameters can make the URL too long
-        null, "application/x-www-form-urlencoded")
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
         .send(this.parametersToQueryString({
           transcriberId : transcriberId,
           action : "uninstall"
