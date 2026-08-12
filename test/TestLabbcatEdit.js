@@ -433,4 +433,37 @@ describe("#LabbcatEdit", function() {
     });
   });
 
+  it("implements uploadParticipantAttributes", (done)=>{
+    const participantId = "UnitTester";
+    const csvName = "participants.csv";
+    const csvPath = "test/" + csvName;
+    const idColumn = 0;
+    const columnLayer = [ null, "participant_gender", "", "participant_notes" ];
+    store.uploadParticipantAttributes(
+      csvPath, idColumn, columnLayer, (counts, errors, messages)=>{
+        assert.isNull(errors);
+        assert.isNotEmpty(counts, "Some counts are returned");
+        assert.equal(0, counts.updated, "No participant updated");
+        assert.equal(1, counts.created, "One participant created");
+        store.getParticipant(
+          participantId, ["participant_gender", "participant_notes"],
+          (participant, errors, messages)=>{
+            assert.isNull(errors);
+            assert.equal(
+              participant.label, participantId, "Correct participant");
+            assert.equal(
+              participant.annotations["participant_gender"][0].label,
+              "X", "Gender correct");
+            assert.equal(
+              participant.annotations["participant_notes"][0].label,
+              "UnitTester notes", "Notes correct");
+            store.deleteParticipant(
+              participantId, (result, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors));            
+                done();
+              });
+          });
+      });
+  });
+
 });

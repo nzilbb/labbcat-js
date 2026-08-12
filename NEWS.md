@@ -1,3 +1,10 @@
+# 1.9.0
+
+- New LabbcatEdit functions:
+  + *uploadParticipantAttributes* - upload participant attribute data from CSV file
+
+Requires LaBB-CAT version 20260812.2001
+
 # 1.8.0
 
 - New LabbcatView functions:
