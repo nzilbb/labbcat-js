@@ -466,4 +466,70 @@ describe("#LabbcatEdit", function() {
       });
   });
 
+  it("implements uploadTranscriptAttributes", (done)=>{
+    const participantName = "UnitTester";
+    const transcriptName = "labbcat-js.test.txt";
+    const transcriptPath = "test/" + transcriptName;
+    const csvName = "transcripts.csv";
+    const csvPath = "test/" + csvName;
+    const idColumn = 0;
+    const columnLayer = [ null, "", "transcript_version", "transcript_versionDate" ];
+    
+    // ensure the transcript/participant dosn't exist to start with    
+    store.deleteTranscript(transcriptName, (nothing, errors, messages)=>{
+      store.deleteParticipant(participantName, (nothing, errors, messages)=>{
+        
+        store.getCorpusIds((ids, errors, messages)=>{
+          assert.isNull(errors, JSON.stringify(errors))
+          assert.isAtLeast(ids.length, 1, "There's at least one corpus");
+          const corpusId = ids[0];
+          store.getLayer("transcript_type", (typeLayer, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors))
+            assert.isNotNull(typeLayer);
+            assert.isNotEmpty(typeLayer.validLabels, "There is at least one transcript type");
+            const transcriptType = Object.keys(typeLayer.validLabels)[0];
+            
+            assert(fs.existsSync(transcriptPath), "Test transcript exists");
+            store.newTranscript(
+              transcriptPath, null, null, transcriptType, corpusId, "test",
+              (result, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors));
+                const threadId = result[Object.keys(result)[0]]
+                assert.isNotNull(threadId);
+
+                // now update transcript attributes
+                store.uploadTranscriptAttributes(
+                  csvPath, idColumn, columnLayer, (counts, errors, messages)=>{
+                    assert.isNull(errors);
+                    assert.isNotEmpty(counts, "Some counts are returned");
+                    assert.equal(1, counts.updated, "One transcript updated");
+                    assert.equal(1, counts.missing, "One transcript missing");
+                    store.getTranscript(
+                      transcriptName, ["transcript_version", "transcript_versionDate"],
+                      (graph, errors, messages)=>{
+                        assert.isNull(errors);
+                        assert.isTrue(graph.transcript_version.length > 0);
+                        assert.equal(
+                          graph.transcript_version[0].label,
+                          "CSV", "Version correct");
+                        assert.isTrue(graph.transcript_versionDate.length > 0);
+                        assert.equal(
+                          graph.transcript_versionDate[0].label,
+                          "2026-08-13", "Version correct");
+                        store.deleteTranscript(
+                          transcriptName, (result, errors, messages)=>{
+                            assert.isNull(errors, JSON.stringify(errors));            
+                            store.deleteParticipant(
+                              participantName, (nothing, errors, messages)=>{
+                                done();
+                              }); // deleteParticipant
+                          }); // deleteTranscript
+                      }); // getTranscript
+                  }); // uploadTranscriptAttributes
+              }); // newTranscript
+          }); // getLayer
+        }); /// getCorpusIds
+      }); // deleteParticipant
+    }); // deleteTranscript
+  });
 });

@@ -4150,6 +4150,125 @@
     } // uploadParticipantAttributes
     
     /**
+     * Uploads attribute values for multiple transcripts from CSV file.
+     * @param {file|string} csv CSV file containing the attribute values to import.
+     * @param {number} idColumn The (zero based) index of the column that
+     * identifies the transcript; if the transcript exists, its
+     * attribute values will be updated, otherwise, the row is ignored. 
+     * @param {string[]} columnLayer Multiple values, where the index of the value
+     * corresponds to the (zero based) CSV column index, and the value
+     * is blank to ignore the column, the layer ID of the transcript
+     * attribute to update. 
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * result, which is an array of two integers; the first is the number of existing
+     * transcripts that were updated, and the second, the number of transcripts
+     * that were not found.
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadTranscriptAttributes(csv, idColumn, columnLayer, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("uploadTranscriptAttributes("
+                    + csv + ", " + idColumn + ", " + JSON.stringify(columnLayer) + ")");
+      }
+      var fd = new FormData();
+      fd.append("idColumn", idColumn);
+      for (let c of columnLayer) {
+        fd.append("columnLayer", c||"");
+      }
+      if (!runningOnNode) {	        
+	fd.append("csv", csv);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadTranscriptAttributes";
+	xhr.id = csv.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = csv.name;
+	
+	xhr.open("POST", this.baseUrl + "api/edit/transcripts/attributes/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var csvName = csv.replace(/.*\//g, "");
+        if (exports.verbose) console.log("csvName: " + csvName);
+        
+	fd.append(
+          "csv", 
+	  fs.createReadStream(csv).on('error', function(){
+	    onResult(
+              null, ["Invalid file: " + csvName], [], "uploadTranscriptAttributes", csvName);
+	  }), csvName);
+	var urlParts = parseUrl(this.baseUrl + "api/edit/transcripts/attributes/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(error, contentLength) {
+          if (error) console.log(error);
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl
+                        + "api/edit/transcripts/attributes/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "uploadTranscriptAttributes", csvName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadTranscriptAttributes", csvName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // uploadTranscriptAttributes
+    
+    /**
      * For HTK dictionary-filling, this adds a new dictionary entry and updates all tokens.
      * @param {string} layerId The dictionary of this layer will be used.
      * @param {string} label The word label to add an entry for.
