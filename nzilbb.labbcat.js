@@ -4069,7 +4069,7 @@
 	xhr.upload.addEventListener("progress", onProgress, false);
 	xhr.upload.id = csv.name;
 	
-	xhr.open("POST", this.baseUrl + "api/edit/participant/attributes/upload");
+	xhr.open("POST", this.baseUrl + "api/edit/participants/attributes/upload");
 	if (this.username) {
 	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
 	}
@@ -4087,7 +4087,7 @@
 	    onResult(
               null, ["Invalid file: " + csvName], [], "uploadParticipantAttributes", csvName);
 	  }), csvName);
-	var urlParts = parseUrl(this.baseUrl + "api/edit/participant/attributes/upload");
+	var urlParts = parseUrl(this.baseUrl + "api/edit/participants/attributes/upload");
 	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
         if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
 	var labbcat = this;
@@ -4112,7 +4112,7 @@
 	  }
           if (exports.verbose) {
             console.log("submit: " + labbcat.baseUrl
-                        + "api/edit/participant/attributes/upload");
+                        + "api/edit/participants/attributes/upload");
           }
           if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
 	  fd.submit(requestParameters, function(err, res) {
