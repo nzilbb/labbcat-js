@@ -532,4 +532,71 @@ describe("#LabbcatEdit", function() {
       }); // deleteParticipant
     }); // deleteTranscript
   });
+
+  it("implements uploadTokenAnnotations", (done)=>{
+    const csvName = "results.csv";
+    const csvPath = "test/" + csvName;
+    const idColumn = 8; // MatchId
+    const columnLayer = [
+      "","","","","","","","","","","","","","","","","","","","lexical" ];
+    
+    // upload the annotations
+    store.uploadTokenAnnotations(
+      csvPath, idColumn, columnLayer, (response, errors, messages)=>{
+        assert.isNull(errors, JSON.stringify(errors))
+        assert.isNotNull(response, JSON.stringify(errors))
+        assert.isObject(response, JSON.stringify(errors))
+        const threadId = response.threadId
+        assert.isNotNull(threadId);
+        store.waitForTask(threadId, 30, (task, errors, messages)=>{
+          assert.equal(threadId, task.threadId, "Correct task");
+          // print the result
+          store.taskStatus(threadId, {log:true}, (t, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors))
+            assert.isNotNull(t);
+            assert.isObject(t);
+            assert.equal(threadId, t.threadId, "Correct task");
+            console.log(`${t.status}`);
+            console.log(`Log: ${t.log}`);
+            //store.releaseTask(threadId);
+            done();
+          }); // taskStatus
+        }); // waitForTask
+      }) // uploadTokenAnnotations
+  });
+  
+  it("implements uploadIntervalAnnotations", (done)=>{
+    const csvName = "results.csv";
+    const csvPath = "test/" + csvName;
+    const transcriptColumn = 4; // Transcript
+    const startTimeColumn = 14; // word start
+    const endTimeColumn = 15; // word end
+    const columnLayer = [
+      "","","","","","","","","","","","","","","","","","","","comment" ];
+    
+    // upload the annotations
+    store.uploadIntervalAnnotations(
+      csvPath, transcriptColumn, startTimeColumn, endTimeColumn, columnLayer,
+      (response, errors, messages)=>{
+        assert.isNull(errors, JSON.stringify(errors))
+        assert.isNotNull(response, JSON.stringify(errors))
+        assert.isObject(response, JSON.stringify(errors))
+        const threadId = response.threadId
+        assert.isNotNull(threadId);
+        store.waitForTask(threadId, 30, (task, errors, messages)=>{
+          assert.equal(threadId, task.threadId, "Correct task");
+          // print the result
+          store.taskStatus(threadId, {log:true}, (t, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors))
+            assert.isNotNull(t);
+            assert.isObject(t);
+            assert.equal(threadId, t.threadId, "Correct task");
+            console.log(`${t.status}`);
+            console.log(`Log: ${t.log}`);
+            //store.releaseTask(threadId);
+            done();
+          }); // taskStatus
+        }); // waitForTask
+      }) // uploadIntervalAnnotations
+  });
 });

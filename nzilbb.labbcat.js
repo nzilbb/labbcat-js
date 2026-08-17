@@ -4269,6 +4269,251 @@
     } // uploadTranscriptAttributes
     
     /**
+     * Uploads annotation labels for tagging match tokens from a results CSV file.
+     * @param {file|string} csv CSV file containing the annotation labels to import.
+     * @param {number} idColumn The (zero based) index of the column that contains
+     * MatchId or another identifier that identifies target token(s);
+     * If the tokens are found, they're annotated with the labels in the columns
+     * identified by <var>columnLayer</var>, otherwise, the row is ignored. 
+     * @param {string[]} columnLayer Multiple values, where the index of the value
+     * corresponds to the (zero based) CSV column index, and the value
+     * is blank to ignore the column, or the ID of the layer to annotate the
+     * tokens on. 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute, the
+     * <var>threadId</var> of the server task processing the annotations. 
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadTokenAnnotations(csv, idColumn, columnLayer, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("uploadTokenAnnotations("
+                    + csv + ", " + idColumn + ", " + JSON.stringify(columnLayer) + ")");
+      }
+      var fd = new FormData();
+      fd.append("idColumn", idColumn);
+      for (let c of columnLayer) {
+        fd.append("columnLayer", c||"");
+      }
+      if (!runningOnNode) {	        
+	fd.append("csv", csv);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadTokenAnnotations";
+	xhr.id = csv.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = csv.name;
+	
+	xhr.open("POST", this.baseUrl + "api/edit/annotations/tokens");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var csvName = csv.replace(/.*\//g, "");
+        if (exports.verbose) console.log("csvName: " + csvName);
+        
+	fd.append(
+          "csv", 
+	  fs.createReadStream(csv).on('error', function(){
+	    onResult(
+              null, ["Invalid file: " + csvName], [], "uploadTranscriptAttributes", csvName);
+	  }), csvName);
+	var urlParts = parseUrl(this.baseUrl + "api/edit/annotations/tokens");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(error, contentLength) {
+          if (error) console.log(error);
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl
+                        + "api/edit/annotations/tokens");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "uploadTranscriptAttributes", csvName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadTranscriptAttributes", csvName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // uploadTokenAnnotations
+        
+    /**
+     * Uploads annotation labels for tagging time intervals from a results CSV file.
+     * @param {file|string} csv CSV file containing the annotation labels to import.
+     * @param {number} idColumn The (zero based) index of the column that contains
+     * @param {number} transcriptColumn The (zero based) index of the column that contains
+     * the transcript name to annotate.
+     * @param {number} startTimeColumn The (zero based) index of the column that contains
+     * the start time for the annotation.
+     * @param {number} endTimeColumn The (zero based) index of the column that contains the
+     * end time for the annotation.
+     * @param {string[]} columnLayer Multiple values, where the index of the value
+     * corresponds to the (zero based) CSV column index, and the value
+     * is blank to ignore the column, or the ID of the layer to annotate the
+     * intervals on. 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object with one attribute, the
+     * <var>threadId</var> of the server task processing the annotations. 
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadIntervalAnnotations(
+      csv, transcriptColumn, startTimeColumn, endTimeColumn, columnLayer,
+      onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("uploadIntervalAnnotations("
+                    + csv + ", " + idColumn + ", " + JSON.stringify(columnLayer) + ")");
+      }
+      var fd = new FormData();
+      fd.append("transcriptColumn", transcriptColumn);
+      fd.append("startTimeColumn", startTimeColumn);
+      fd.append("endTimeColumn", endTimeColumn);
+      for (let c of columnLayer) {
+        fd.append("columnLayer", c||"");
+      }
+      if (!runningOnNode) {	        
+	fd.append("csv", csv);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadIntervalAnnotations";
+	xhr.id = csv.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = csv.name;
+	
+	xhr.open("POST", this.baseUrl + "api/edit/annotations/intervals");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var csvName = csv.replace(/.*\//g, "");
+        if (exports.verbose) console.log("csvName: " + csvName);
+        
+	fd.append(
+          "csv", 
+	  fs.createReadStream(csv).on('error', function(){
+	    onResult(
+              null, ["Invalid file: " + csvName], [], "uploadTranscriptAttributes", csvName);
+	  }), csvName);
+	var urlParts = parseUrl(this.baseUrl + "api/edit/annotations/intervals");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(error, contentLength) {
+          if (error) console.log(error);
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl
+                        + "api/edit/annotations/intervals");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "uploadTranscriptAttributes", csvName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadTranscriptAttributes", csvName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // uploadIntervalAnnotations
+    
+    /**
      * For HTK dictionary-filling, this adds a new dictionary entry and updates all tokens.
      * @param {string} layerId The dictionary of this layer will be used.
      * @param {string} label The word label to add an entry for.

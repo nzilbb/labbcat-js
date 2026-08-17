@@ -3,6 +3,10 @@
 - New LabbcatEdit functions:
   + *uploadParticipantAttributes* - upload participant attribute data from CSV file
   + *uploadTranscriptAttributes* - upload transcript attribute data from CSV file
+  + *uploadTokenAnnotations* - upload annotated results CSV file, to insert/update/delete
+    annotations for match tokens.
+  + *uploadIntervalAnnotations* - upload annotated results CSV file, to insert/update/delete
+    annotations for intervals.
 
 Requires LaBB-CAT version 20260812.2001
 
