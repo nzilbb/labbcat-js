@@ -7,6 +7,9 @@
     annotations for match tokens.
   + *uploadIntervalAnnotations* - upload annotated results CSV file, to insert/update/delete
     annotations for intervals.
+  + *fragmentUpload* - start annotated fragment (e.g. TextGrid) upload
+  + *fragmentUploadParameters* - finish annotated fragment upload
+  + *fragmentUploadDelete* - delete annotated fragment upload
 
 Requires LaBB-CAT version 20260812.2001
 

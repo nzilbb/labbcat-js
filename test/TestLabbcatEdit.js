@@ -433,6 +433,87 @@ describe("#LabbcatEdit", function() {
     });
   });
 
+  it("implements fragmentUpload and fragmentUploadParameters", (done)=>{
+    // use a real fragment...
+    
+    // get a participant ID to use
+    store.getParticipantIds((ids, errors, messages)=>{
+      assert.isNull(errors);
+      assert.isNotEmpty(ids, "Some participant IDs exist");
+      const participantId = ids[0];
+      
+      // all instances of "and"
+      const pattern = {"columns" : [{
+        "layers" : {
+          "orthography" : { "pattern" : "and"}}}]};
+      store.search(pattern, [ participantId ], false, (response, errors, messages)=>{
+        assert.isNull(errors, JSON.stringify(errors))
+        assert.isNotNull(response)
+        assert.isObject(response)
+        const threadId = response.threadId
+        
+        store.waitForTask(threadId, 30, (task, errors, messages)=>{
+          assert.isNull(errors, JSON.stringify(errors));
+          
+          // if the task is still running, it's taking too long, so cancel it
+          if (task.running) store.cancelTask(threadId);
+          assert.isFalse(task.running, "Search finished in a timely manner");
+          
+          store.getMatches(threadId, 2, (result, errors, messages)=>{
+            assert.isNull(errors, JSON.stringify(errors))
+            assert.isNotNull(result)
+            assert.isNotNull(result.name)
+            const matches = result.matches;
+            assert.isArray(result.matches)
+            assert.isAtLeast(matches.length, 1,
+                             "getMatches: No matches were returned,"
+                             +" cannot test getMatchAnnotations");
+            const match = [ matches[0] ];
+            store.getFragments(
+              match, ["word", "segment"], "text/praat-textgrid",
+              (textgrids, errors, messages)=>{
+                assert.isNull(errors, "getFragments with matches: " +JSON.stringify(errors))
+                assert.equal(
+                  1, textgrids.length, "files array is same size as matches array");
+                const fragment = textgrids[0];
+                assert.isTrue(fs.existsSync(fragment), "File exists: " + fragment);
+
+                // finally, start fragment upload
+                store.fragmentUpload(fragment, false, (result, errors, messages)=>{
+                  assert.isNull(
+                    errors, "No errors on fragmentUpload: "+JSON.stringify(errors));
+                  assert.isNotNull(
+                    result, "Result returned by fragmentUpload");
+                  
+                  assert.exists(result.id, "Upload ID returned");
+                  assert.exists(result.transcript, "Transcript returned");
+                  assert.exists(result.start, "Start offset returned");
+                  assert.exists(result.end, "End offste returned");
+                  assert.exists(result.parameters, "Upload parameters returned");
+                  // set parameters with their default values
+                  var parameters = {};
+                  for (var parameter of result.parameters) {
+                    parameters[parameter.name] = parameters[parameter.value];
+                  }
+                  store.fragmentUploadParameters(
+                    result.id, parameters,
+                    (result, errors, messages)=>{
+                      assert.isNull(
+                        errors, "No errors on fragmentUpload: "+JSON.stringify(errors));
+                      assert.isNotNull(result, "redult returned");
+                      assert.isNotNull(result.url, "Result includes fragment url");
+                      // delete fragmet file
+                      try { fs.unlinkSync(fragment); } catch(x) {}
+                      done();
+                    });
+                });
+              });
+          });
+        });
+      });
+    });
+  });
+  
   it("implements uploadParticipantAttributes", (done)=>{
     const participantId = "UnitTester";
     const csvName = "participants.csv";

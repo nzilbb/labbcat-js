@@ -4028,6 +4028,214 @@
     }
 
     /**
+     * Upload an annotated fragment file, as the first stage in updating a fragment
+     * (e.g. a single utterance) in LaBB-CAT. The second stage is
+     * {@link #fragmentUploadParameters}
+     * @param {file|string} fragment The fragment to upload. In a browser, this
+     * must be a file object, and in Node, it must be the full path to the file. 
+     * @param automaticMapping A value of true indicates that default parameters
+     * for processing the upload (e.g. mappings from TextGrid tiers to LaBB-CAT layers)
+     * should be automatically applied, and the resulting data should be immediately
+     * saved, instead of using the two-step process of first uploading the file via
+     * this method and then setting parameters via {@link #fragmentUploadParameters}.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * result, which is and object that has the following attributes:
+     * <dl>
+     *  <dt> id </dt> <dd> The unique identifier to use for this upload when subsequently
+     *          calling {@link #fragmentUploadParameters}. </dd>
+     *  <dt> transcript </dt>
+     *     <dd> The name of the transcript, inferred from the fragment file name. </dd> 
+     *  <dt> start </dt>
+     *     <dd> The start time of the fragment, inferred from the fragment file name. </dd> 
+     *  <dt> end </dt>
+     *     <dd> The end time of the fragment, inferred from the fragment file name. </dd> 
+     *  <dt> parameters </dt> <dd> An array of objects representing the parameters that
+     *          require values to be passed into {@link #fragmentUploadParameters}. 
+     *          The <q>parameters</q> returned may include both information
+     *          required by the format deserializer (e.g. mappings from tiers to LaBB-CAT
+     *          layers) and also general information required by LaBB-CAT (e.g. the
+     *          corpus, episode, and type of the fragment). 
+     *                 </dd>
+     * <p> Each parameter may contain the following attributes:
+     *  <dl>
+     *   <dt> name </dt>
+     *       <dd> The name that should be used when specifying the value for the parameter
+     *        when calling {@link #fragmentUploadParameters}. </dd> 
+     *   <dt> label </dt>
+     *       <dd> A label for the parameter intended for display to the user.</dd> 
+     *   <dt> hint </dt>
+     *       <dd> A description of the purpose of the parameter, for display to the user.</dd> 
+     *   <dt> type </dt>
+     *       <dd> The type of the parameter, e.g. <q>String</q>, <q>Double</q>, <q>Integer</q>,  
+     *         <q>Boolean</q>.</dd> 
+     *   <dt> required </dt>
+     *       <dd> <tt>true</tt> if the value must be specified, <tt>false</tt> if it is optional.</dd> 
+     *   <dt> value </dt>
+     *       <dd> A default value for the parameter.</dd> 
+     *   <dt> possibleValues </dt>
+     *       <dd> A list of possible values, if the possibilities are limited to a finite set.</dd> 
+     *  </dl>
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    fragmentUpload(fragment, automaticMapping, onResult, onProgress) {
+      if (exports.verbose) {
+        console.log("fragmentUpload(" + fragment + ", " + automaticMapping + ")");
+      }
+      // create form
+      var fd = new FormData();
+      fd.append("automaticMapping", ""+(automaticMapping?true:false));
+      
+      if (!runningOnNode) {	
+        
+	fd.append("fragment", fragment);
+        
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "fragmentUpload";
+	xhr.id = fragment.name;
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	xhr.upload.id = fragment.name; // for knowing what status to update during events
+	
+	xhr.open("POST", this.baseUrl + "api/edit/fragment/upload");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+	
+	// on node.js, files are actually paths
+	var fragmentName = fragment.replace(/.*\//g, "");
+        if (exports.verbose) console.log("fragmentName: " + fragmentName);
+        
+	fd.append(
+          "fragment", 
+	  fs.createReadStream(fragment).on('error', function(){
+	    onResult(
+              null, ["Invalid fragment: " + fragmentName], [], "fragmentUpload", fragmentName);
+	  }), fragmentName);
+        
+	var urlParts = parseUrl(this.baseUrl + "api/edit/fragment/upload");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+        if (exports.verbose) console.log("urlParts " + JSON.stringify(urlParts));
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/edit/fragment/upload");
+          }
+          if (exports.verbose) console.log("fd.submit " + JSON.stringify(requestParameters));
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+		onResult(result, errors, messages, "fragmentUpload", fragmentName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "fragmentUpload", fragmentName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    } // fragmentUpload
+    
+    /**
+     * The second part of a fragment upload process started by a call to
+     * {@link #fragmentUpload}, which specifies values for the parameters
+     * required to save the uploaded fragment to LaBB-CAT's database. 
+     * @param {string} id Upload ID returned by the prior call to {@link #fragmentUpload}.
+     * @param {object} parameters Object with an attribute and value for each parameter
+     * returned by the prior call to {@link #fragmentUpload}.
+     * @param {resultCallback} onResult Invoked when the request has returned a
+     * result, which is and object that has the following attributes:
+     * <dl>
+     *  <dt> id </dt> <dd> The unique identifier to use for this upload when subsequently
+     *          calling {@link #fragmentUploadParameters} (if parameters are returned). </dd>
+     *   <dt> transcript </dt>
+     *     <dd> The name of the transcript, inferred from the fragment file name. </dd> 
+     *   <dt> start </dt>
+     *     <dd> The start time of the fragment, inferred from the fragment file name. </dd> 
+     *   <dt> end </dt>
+     *     <dd> The end time of the fragment, inferred from the fragment file name. </dd> 
+     *   <dt> url </dt>
+     *     <dd> The URL for the fragment, in the context of the whole transcript. </dd> 
+     *  <dt> parameters </dt> <dd> An array of objects representing the parameters that
+     *          still require values. </dd>
+     * <p> If parameters are returned, they have the same structure as those returned by 
+     * {@link #fragmentUpload}
+     */
+    fragmentUploadParameters(id, parameters, onResult) {
+      if (parameters.constructor === Array) { // array of parameter objects, not keys/values
+        var parameterValues = {}
+        for (var p in parameters) {
+          var parameter = parameters[p];
+          if (parameter.name) {
+            parameterValues[parameter.name] = parameter.value;
+          }
+        } // next parameter
+        parameters = parameterValues;
+      }
+      this.createRequest(
+        "fragmentUploadParameters", null, onResult,
+        this.baseUrl+"api/edit/fragment/upload/"+encodeURIComponent(id)
+          + "?"+this.parametersToQueryString(parameters),
+        "PUT").send();
+    } // fragmentUploadParameters
+
+    /**
+     * Cancel a fragment upload started by a call to {@link #fragmentUpload}, 
+     * deleting any uploaded files from the server.
+     * @param {string} id Upload ID returned by the prior call to {@link #fragmentUpload}.
+     * @param {resultCallback} onResult Invoked when the request has returned.
+     */
+    fragmentUploadDelete(id, onResult) {
+      this.createRequest(
+        "fragmentUploadDelete", null, onResult,
+        this.baseUrl+"api/edit/fragment/upload/"+encodeURIComponent(id),
+        "DELETE").send();
+    } // fragmentUploadDelete
+    
+    /**
      * Uploads attribute values for multiple participants from CSV file.
      * @param {file|string} csv CSV file containing the attribute values to import.
      * @param {number} idColumn The (zero based) index of the column that
