@@ -10,6 +10,10 @@
   + *fragmentUpload* - start annotated fragment (e.g. TextGrid) upload
   + *fragmentUploadParameters* - finish annotated fragment upload
   + *fragmentUploadDelete* - delete annotated fragment upload
+- New LabbcatAdmin functions:
+  + *uploadSerialization* - upload a formatter module
+  + *installSerialization* - install an uploaded formatter module
+  + *uninstallSerialization* - uninstall a formatter module
 
 Requires LaBB-CAT version 20260812.2001
 

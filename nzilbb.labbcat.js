@@ -5649,6 +5649,175 @@
     }
     
     /**
+     * Uploads a serialization (formatter) module in preparation for installing it.
+     * @param {string|file} jarFile Serialization .jar file.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object describing the attributes of the
+     * serialization found in the jar file:
+     * <dl>
+     *  <dt> jar </dt><dd> The name of the .jar file uploaded (this must be used in the
+     *                     subsequent request). </dd>
+     *  <dt> name </dt><dd> The human-readable name of the file format handled by the 
+     *                     serialization module found in the .jar file. </dd>
+     *  <dt> mimeType </dt><dd> The MIME (Content) Type handled by the serialization module
+     *                     found in the .jar file. </dd>
+     *  <dt> version </dt><dd> The version of the serialization implementation. </dd>
+     *  <dt> deserializer </dt><dd> Whether or not the module can read files of the
+     *                     given format </dd> 
+     *  <dt> serializer </dt><dd> Whether or not the module can produce files of the
+     *                     given format </dd> 
+     *  <dt> icon </dt><dd> URL for the module's icon. </dd>
+     *  <dt> installedVersion </dt><dd> The version of the already-installed serialization
+     *                     implementation, if any. </dd>
+     * </dl>
+     * @param onProgress Invoked on XMLHttpRequest progress.
+     */
+    uploadSerialization(jarFile, onResult, onProgress) {
+
+      // create form
+      var fd = new FormData();
+
+      // TODO nzibb/labbcat-server/user-interface thinks it's running on Node when actually
+      // it's running in a browser, so we need a better test for runningOnNode
+      if (runningOnNode || true) {                
+        
+	fd.append("jarFile", jarFile);
+	// create HTTP request
+	var xhr = new XMLHttpRequest();
+	xhr.call = "uploadSerialization";
+	xhr.onResult = onResult;
+	xhr.addEventListener("load", callComplete, false);
+	xhr.addEventListener("error", callFailed, false);
+	xhr.addEventListener("abort", callCancelled, false);
+	xhr.upload.addEventListener("progress", onProgress, false);
+	
+	xhr.open("POST", this.baseUrl + "api/admin/serialization");
+	if (this.username) {
+	  xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password))
+	}
+	xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(fd);
+      } else { // runningOnNode
+        
+	var jarName = jarFile.replace(/.*\//g, "");
+        if (exports.verbose) console.log("jarName: " + jarName);
+        fd.append(
+          "jarFile", 
+	  fs.createReadStream(jarFile).on('error', function(){
+	    onResult(null, ["Invalid jar: " + jarFile], [], "uploadSerialization", jarFile);
+	  }), jarName);
+        
+	var urlParts = parseUrl(this.baseUrl + "api/admin/serialization");
+	// for tomcat 8, we need to explicitly send the content-type and content-length headers...
+	var labbcat = this;
+        var password = this._password;
+	fd.getLength(function(something, contentLength) {
+	  var requestParameters = {
+	    port: urlParts.port,
+	    path: urlParts.pathname,
+	    host: urlParts.hostname,
+	    headers: {
+	      "Accept" : "application/json",
+	      "content-length" : contentLength,
+	      "Content-Type" : "multipart/form-data; boundary=" + fd.getBoundary()
+	    }
+	  };
+	  if (labbcat.username && password) {
+	    requestParameters.auth = labbcat.username+':'+password;
+	  }
+	  if (/^https.*/.test(labbcat.baseUrl)) {
+	    requestParameters.protocol = "https:";
+	  }
+          if (exports.verbose) {
+            console.log("submit: " + labbcat.baseUrl + "api/admin/serialization");
+          }
+	  fd.submit(requestParameters, function(err, res) {
+	    var responseText = "";
+	    if (!err) {
+	      res.on('data',function(buffer) {
+		//console.log('data ' + buffer);
+		responseText += buffer;
+	      });
+	      res.on('end',function(){
+                if (exports.verbose) console.log("response: " + responseText);
+	        var result = null;
+	        var errors = null;
+	        var messages = null;
+		try {
+		  var response = JSON.parse(responseText);
+		  result = response.model.result || response.model;
+		  errors = response.errors;
+		  if (errors && errors.length == 0) errors = null
+		  messages = response.messages;
+		  if (messages && messages.length == 0) messages = null
+		} catch(exception) {
+		  result = null
+                  errors = ["" +exception+ ": " + labbcat.responseText];
+                  messages = [];
+		}
+                // for this call, the result is an object with one key, whose
+                // value is the threadId - so just return that
+		onResult(
+                  result[jarName], errors, messages, "uploadSerialization", jarName);
+	      });
+	    } else {
+	      onResult(null, ["" +err+ ": " + labbcat.responseText], [], "uploadSerialization", jarName);
+	    }
+	    
+	    if (res) res.resume();
+	  });
+	}); // got length
+      } // runningOnNode
+    }
+    
+    /**
+     * Installs (or cancels the installation of) a serialization module.
+     * @param {string} jar Name of the serialization .jar file already uploaded, as
+     * specified by the "jar" attribute of the uploadSerialization() response. 
+     * @param {boolean} install true to install the serialization, false to cancel the
+     * installation. 
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: An object describing the attributes of the
+     * serialization installed:
+     * <dl>
+     *  <dt> jar </dt><dd> The name of the .jar file uploaded (this must be used in the
+     *                     subsequent request). </dd>
+     *  <dt> name </dt><dd> The human-readable name of the file format handled by the 
+     *                     serialization module found in the .jar file. </dd>
+     *  <dt> mimeType </dt><dd> The MIME (Content) Type handled by the serialization module
+     *                     found in the .jar file. </dd>
+     *  <dt> version </dt><dd> The version of the serialization implementation. </dd>
+     * </dl>
+     */
+    installSerialization(jar, install, onResult) {
+      this.createRequest(
+        "installSerialization", null, onResult, this.baseUrl+"api/admin/serialization",
+        "POST", // not GET, because the number of parameters can make the URL too long
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
+        .send(this.parametersToQueryString({
+          jar : jar,
+          action : install?"install":"cancel"
+        }));
+    }
+
+    /**
+     * Uninstalls a serialization module.
+     * @param {string} mimeType The MIME (Content) Type handled by the serialization module.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var>.
+     */
+    uninstallSerialization(mimeType, onResult) {
+      this.createRequest(
+        "uninstallSerialization", null, onResult, this.baseUrl+"api/admin/serialization",
+        "POST", // not GET, because the number of parameters can make the URL too long
+        null, "application/x-www-form-urlencoded;charset=\"utf-8\"")
+        .send(this.parametersToQueryString({
+          mimeType : mimeType,
+          action : "uninstall"
+        }));
+    }
+
+    /**
      * Uploads an annotator module in preparation for installing it.
      * @param {string|file} jarFile Annotator .jar file.
      * @param {resultCallback} onResult Invoked when the request has returned a 
