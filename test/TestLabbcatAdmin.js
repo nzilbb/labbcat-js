@@ -92,7 +92,7 @@ describe("#LabbcatAdmin", function() {
                         
                         const matchedCorpora = corpora.filter(c => {
                             return c.corpus_name == corpus_name;});
-                        assert.equal(matchedCorpora.length, 1,
+                       assert.equal(matchedCorpora.length, 1,
                                      "The new corpus is present: " + JSON.stringify(corpora));
                         assert.equal(matchedCorpora[0].corpus_name, corpus_name,
                                      "corpus_name present");
@@ -981,5 +981,112 @@ describe("#LabbcatAdmin", function() {
       });
     });
 
+    it("implements elicitation task CRUD operations", (done)=>{
+
+      // get a corpus to use
+      store.readCorpora((corpora, errors, messages)=>{
+        const corpusName = corpora[0].corpus_name;
+
+        // get a transcript_type to use
+        store.getLayer("transcript_type", (transcriptTypeLayer, errors, messages)=>{
+          const transcriptType = Object.keys(transcriptTypeLayer.validLabels)[0];
+
+          // create a new task
+          store.createElicitationTask(
+            "unit-test", "test description", corpusName, transcriptType,
+            "<p>preamble</p>", "<p>consent</p>", "https://example.com",
+            (task, errors, messages)=>{
+              assert.isNull(errors, JSON.stringify(errors))
+              assert.isNotNull(task);
+              assert.equal(task.task_name, "unit-test", "name saved");
+              assert.equal(task.description, "test description", "description saved");
+              assert.equal(task.corpus_name, corpusName, "corpus saved");
+              assert.equal(task.transcript_type, transcriptType, "type saved");
+              assert.equal(task.preamble, "<p>preamble</p>", "preamble saved");
+              assert.equal(task.consent, "<p>consent</p>", "consent saved");
+              assert.equal(task.endUrl, "https://example.com", "endUrl saved");
+              assert.isNotNull(task.task_id, "task_id assigned");
+              const task_id = task.task_id;
+              console.log("task_id " + task_id)
+        
+              store.readElicitationTasks((tasks, errors, messages)=>{
+                assert.isNull(errors, JSON.stringify(errors))
+                assert.isNotNull(tasks, "The records are returned")
+                assert.isAtLeast(tasks.length, 1, "There is at least one record");
+
+                let savedTask = null;
+                for (let t of tasks) {
+                  if (t.task_id == task_id) {
+                    savedTask = t;
+                    break;
+                  }
+                }
+                assert.isNotNull(savedTask, "Our new task was returned")
+                assert.equal(savedTask.task_name, "unit-test", "name saved");
+                assert.equal(savedTask.description, "test description", "description saved");
+                assert.equal(savedTask.corpus_name, corpusName, "corpus saved");
+                assert.equal(savedTask.transcript_type, transcriptType, "type saved");
+                assert.equal(savedTask.preamble, "<p>preamble</p>", "preamble saved");
+                assert.equal(savedTask.consent, "<p>consent</p>", "consent saved");
+                assert.equal(savedTask.endUrl, "https://example.com", "endUrl saved");
+                
+                // update it
+                const newCorpusName = corpora[corpora.length-1].corpus_name;
+                const newTranscriptType = Object.keys(transcriptTypeLayer.validLabels)[
+                  Object.keys(transcriptTypeLayer.validLabels).length-1];
+                store.updateElicitationTask(
+                  task_id, "unit-test-changed", "edited desc", newCorpusName,
+                  newTranscriptType, "<p>edited</p>", "", "",
+                  (updatedTask, errors, messages)=>{
+                    assert.isNull(errors, JSON.stringify(errors))
+                    assert.isNotNull(updatedTask);
+                    assert.equal(updatedTask.task_name, "unit-test-changed", "name saved");
+                    assert.equal(updatedTask.description, "edited desc", "description saved");
+                    assert.equal(updatedTask.corpus_name, newCorpusName, "corpus saved");
+                    assert.equal(updatedTask.transcript_type, newTranscriptType, "type saved");
+                    assert.equal(updatedTask.preamble, "<p>edited</p>", "preamble saved");
+                    assert.equal(updatedTask.consent, "", "consent saved");
+                    assert.equal(updatedTask.endUrl, "", "endUrl saved");
+                    assert.equal(updatedTask.task_id, task_id);
+
+                    // resources should exist
+                    store.readElicitationTaskResources(
+                      task_id, (resources, errors, messages)=>{
+                        assert.isNull(errors, JSON.stringify(errors));
+                        assert.isNotNull(resources, "resources returned");
+                        assert.isTrue(resources.length > 0, "There are resources");
+                        
+                        // update one
+                        store.updateElicitationTaskResource(
+                          task_id, resources[0].resource_id, resources[0].help,
+                          "new message", (editedResource, errors, messages)=>{
+                            assert.isNull(errors, JSON.stringify(errors));
+                            assert.isNotNull(editedResource, "resource returned");
+                            assert.equal(editedResource.task_id, task_id);
+                            assert.equal(editedResource.resource_id, resources[0].resource_id);
+                            assert.equal(editedResource.message, "new message");
+                            
+                            // delete task
+                            store.deleteElicitationTask(task_id, (deleteResult, errors, messages)=>{
+                              assert.isNull(errors, JSON.stringify(errors));
+                              assert.isNotNull(messages);
+                      
+                              // resources should no longer exist
+                              store.readElicitationTaskResources(
+                                task_id, (resources, errors, messages)=>{
+                                  assert.isNull(errors, JSON.stringify(errors));
+                                  assert.isNotNull(resources, "resources returned");
+                                  assert.isTrue(resources.length == 0, "No resources");
+                                  done();
+                                }); // readElicitationTaskResources
+                            }); // deleteElicitationTask
+                          }); // updateElicitationTaskResource
+                      }); // readElicitationTaskResources
+                  }); // updateElicitationTask
+              }); // readElicitationTasks
+            }); // createElicitationTask
+        }); // getLayer 
+      }); // readCorpora
+    });
     
 });

@@ -14,7 +14,21 @@
   + *uploadSerialization* - upload a formatter module
   + *installSerialization* - install an uploaded formatter module
   + *uninstallSerialization* - uninstall a formatter module
-
+  + *createElicitationTask* - functions for elicitation task administration
+  + *readElicitationTasks*
+  + *updateElicitationTask*
+  + *deleteElicitationTask*
+  + *readElicitationTaskResources*
+  + *updateElicitationTaskResource*
+  + *createElicitationTaskTranscriptAttributeOption*
+  + *readElicitationTaskTranscriptAttributeOptions*
+  + *updateElicitationTaskTranscriptAttributeOption*
+  + *deleteElicitationTaskTranscriptAttributeOption*
+  + *createElicitationTaskParticipantAttributeOption*
+  + *readElicitationTaskParticipantAttributeOptions*
+  + *updateElicitationTaskParticipantAttributeOption*
+  + *deleteElicitationTaskParticipantAttributeOption*
+  
 Requires LaBB-CAT version 20260812.2001
 
 # 1.8.0
