@@ -18,6 +18,7 @@
   + *readElicitationTasks*
   + *updateElicitationTask*
   + *deleteElicitationTask*
+  + *elicitatationTaskUpload*
   + *readElicitationTaskResources*
   + *updateElicitationTaskResource*
   + *createElicitationTaskTranscriptAttributeOption*

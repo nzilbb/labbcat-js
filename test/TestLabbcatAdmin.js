@@ -1089,4 +1089,18 @@ describe("#LabbcatAdmin", function() {
       }); // readCorpora
     });
     
+  it("implements elicitatationTaskUpload", (done)=>{
+    const jsonFile = "test/unit-test-task.json";
+    store.elicitatationTaskUpload(
+      jsonFile, (result, errors, messages)=>{
+        assert.isNull(errors, "No errors on elicitatationTaskUpload: "+JSON.stringify(errors));
+        assert.exists(result.task_id, "Task ID returned");
+        const task_id = result.task_id;
+        store.deleteElicitationTask(task_id, (deleteResult, errors, messages)=>{
+          assert.isNull(errors, JSON.stringify(errors));
+          assert.isNotNull(messages);
+          done();
+        });
+      });
+    });
 });
