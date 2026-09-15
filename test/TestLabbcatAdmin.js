@@ -981,7 +981,7 @@ describe("#LabbcatAdmin", function() {
       });
     });
 
-    it("implements elicitation task CRUD operations", (done)=>{
+    it("implements elicitation task CRUD operations including resources", (done)=>{
 
       // get a corpus to use
       store.readCorpora((corpora, errors, messages)=>{

@@ -21,14 +21,10 @@
   + *elicitatationTaskUpload*
   + *readElicitationTaskResources*
   + *updateElicitationTaskResource*
-  + *createElicitationTaskTranscriptAttributeOption*
-  + *readElicitationTaskTranscriptAttributeOptions*
-  + *updateElicitationTaskTranscriptAttributeOption*
-  + *deleteElicitationTaskTranscriptAttributeOption*
-  + *createElicitationTaskParticipantAttributeOption*
-  + *readElicitationTaskParticipantAttributeOptions*
-  + *updateElicitationTaskParticipantAttributeOption*
-  + *deleteElicitationTaskParticipantAttributeOption*
+  + *createElicitationTaskAttributeOption*
+  + *readElicitationTaskAttributeOptions*
+  + *updateElicitationTaskAttributeOption*
+  + *deleteElicitationTaskAttributeOption*
   
 Requires LaBB-CAT version 20260812.2001
 
