@@ -587,7 +587,7 @@ describe("#LabbcatView", function() {
         console.warn("There are no tasks, so can't test getTask.");
         done();
       } else {
-        const threadId = Object.keys(tasks)[0];
+        const threadId = tasks[0];
         store.waitForTask(threadId, 1, (task, errors, messages)=>{
           assert.equal(threadId, task.threadId, "Correct task");
           assert.containsAllKeys(

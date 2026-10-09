@@ -470,7 +470,7 @@ describe("#LabbcatEdit", function() {
                              +" cannot test getMatchAnnotations");
             const match = [ matches[0] ];
             store.getFragments(
-              match, ["word", "segment"], "text/praat-textgrid",
+              match, ["utterance", "word", "segment"], "text/praat-textgrid",
               (textgrids, errors, messages)=>{
                 assert.isNull(errors, "getFragments with matches: " +JSON.stringify(errors))
                 assert.equal(
@@ -515,7 +515,7 @@ describe("#LabbcatEdit", function() {
   });
   
   it("implements uploadParticipantAttributes", (done)=>{
-    const participantId = "UnitTester";
+    const participantId = "UnitTesterJs";
     const csvName = "participants.csv";
     const csvPath = "test/" + csvName;
     const idColumn = 0;
