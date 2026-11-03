@@ -25,8 +25,14 @@
   + *readElicitationTaskAttributeOptions*
   + *updateElicitationTaskAttributeOption*
   + *deleteElicitationTaskAttributeOption*
+  + *createDashboardItem* - functions for dashboard item administration
+  + *readDashboardItems*
+  + *updateDashboardItem*
+  + *deleteDashboardItem*
+  + *readEpisodes* - functions for transcript episode administration
+  + *updateEpisode*
   
-Requires LaBB-CAT version 20260812.2001
+Requires LaBB-CAT version 20261103.1017
 
 # 1.8.0
 

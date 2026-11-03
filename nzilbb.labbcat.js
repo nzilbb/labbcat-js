@@ -141,7 +141,13 @@
     var messages = null;
     try {
       if (evt.target.raw) {
-        result = this.responseText;
+        if (this.status >= 400) {
+          errors = [`Error ${this.status} ${this.responseText}`.trim()];
+          messages = [];
+        } else {
+          result = this.responseText;
+          errors = messages = [];
+        }
       } else {
         var response = JSON.parse(this.responseText);
         if (response.model != null) {
@@ -5374,6 +5380,132 @@
     }
     
     /**
+     * Creates a new dashboard item.
+     * @see LabbcatAdmin#readDashboardItems
+     * @see LabbcatAdmin#updateDashboardItem
+     * @see LabbcatAdmin#deleteDashboardItem
+     * @param {string} type "link" or "sql".
+     * @param {string} label The item label.
+     * @param {string} icon The icon for the item, if any.
+     * @param {string} definition The URL/fragment for "link" items
+     *        or the SQL query for "sql" items.
+     * @param {string} dashboard Whether the item is for the home page.
+     * @param {string} express Whether the item is for the 'express' home page.
+     * @param {string} statistics Whether the item is for the statistics page.
+     * @param {int} display_order The position of the dashboardItem relative to other dashboardItems.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the dashboardItem record. 
+     */
+    createDashboardItem(
+      type, label, icon, definition, dashboard, express, statistics, display_order,
+      onResult) {
+      this.createRequest(
+        "dashboardItems", null, onResult, this.baseUrl+"api/admin/dashboard", "POST",
+        null, "application/json")
+        .send(JSON.stringify({
+          type : type,
+          label : label,
+          icon : icon || "",
+          definition : definition,
+          dashboard : dashboard?1:0,
+          express : express?1:0,
+          statistics : statistics?1:0,
+          display_order: display_order}));
+    }
+    
+    /**
+     * Reads a list of dashboard items.
+     * @see LabbcatAdmin#createDashboardItem
+     * @see LabbcatAdmin#updateDashboardItem
+     * @see LabbcatAdmin#deleteDashboardItem
+     * @param {string} type "link" or "sql". 
+     * @param {int} [pageNumber] The zero-based  page of records to return (if null, all
+     * records will be returned). 
+     * @param {int} [pageLength] The length of pages (if null, the default page length is 20).
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A list of dashboardItem records with the following
+     * attributes:
+     * <dl>
+     *  <dt> item_id </dt><dd> A unique identidier for the item. </dd>
+     *  <dt> label </dt><dd> The label for the item. </dd>
+     *  <dt> icon </dt><dd> The item's icon. </dd>
+     *  <dt> definition </dt><dd> The items' definition - i.e. a URL/fragment for "link"
+     *       items or an SQL query for "sql" items. </dd>
+     *  <dt> dashboard </dt><dd> Whether the item is shown on the home page. </dd>
+     *  <dt> express </dt><dd> Whether the item is shown on the 'express' home page. </dd>
+     *  <dt> statistics </dt><dd> Whether the item is shown on the statistics page. </dd>
+     *  <dt> display_order </dt><dd> The position of the track amongst other tracks. </dd>
+     * </dl>
+     */
+    readDashboardItems(type, pageNumber, pageLength, onResult) {
+      if (typeof pageNumber === "function") { // (onResult)
+        onResult = pageNumber;
+        pageNumber = null;
+        pageLength = null;
+      } else if (typeof l === "function") { // (p, onResult)
+        onResult = l;
+        pageLength = null;
+      }
+      this.createRequest(
+        "dashboardItems", {
+          pageNumber:pageNumber,
+          pageLength:pageLength
+        }, onResult, this.baseUrl+"api/admin/dashboard/"+type)
+        .send();
+    }
+    
+    /**
+     * Updates an existing dashboard item.
+     * @see LabbcatAdmin#createDashboardItem
+     * @see LabbcatAdmin#readDashboardItems
+     * @see LabbcatAdmin#deleteDashboardItem
+     * @param {string} type "link" or "sql".
+     * @param {int} item_id The ID of the item.
+     * @param {string} label The item label.
+     * @param {string} icon The icon for the item, if any.
+     * @param {string} definition The URL/fragment for "link" items
+     *        or the SQL query for "sql" items.
+     * @param {string} dashboard Whether the item is for the home page.
+     * @param {string} express Whether the item is for the 'express' home page.
+     * @param {string} statistics Whether the item is for the statistics page.
+     * @param {int} display_order The position of the dashboardItem relative to other dashboardItems.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the dashboardItem record. 
+     */
+    updateDashboardItem(
+      type, item_id, label, icon, definition, dashboard, express, statistics, display_order,
+      onResult) {
+      this.createRequest(
+        "dashboardItems", null, onResult, this.baseUrl+"api/admin/dashboard", "PUT")
+        .send(JSON.stringify({
+          item_id : item_id,
+          type : type,
+          label : label,
+          icon : icon || "",
+          definition : definition,
+          dashboard : dashboard?1:0,
+          express : express?1:0,
+          statistics : statistics?1:0,
+          display_order: display_order}));
+    }
+    
+    /**
+     * Deletes an existing dashboard item.
+     * @see LabbcatAdmin#createDashboardItem
+     * @see LabbcatAdmin#readDashboardItems
+     * @see LabbcatAdmin#updateDashboardItem
+     * @param {string} type "link" or "sql".
+     * @param {int} item_id The ID of the item.
+     * @param {resultCallback} onResult Invoked when the request has completed.
+     */
+    deleteDashboardItem(type, item_id, onResult) {
+      this.createRequest(
+        "dashboardItems", null, onResult,
+        `${this.baseUrl}api/admin/dashboard/${type}/${item_id}`,
+        "DELETE").send();
+    }
+    
+    /**
      * Creates a new role record.
      * @see LabbcatAdmin#readRoles
      * @see LabbcatAdmin#updateRole
@@ -6775,6 +6907,87 @@
           +"/"+encodeURIComponent(attribute)
           +"/"+encodeURIComponent(value),
         "DELETE").send();
+    }
+    
+    /**
+     * Reads the given elicitation task attribute validation script.
+     * @see LabbcatAdmin#updateElicitedAttributeValidation
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be the validation JavaScript, if any.
+     */
+    readElicitedAttributeValidation(taskId, scope, attribute, onResult) {
+      this.createRequest(
+        "readElicitedAttributeValidation", {}, onResult, 
+        this.baseUrl+"api/admin/elicit/validation"
+          +"/"+encodeURIComponent(taskId)
+          +(scope=="transcript"?"/transcript":"/participant")
+          +"/"+encodeURIComponent(attribute), "GET", null, null,
+        true) // raw response
+        .send();
+    }
+    
+    /**
+     * Updates the given elicitation task attribute validation script.
+     * @see LabbcatAdmin#readElicitedAttributeValidation
+     * @param {string} taskId The ID of the elicitation task.
+     * @param {string} scope "transcript" for a transcript attribute,
+     * "participant" for a participant attribute.
+     * @param {string} attribute The attribute name.
+     * @param {string} script The validation JavaScript.
+     * @param {resultCallback} onResult Invoked when the request has returned. 
+     */
+    updateElicitedAttributeValidation(taskId, scope, attribute, script, onResult) {
+      this.createRequest(
+        "updateElicitedAttributeValidation", null, onResult, 
+        this.baseUrl+"/api/admin/elicit/validation"
+          +"/"+encodeURIComponent(taskId)
+          +(scope=="transcript"?"/transcript":"/participant")
+          +"/"+encodeURIComponent(attribute),
+        "PUT", null, null,
+        true) // raw response
+        .send(script);
+    }
+    
+    /**
+     * Reads a list of episodes for a given corpus.
+     * @see LabbcatAdmin#updateEpisode
+     * @param {string} corpus The name of the corpus.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A list of episode records with the following
+     * attributes:
+     * <dl>
+     *    <dt> episode_id </dt><dd> The database key for the record. </dd>
+     *    <dt> name </dt><dd> The name of the episode. </dd>
+     *    <dt> corpus </dt><dd> The name of the corpus. </dd>
+     *    <dt> transcript_count </dt><dd> The number of transcript in the episode. </dd>
+     * </dl>
+     */
+    readEpisodes(corpus, onResult) {
+      this.createRequest(
+        "episodes", {}, onResult, `${this.baseUrl}api/admin/episodes/${corpus}`)
+        .send();
+    }
+    
+    /**
+     * Updates an existing episode record.
+     * @see LabbcatAdmin#readEpisodes
+     * @param {string} episode_id The name/ID of the role.
+     * @param {string} name The (new) name of the episode.
+     * @param {string} corpus The (new) name of the corpus.
+     * @param {resultCallback} onResult Invoked when the request has returned a 
+     * <var>result</var> which will be: A copy of the episode record. 
+     */
+    updateEpisode(episode_id, name, corpus, onResult) {
+      var permission = this.createRequest(
+        "episodes", null, onResult, this.baseUrl+"api/admin/episodes", "PUT")
+          .send(JSON.stringify({
+            episode_id : episode_id,
+            name : name,
+            corpus : corpus}));
     }
   }
   
